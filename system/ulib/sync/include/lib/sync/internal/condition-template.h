@@ -56,6 +56,8 @@ static inline void spin() {
                          : "memory");
 #elif defined(__aarch64__)
     __atomic_thread_fence(__ATOMIC_SEQ_CST);
+#elif defined(__loongarch64)
+    __atomic_thread_fence(__ATOMIC_SEQ_CST);
 #else
 #error Please define spin() for your architecture
 #endif
