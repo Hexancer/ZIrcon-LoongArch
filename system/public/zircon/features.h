@@ -38,6 +38,10 @@
 #define ZX_ARM64_FEATURE_ISA_DP        ((uint32_t)(1u << 13))
 #define ZX_ARM64_FEATURE_ISA_DPB       ((uint32_t)(1u << 14))
 
+#elif defined(__loongarch64)
+
+#define ZX_LOONGARCH64_FEATURE_ISA_FPE ((uint32_t)(1u << 1))
+
 #else
 
 #error what architecture?

@@ -18,6 +18,10 @@ zx_ticks_t _zx_ticks_get(void) {
     return ticks;
 #elif __x86_64__
     return __rdtsc();
+#elif __loongarch64
+    zx_ticks_t ticks;
+    __asm__ volatile("rdtime.d %0, $r0" : "=r" (ticks));
+    return ticks;
 #else
 #error Unsupported architecture
 #endif

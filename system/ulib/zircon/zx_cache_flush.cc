@@ -109,6 +109,10 @@ zx_status_t _zx_cache_flush(const void* addr, size_t len, uint32_t options) {
         __asm__ volatile("isb sy");
     }
 
+#elif defined(__loongarch64)
+
+    // TODO: Use cacop to invalidate all cache
+
 #else
 
 # error what architecture?
