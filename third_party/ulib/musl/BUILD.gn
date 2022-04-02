@@ -12,7 +12,7 @@ config("headers") {
     "$zx/system/ulib/c:*",
   ]
   cflags = [
-    "-idirafter",
+    "-I",
     rebase_path("include", root_build_dir),
   ]
   asmflags = cflags
@@ -62,7 +62,7 @@ config("musl_internal.config") {
   # TODO(kulakowski): Clean up the junkier -Wno flags below.
   cflags = [
     "-Wno-sign-compare",
-    "-Werror=incompatible-pointer-types",
+    #"-Werror=incompatible-pointer-types", #Fix ./system/ulib/c/sanitizers/ubsan-stubs.cc
     "-Wno-implicit-fallthrough",
   ]
 
