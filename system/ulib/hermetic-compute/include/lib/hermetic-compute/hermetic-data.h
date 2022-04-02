@@ -86,6 +86,26 @@ static_assert(offsetof(Tcb, stack_guard) ==
 static_assert(offsetof(Tcb, unsafe_sp) ==
               sizeof(Tcb) + ZX_TLS_UNSAFE_SP_OFFSET);
 
+#elif defined(__loongarch64)
+
+struct Tcb {
+    Tcb(uintptr_t, uintptr_t guard, uintptr_t usp) :
+        stack_guard(guard),
+        unsafe_sp(reinterpret_cast<HermeticPtr<std::byte>>(usp)) {}
+
+    // TODO: Figure this out
+    HermeticPtr<void> self;             // Points to this address (%fs:0).
+    HermeticPtr<void> reserved{};       // unused (reserved for runtime)
+    uintptr_t stack_guard;
+    HermeticPtr<std::byte> unsafe_sp;
+
+    static constexpr std::ptrdiff_t ThreadPointerOffset() {
+        return sizeof(Tcb);
+    }
+};
+static_assert(offsetof(Tcb, stack_guard) == ZX_TLS_STACK_GUARD_OFFSET);
+static_assert(offsetof(Tcb, unsafe_sp) == ZX_TLS_UNSAFE_SP_OFFSET);
+
 #elif defined(__x86_64__)
 
 // %fs.base points here, so %fs:0 maps to this struct.

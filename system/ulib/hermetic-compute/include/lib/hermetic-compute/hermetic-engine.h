@@ -101,6 +101,9 @@ void HermeticComputeEngineBase<Engine, Args...>::EngineMain(uintptr_t first,
 # elif defined(__aarch64__)
 #  define HermeticComputeEngine_tailcall_asm "b %0"
 #  define HermeticComputeEngine_tailcall_constraint "S"
+# elif defined(__loongarch64)
+#  define HermeticComputeEngine_tailcall_asm "b %0"
+#  define HermeticComputeEngine_tailcall_constraint "i"
 # else
 #  error "what architecture?"
 # endif
