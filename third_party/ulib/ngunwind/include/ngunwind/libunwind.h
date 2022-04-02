@@ -34,6 +34,8 @@ extern "C" {
 #include "private/tgt-arm.h"
 #elif defined __aarch64__
 #include "private/tgt-aarch64.h"
+#elif defined __loongarch64
+#include "private/tgt-loongarch64.h"
 #elif defined __x86_64__
 #include "private/tgt-x86_64.h"
 #else
