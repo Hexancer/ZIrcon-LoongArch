@@ -111,6 +111,7 @@ if (current_toolchain == default_toolchain) {
     include_dirs = [
       "include",
       "lib/libc/include",
+      "/home/geng/libcxx-scripts/out-loongarch64/include/c++/v1",
     ]
 
     # lib/libc/include is before toolchain headers because it needs to be
