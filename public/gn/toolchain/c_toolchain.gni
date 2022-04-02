@@ -173,14 +173,14 @@ template("c_toolchain") {
         tool_dir = gcc_tool_dir
         tool_prefix = "${tc_cpu}-elf-"
         version_string = gcc_version_string
-        include_dirs = [ rebase_path(
-                exec_script(
-                    "/usr/bin/env",
-                    clangxx_args + [ "-print-file-name=include/c++/v1" ],
-                    "trim string",
-                    clangxx_exec_inputs),
-                "",
-                root_build_dir) ]
+        #include_dirs = [ rebase_path(
+        #        exec_script(
+        #            "/usr/bin/env",
+        #            clangxx_args + [ "-print-file-name=include/c++/v1" ],
+        #            "trim string",
+        #            clangxx_exec_inputs),
+        #        "",
+        #        root_build_dir) ]
         lib_dirs = [ rebase_path(
                 get_path_info(
                     exec_script("/usr/bin/env",
@@ -190,6 +190,10 @@ template("c_toolchain") {
                     "dir"),
                 "",
                 root_build_dir) ]
+      }
+
+      if (tc_cpu == "loongarch64") {
+        tc.tool_prefix = "${tc_cpu}-unknown-linux-gnu-"
       }
     }
   } else {
