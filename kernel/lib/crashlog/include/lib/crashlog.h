@@ -14,6 +14,10 @@
 
 #include <arch/x86.h>
 
+#elif defined(__loongarch64)
+
+#include <arch/loongarch64.h>
+
 #endif
 
 typedef struct {

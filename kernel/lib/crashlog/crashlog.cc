@@ -43,6 +43,8 @@ size_t crashlog_to_string(char* out, const size_t out_len) {
     const char* arch = "x86_64";
 #elif defined(__aarch64__)
     const char* arch = "aarch64";
+#elif defined(__loongarch64)
+    const char* arch = "loongarch64";
 #endif
     len = snprintf(buf, remain, "VERSION\narch: %s\nbuild_id: %s\ndso: id=%s base=%#lx name=zircon.elf\n\n", arch, version.buildid, version.elf_build_id, crashlog.base_address);
     if (len > remain) {
