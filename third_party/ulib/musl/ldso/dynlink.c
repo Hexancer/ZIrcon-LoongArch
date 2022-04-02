@@ -172,6 +172,8 @@ static void debug_break(void) {
     __asm__("int3");
 #elif defined(__aarch64__)
     __asm__("brk 0");
+#elif defined(__loongarch64)
+    __asm__("dbcl 0");
 #else
 #error
 #endif
