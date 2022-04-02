@@ -2,6 +2,8 @@
 #include "x86_64/ioctl.h"
 #elif defined(__aarch64__)
 #include "aarch64/ioctl.h"
+#elif defined(__loongarch64)
+#include "loongarch64/ioctl.h"
 #else
 #error Unsupported architecture!
 #endif
