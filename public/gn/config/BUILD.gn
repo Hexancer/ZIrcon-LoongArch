@@ -51,7 +51,7 @@ if (current_os == "mac") {
   if (current_os == "linux" ||
       ((current_cpu != host_cpu || current_os != host_os) && !is_kernel &&
        current_os != "win")) {
-    linker = "gold"
+    linker = ""
   } else {
     # For GCC on non-ELF hosts, use the system default linker.
     linker = ""
