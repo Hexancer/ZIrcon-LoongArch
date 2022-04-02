@@ -63,7 +63,13 @@ if (current_toolchain == default_toolchain) {
   }
 
   source_set("loongarch64") {
-    sources = []
-    deps = []
+    sources = [
+      "mmu.cc",
+      "spinlock.cc",
+      "cache-ops.S",
+    ]
+    deps = [
+      "$zx/system/ulib/bitmap",
+    ]
   }
 }
