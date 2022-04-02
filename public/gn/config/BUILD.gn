@@ -113,6 +113,18 @@ config("compiler") {
 
       # These are done by default in the Clang toolchain.
       cflags += [ "-fasynchronous-unwind-tables" ]
+      if (!is_kernel) {
+        _libcxx_dir = "/home/geng/libcxx-scripts/out-loongarch64"
+        _libcxx_libdir = "${_libcxx_dir}/lib"
+        _libcxx_incdir = "${_libcxx_dir}/include/c++/v1"
+        _clang_incdir  = "${_libcxx_dir}/include"
+
+        compiler_flags += [ "-nostdinc", "-nostdinc++",
+                "-I${_libcxx_incdir}",
+                "-I${_clang_incdir}",
+                "-L${_libcxx_libdir}",
+                ]
+      }
       ldflags += [
         "-Wl,--build-id",
         "-Wl,--eh-frame-hdr",
@@ -244,7 +256,6 @@ config("nolibc") {
     libs = [ "./dso_handle.ld" ]
   } else {
     # TODO(mcgrathr): GCC 9 has -nolibc, so use it when we get that toolchain.
-    ldflags += [ "-nolibc" ]
   }
 }
 
@@ -383,6 +394,14 @@ config("default_warnings") {
     "-Wno-multichar",
     "-Wno-unused-parameter",
     "-Wno-unused-function",
+    "-Wno-unused-value",  # Fix ./gen/system/fidl/fuchsia-sysinfo/fuchsia-sysinfo.tables/tables.cpp:13
+    "-Wno-array-bounds",  # Fix ./kernel/debugcommands/debugcommands.cc:304
+    "-Wno-uninitialized", # Fix ./kernel/lib/ktrace/ktrace.cc:159
+    "-Wno-nonnull",       # Fix ./system/ulib/fbl/include/fbl/function.h:30
+    "-Wno-type-limits",   # Fix ./system/ulib/fit/include/lib/fit/bridge_internal.h:335
+    "-Wno-pessimizing-move", # Fix ./system/ulib/fbl/include/fbl/vector.h:226
+    "-Wno-redundant-move",# Fix ./system/dev/lib/operation/include/lib/operation/operation.h:196
+    "-Wno-address",       # Fix ./system/dev/display/hikey-display/hi3660-dsi.cc:30
     "-Werror=unused-label",
     "-Werror=return-type",
     "-Wno-address-of-packed-member",
@@ -561,7 +580,7 @@ config("user_executable") {
   # In Clang, this is the default in the compiler driver for *-fuchsia targets.
   # For GCC, it must be explicit.
   if (is_gcc) {
-    compiler_flags = [ "-fPIE" ]
+    compiler_flags = [ "-fPIE", "-shared" ]
     asmflags = compiler_flags
     cflags = compiler_flags
     ldflags = compiler_flags + [ "-Wl,-pie" ]
