@@ -222,12 +222,13 @@ typedef struct {
 //     holds the physical address of the bootloader-constructed ZBI.
 //     All other registers are unspecified.
 //
-#define ZBI_TYPE_KERNEL_PREFIX     (0x004e524b) // KRN\0
-#define ZBI_TYPE_KERNEL_MASK       (0x00FFFFFF)
-#define ZBI_TYPE_KERNEL_X64        (0x4c4e524b) // KRNL
-#define ZBI_TYPE_KERNEL_ARM64      (0x384e524b) // KRN8
-#define ZBI_IS_KERNEL_BOOTITEM(x)  (((x) & ZBI_TYPE_KERNEL_MASK) ==  \
-                                    ZBI_TYPE_KERNEL_PREFIX)
+#define ZBI_TYPE_KERNEL_PREFIX      (0x004e524b) // KRN\0
+#define ZBI_TYPE_KERNEL_MASK        (0x00FFFFFF)
+#define ZBI_TYPE_KERNEL_X64         (0x4c4e524b) // KRNL
+#define ZBI_TYPE_KERNEL_ARM64       (0x384e524b) // KRN8
+#define ZBI_TYPE_KERNEL_LOONGARCH64 (0x474e524b) // KRNG
+#define ZBI_IS_KERNEL_BOOTITEM(x)   (((x) & ZBI_TYPE_KERNEL_MASK) ==  \
+                                     ZBI_TYPE_KERNEL_PREFIX)
 
 #ifndef __ASSEMBLER__
 typedef struct {

@@ -126,6 +126,8 @@ zbi_result_t zbi_check_complete(const void* base, zbi_header_t** err) {
                               ZBI_TYPE_KERNEL_ARM64,
 #elif defined(__x86_64__) || defined(__i386__)
                               ZBI_TYPE_KERNEL_X64,
+#elif defined(__loongarch64)
+                              ZBI_TYPE_KERNEL_LOONGARCH64,
 #else
 #error "what architecture?"
 #endif
