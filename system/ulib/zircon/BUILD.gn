@@ -51,6 +51,8 @@ if (toolchain.tags + exclude_tags - exclude_tags != toolchain.tags ||
     abigen_cpu = "x86"
   } else if (zircon_cpu == "arm64") {
     abigen_cpu = "arm"
+  } else if (zircon_cpu == "loongarch64") {
+    abigen_cpu = "loongarch64"
   }
 
   library("zircon") {
