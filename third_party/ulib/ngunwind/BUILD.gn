@@ -96,6 +96,16 @@ library("ngunwind") {
       "src/aarch64/regname.c",
       "src/elf64.c",
     ]
+  } else if (current_cpu == "loongarch64") {
+    sources += [
+      "src/loongarch64/fuchsia.c",
+      "src/loongarch64/Gstep.c",
+      "src/loongarch64/Ginit.c",
+      "src/loongarch64/Gregs.c",
+      "src/loongarch64/Gcreate_addr_space.c",
+      "src/loongarch64/Gglobal.c",
+      "src/loongarch64/Ginit_remote.c",
+    ]
   } else if (current_cpu == "x64") {
     sources += [
       "src/elf64.c",
