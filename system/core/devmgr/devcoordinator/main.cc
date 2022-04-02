@@ -345,15 +345,15 @@ int pwrbtn_monitor_starter(void* arg) {
   }
 
   fdio_spawn_action_t actions[] = {
-      {.action = FDIO_SPAWN_ACTION_SET_NAME, .name = {.data = name}},
+      {.action = FDIO_SPAWN_ACTION_SET_NAME, .name = fdio_spawn_action_name {.data = name}},
       {.action = FDIO_SPAWN_ACTION_ADD_NS_ENTRY,
-       .ns = {.prefix = "/input", .handle = input_handle.release()}},
+       .ns = fdio_spawn_action_ns {.prefix = "/input", .handle = input_handle.release()}},
       // Ideally we'd only expose /svc/fuchsia.device.manager.Administrator, but we do not
       // support exposing single services.
       {.action = FDIO_SPAWN_ACTION_ADD_NS_ENTRY,
-       .ns = {.prefix = "/svc", .handle = svc_handle.release()}},
+       .ns = fdio_spawn_action_ns {.prefix = "/svc", .handle = svc_handle.release()}},
       {.action = FDIO_SPAWN_ACTION_ADD_HANDLE,
-       .h = {.id = PA_HND(PA_FD, FDIO_FLAG_USE_FOR_STDIO | 0), .handle = debuglog.release()}},
+       .h = fdio_spawn_action_h {.id = PA_HND(PA_FD, FDIO_FLAG_USE_FOR_STDIO | 0), .handle = debuglog.release()}},
   };
 
   char err_msg[FDIO_SPAWN_ERR_MSG_MAX_LENGTH];

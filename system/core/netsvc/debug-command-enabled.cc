@@ -16,10 +16,10 @@ static void run_program(const char* progname, const char** argv, zx_handle_t h) 
     zx_debuglog_create(ZX_HANDLE_INVALID, 0, &logger);
 
     fdio_spawn_action_t actions[] = {
-        {.action = FDIO_SPAWN_ACTION_SET_NAME, .name = {.data = progname}},
+        {.action = FDIO_SPAWN_ACTION_SET_NAME, .name = fdio_spawn_action_name {.data = progname}},
         {.action = FDIO_SPAWN_ACTION_ADD_HANDLE,
-         .h = {.id = PA_HND(PA_FD, 0 | FDIO_FLAG_USE_FOR_STDIO), .handle = logger}},
-        {.action = FDIO_SPAWN_ACTION_ADD_HANDLE, .h = {.id = PA_HND(PA_USER0, 0), .handle = h}},
+         .h = fdio_spawn_action_h {.id = PA_HND(PA_FD, 0 | FDIO_FLAG_USE_FOR_STDIO), .handle = logger}},
+        {.action = FDIO_SPAWN_ACTION_ADD_HANDLE, .h = fdio_spawn_action_h {.id = PA_HND(PA_USER0, 0), .handle = h}},
     };
 
     size_t action_count = (h == ZX_HANDLE_INVALID) ? 2 : 3;

@@ -402,24 +402,27 @@ static zx_status_t dc_launch_devhost(Devhost* host, DevhostLoaderService* loader
   fdio_spawn_action_t actions[kMaxActions];
   size_t actions_count = 0;
   actions[actions_count++] =
-      fdio_spawn_action_t{.action = FDIO_SPAWN_ACTION_SET_NAME, .name = {.data = name}};
+    fdio_spawn_action_t {
+      .action = FDIO_SPAWN_ACTION_SET_NAME,
+      .name = fdio_spawn_action_name {.data = name}
+  };
   // TODO: constrain to /svc/device
   actions[actions_count++] = fdio_spawn_action_t{
       .action = FDIO_SPAWN_ACTION_ADD_NS_ENTRY,
-      .ns = {.prefix = "/svc", .handle = fs_clone("svc").release()},
+      .ns = fdio_spawn_action_ns {.prefix = "/svc", .handle = fs_clone("svc").release()},
   };
   actions[actions_count++] = fdio_spawn_action_t{
       .action = FDIO_SPAWN_ACTION_ADD_HANDLE,
-      .h = {.id = PA_HND(PA_USER0, 0), .handle = hrpc},
+      .h = fdio_spawn_action_h {.id = PA_HND(PA_USER0, 0), .handle = hrpc},
   };
   actions[actions_count++] = fdio_spawn_action_t{
       .action = FDIO_SPAWN_ACTION_ADD_HANDLE,
-      .h = {.id = PA_HND(PA_USER0, kIdHJobRoot), .handle = root_job_svc.release()},
+      .h = fdio_spawn_action_h {.id = PA_HND(PA_USER0, kIdHJobRoot), .handle = root_job_svc.release()},
   };
   if (resource.is_valid()) {
     actions[actions_count++] = fdio_spawn_action_t{
         .action = FDIO_SPAWN_ACTION_ADD_HANDLE,
-        .h = {.id = PA_HND(PA_RESOURCE, 0), .handle = resource.release()},
+        .h = fdio_spawn_action_h {.id = PA_HND(PA_RESOURCE, 0), .handle = resource.release()},
     };
   }
 
@@ -427,7 +430,7 @@ static zx_status_t dc_launch_devhost(Devhost* host, DevhostLoaderService* loader
   if (loader_connection.is_valid()) {
     actions[actions_count++] = fdio_spawn_action_t{
         .action = FDIO_SPAWN_ACTION_ADD_HANDLE,
-        .h = {.id = PA_HND(PA_LDSVC_LOADER, 0), .handle = loader_connection.release()},
+        .h = fdio_spawn_action_h {.id = PA_HND(PA_LDSVC_LOADER, 0), .handle = loader_connection.release()},
     };
   } else {
     spawn_flags |= FDIO_SPAWN_DEFAULT_LDSVC;
