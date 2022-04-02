@@ -1,9 +1,9 @@
 forward_variables_from({
-                         default_deps = [ ":legacy-image-x64" ]
+                         default_deps = [ ":legacy-image-loongarch64" ]
                          enable_kernel_debugging_features = true
                          enable_netsvc_debugging_features = true
                          goma_dir = "/home/pan/goma"
                          use_goma = false
-                         variants = []
+                         variants = [ "gcc" ]
                        },
                        "*")
