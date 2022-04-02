@@ -253,7 +253,7 @@ private:
         .wHubCharacteristics = 0,
         .bPowerOn2PwrGood = 1,
         .bHubContrCurrent = 0,
-        .hs = {
+        .hs = usb_hub_desc_hs_t {
             .DeviceRemovable = {0, 0, 0, 0},
             .PortPwrCtrlMask = {0, 0, 0, 0},
         },
