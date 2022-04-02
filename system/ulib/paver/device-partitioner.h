@@ -45,6 +45,7 @@ extern bool (*TestBlockFilter)(const fbl::unique_fd&);
 enum class Arch {
     kX64,
     kArm64,
+    kLoongarch64
 };
 
 // Abstract device partitioner definition.

@@ -1058,6 +1058,8 @@ bool Paver::InitializePartitioner() {
         Arch arch = Arch::kX64;
 #elif defined(__aarch64__)
         Arch arch = Arch::kArm64;
+#elif defined(__loongarch64)
+        Arch arch = Arch::kLoongarch64;
 #else
 #error "Unknown arch"
 #endif
