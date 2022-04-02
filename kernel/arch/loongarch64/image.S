@@ -17,3 +17,14 @@ DATA(_zbi_kernel_header)
     .int ZBI_ITEM_MAGIC
     .int ZBI_ITEM_NO_CRC32
 END_DATA(_zbi_kernel_header)
+
+// ZBI_TYPE_KERNEL payload (zbi_kernel_t)
+DATA(_zbi_kernel_payload)
+// The boot-shim code expects this to be an offset from the beginning
+// of the load image, whatever the kernel's virtual address.
+.quad IMAGE_ELF_ENTRY - _zbi_file_header
+.quad IMAGE_MEMORY_END - boot_load_end
+END_DATA(_zbi_kernel_payload)
+
+.balign 8
+DATA(boot_load_end)

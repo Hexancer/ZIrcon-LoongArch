@@ -71,6 +71,7 @@ if (current_toolchain == default_toolchain) {
       "mmu.cc",
       "mp.cc",
       "spinlock.cc",
+      "start.S",
       "thread.cc",
       "user_copy_c.cc"
     ]

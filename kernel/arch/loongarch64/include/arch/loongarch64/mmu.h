@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef __ASSEMBLER__
+
 #include <arch/defines.h>
 #include <sys/types.h>
 
@@ -11,3 +13,5 @@
 
 // TODO: PTE size
 typedef uint64_t pte_t;
+
+#endif // __ASSEMBLER__
