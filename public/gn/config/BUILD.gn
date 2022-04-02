@@ -240,7 +240,7 @@ config("relative_paths") {
 }
 
 config("nolibc") {
-  ldflags = [ "-nostartfiles" ]
+  ldflags = [ "-nolibc" ]
 
   # Don't use -nostdlib, because the builtins (or libgcc) are what we want
   # and are otherwise annoying to find and specify.  It's just the -lc that
@@ -254,8 +254,6 @@ config("nolibc") {
     # Include this in every link.
     # Note GN requires "./" so it doesn't think this should mean a -l switch.
     libs = [ "./dso_handle.ld" ]
-  } else {
-    # TODO(mcgrathr): GCC 9 has -nolibc, so use it when we get that toolchain.
   }
 }
 
