@@ -28,6 +28,12 @@
 #define JB_D(n) (JB_X(29) + n - 8)
 #define JB_COUNT JB_D(16)
 
+#elif defined(__loongarch64)
+
+#define JB_X(n) 0
+#define JB_D(n) 0
+#define JB_COUNT 32
+
 #else
 
 #error what architecture?

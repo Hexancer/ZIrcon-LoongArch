@@ -30,6 +30,19 @@ __NO_SAFESTACK static inline void zxr_tp_set(zx_handle_t self, void* tp) {
                      : "r"(tp));
 }
 
+#elif defined(__loongarch64)
+
+// TODO:
+__NO_SAFESTACK static inline void* zxr_tp_get(void) {
+    void* tp;
+    __asm__ __volatile__("move $tp, %0"
+                         : "=r"(tp));
+    return tp;
+}
+
+__NO_SAFESTACK static inline void zxr_tp_set(zx_handle_t self, void* tp) {
+}
+
 #elif defined(__x86_64__)
 
 __NO_SAFESTACK static inline void* zxr_tp_get(void) {
