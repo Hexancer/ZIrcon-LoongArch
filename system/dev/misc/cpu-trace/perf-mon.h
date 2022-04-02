@@ -23,6 +23,9 @@
 #elif defined(__aarch64__)
 #include <lib/zircon-internal/device/cpu-trace/arm64-pm.h>
 #include "arm64-pm-impl.h"
+#elif defined(__loongarch64)
+#include <lib/zircon-internal/device/cpu-trace/loongarch64-pm.h>
+#include "loongarch64-pm-impl.h"
 #else
 #error "unsupported architecture"
 #endif
@@ -40,6 +43,11 @@ using PmuConfig = X86PmuConfig;
 #elif defined(__aarch64__)
 using PmuHwProperties = Arm64PmuProperties;
 using PmuConfig = Arm64PmuConfig;
+#elif defined(__loongarch64)
+using PmuHwProperties = Loongarch64PmuProperties;
+using PmuConfig = Loongarch64PmuConfig;
+#else
+#error unsupported architecture
 #endif
 
 struct EventDetails {
