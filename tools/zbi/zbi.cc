@@ -2613,9 +2613,11 @@ int main(int argc, char** argv) {
                 complete_arch = ZBI_TYPE_KERNEL_X64;
             } else if (!strcmp(optarg, "arm64")) {
                 complete_arch = ZBI_TYPE_KERNEL_ARM64;
+            } else if (!strcmp(optarg, "loongarch64")) {
+                complete_arch = ZBI_TYPE_KERNEL_LOONGARCH64;
             } else {
                 fprintf(stderr, "--complete architecture argument must be one"
-                                " of: x64, arm64\n");
+                                " of: x64, arm64, loongarch64\n");
                 exit(1);
             }
             continue;
