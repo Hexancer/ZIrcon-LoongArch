@@ -121,6 +121,9 @@ const map<string, Generator&> type_to_generator = {
     //  The assembly include file for ARM64.
     {"arm-asm", vdso_asm_generator},
 
+    //  The assembly include file for LoongArch64.
+    {"loongarch64-asm", vdso_asm_generator},
+
     // A C header defining ZX_SYS_* syscall number macros.
     {"numbers", syscall_num_generator},
 
