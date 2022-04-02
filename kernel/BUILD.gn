@@ -241,6 +241,8 @@ if (current_toolchain == default_toolchain) {
     ]
     if (current_cpu == "arm64") {
       deps += [ "platform/generic-arm" ]
+    } else if (current_cpu == "loongarch64") {
+      deps += [ "platform/generic-loongarch" ]
     } else if (current_cpu == "x64") {
       deps += [ "target/pc" ]
     }
