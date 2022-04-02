@@ -1,0 +1,314 @@
+[
+  {
+    "cflags": [], 
+    "ldflags": [], 
+    "runtime": [
+      {
+        "dist": "x86_64-unknown-fuchsia/c++/libc++.so.2", 
+        "soname": "libc++.so.2"
+      }, 
+      {
+        "dist": "x86_64-unknown-fuchsia/c++/libc++abi.so.1", 
+        "soname": "libc++abi.so.1"
+      }, 
+      {
+        "dist": "x86_64-unknown-fuchsia/c++/libunwind.so.1", 
+        "soname": "libunwind.so.1"
+      }
+    ], 
+    "target": [
+      "x86_64-unknown-fuchsia", 
+      "x86_64-fuchsia"
+    ]
+  }, 
+  {
+    "cflags": [
+      "-fsanitize=address"
+    ], 
+    "ldflags": [], 
+    "runtime": [
+      {
+        "dist": "clang/9.0.0/lib/x86_64-unknown-fuchsia/libclang_rt.asan.so", 
+        "soname": "libclang_rt.asan.so"
+      }, 
+      {
+        "dist": "x86_64-unknown-fuchsia/c++/asan/libc++.so.2", 
+        "soname": "libc++.so.2"
+      }, 
+      {
+        "dist": "x86_64-unknown-fuchsia/c++/asan/libc++abi.so.1", 
+        "soname": "libc++abi.so.1"
+      }, 
+      {
+        "dist": "x86_64-unknown-fuchsia/c++/asan/libunwind.so.1", 
+        "soname": "libunwind.so.1"
+      }
+    ], 
+    "target": [
+      "x86_64-unknown-fuchsia", 
+      "x86_64-fuchsia"
+    ]
+  }, 
+  {
+    "cflags": [
+      "-fsanitize=undefined"
+    ], 
+    "ldflags": [], 
+    "runtime": [
+      {
+        "dist": "clang/9.0.0/lib/x86_64-unknown-fuchsia/libclang_rt.ubsan_standalone.so", 
+        "soname": "libclang_rt.ubsan_standalone.so"
+      }, 
+      {
+        "dist": "x86_64-unknown-fuchsia/c++/libc++.so.2", 
+        "soname": "libc++.so.2"
+      }, 
+      {
+        "dist": "x86_64-unknown-fuchsia/c++/libc++abi.so.1", 
+        "soname": "libc++abi.so.1"
+      }, 
+      {
+        "dist": "x86_64-unknown-fuchsia/c++/libunwind.so.1", 
+        "soname": "libunwind.so.1"
+      }
+    ], 
+    "target": [
+      "x86_64-unknown-fuchsia", 
+      "x86_64-fuchsia"
+    ]
+  }, 
+  {
+    "cflags": [], 
+    "ldflags": [
+      "-static-libstdc++"
+    ], 
+    "runtime": [], 
+    "target": [
+      "x86_64-unknown-fuchsia", 
+      "x86_64-fuchsia"
+    ]
+  }, 
+  {
+    "cflags": [
+      "-fsanitize=address"
+    ], 
+    "ldflags": [
+      "-static-libstdc++"
+    ], 
+    "runtime": [
+      {
+        "dist": "clang/9.0.0/lib/x86_64-unknown-fuchsia/libclang_rt.asan.so", 
+        "soname": "libclang_rt.asan.so"
+      }
+    ], 
+    "target": [
+      "x86_64-unknown-fuchsia", 
+      "x86_64-fuchsia"
+    ]
+  }, 
+  {
+    "cflags": [
+      "-fsanitize=undefined"
+    ], 
+    "ldflags": [
+      "-static-libstdc++"
+    ], 
+    "runtime": [
+      {
+        "dist": "clang/9.0.0/lib/x86_64-unknown-fuchsia/libclang_rt.ubsan_standalone.so", 
+        "soname": "libclang_rt.ubsan_standalone.so"
+      }
+    ], 
+    "target": [
+      "x86_64-unknown-fuchsia", 
+      "x86_64-fuchsia"
+    ]
+  }, 
+  {
+    "cflags": [], 
+    "ldflags": [], 
+    "runtime": [
+      {
+        "dist": "aarch64-unknown-fuchsia/c++/libc++.so.2", 
+        "soname": "libc++.so.2"
+      }, 
+      {
+        "dist": "aarch64-unknown-fuchsia/c++/libc++abi.so.1", 
+        "soname": "libc++abi.so.1"
+      }, 
+      {
+        "dist": "aarch64-unknown-fuchsia/c++/libunwind.so.1", 
+        "soname": "libunwind.so.1"
+      }
+    ], 
+    "target": [
+      "aarch64-unknown-fuchsia", 
+      "aarch64-fuchsia"
+    ]
+  }, 
+  {
+    "cflags": [
+      "-fsanitize=address"
+    ], 
+    "ldflags": [], 
+    "runtime": [
+      {
+        "dist": "clang/9.0.0/lib/aarch64-unknown-fuchsia/libclang_rt.asan.so", 
+        "soname": "libclang_rt.asan.so"
+      }, 
+      {
+        "dist": "aarch64-unknown-fuchsia/c++/asan/libc++.so.2", 
+        "soname": "libc++.so.2"
+      }, 
+      {
+        "dist": "aarch64-unknown-fuchsia/c++/asan/libc++abi.so.1", 
+        "soname": "libc++abi.so.1"
+      }, 
+      {
+        "dist": "aarch64-unknown-fuchsia/c++/asan/libunwind.so.1", 
+        "soname": "libunwind.so.1"
+      }
+    ], 
+    "target": [
+      "aarch64-unknown-fuchsia", 
+      "aarch64-fuchsia"
+    ]
+  }, 
+  {
+    "cflags": [
+      "-fsanitize=undefined"
+    ], 
+    "ldflags": [], 
+    "runtime": [
+      {
+        "dist": "clang/9.0.0/lib/aarch64-unknown-fuchsia/libclang_rt.ubsan_standalone.so", 
+        "soname": "libclang_rt.ubsan_standalone.so"
+      }, 
+      {
+        "dist": "aarch64-unknown-fuchsia/c++/libc++.so.2", 
+        "soname": "libc++.so.2"
+      }, 
+      {
+        "dist": "aarch64-unknown-fuchsia/c++/libc++abi.so.1", 
+        "soname": "libc++abi.so.1"
+      }, 
+      {
+        "dist": "aarch64-unknown-fuchsia/c++/libunwind.so.1", 
+        "soname": "libunwind.so.1"
+      }
+    ], 
+    "target": [
+      "aarch64-unknown-fuchsia", 
+      "aarch64-fuchsia"
+    ]
+  }, 
+  {
+    "cflags": [], 
+    "ldflags": [
+      "-static-libstdc++"
+    ], 
+    "runtime": [], 
+    "target": [
+      "aarch64-unknown-fuchsia", 
+      "aarch64-fuchsia"
+    ]
+  }, 
+  {
+    "cflags": [
+      "-fsanitize=address"
+    ], 
+    "ldflags": [
+      "-static-libstdc++"
+    ], 
+    "runtime": [
+      {
+        "dist": "clang/9.0.0/lib/aarch64-unknown-fuchsia/libclang_rt.asan.so", 
+        "soname": "libclang_rt.asan.so"
+      }
+    ], 
+    "target": [
+      "aarch64-unknown-fuchsia", 
+      "aarch64-fuchsia"
+    ]
+  }, 
+  {
+    "cflags": [
+      "-fsanitize=undefined"
+    ], 
+    "ldflags": [
+      "-static-libstdc++"
+    ], 
+    "runtime": [
+      {
+        "dist": "clang/9.0.0/lib/aarch64-unknown-fuchsia/libclang_rt.ubsan_standalone.so", 
+        "soname": "libclang_rt.ubsan_standalone.so"
+      }
+    ], 
+    "target": [
+      "aarch64-unknown-fuchsia", 
+      "aarch64-fuchsia"
+    ]
+  }, 
+  {
+    "cflags": [], 
+    "ldflags": [], 
+    "runtime": [], 
+    "target": [
+      "loongarch64-fuchsia"
+    ]
+  },
+  {
+    "cflags": [], 
+    "ldflags": [
+       "-static-libstdc++"
+     ], 
+    "runtime": [], 
+    "target": [
+      "loongarch64-fuchsia"
+    ]
+  },
+  {
+    "cflags": [
+      "-fsanitize=undefined"
+    ], 
+    "ldflags": [
+      "-static-libstdc++"
+    ], 
+    "runtime": [], 
+    "target": [
+      "loongarch64-fuchsia"
+    ]
+  },
+  {
+    "cflags": [
+      "-fsanitize=undefined"
+    ], 
+    "ldflags": [], 
+    "runtime": [], 
+    "target": [
+      "loongarch64-fuchsia"
+    ]
+  },
+  {
+    "cflags": [
+      "-fsanitize=address"
+    ], 
+    "ldflags": [
+      "-static-libstdc++"
+    ], 
+    "runtime": [], 
+    "target": [
+      "loongarch64-fuchsia"
+    ]
+  },
+  {
+    "cflags": [
+      "-fsanitize=address"
+    ], 
+    "ldflags": [], 
+    "runtime": [], 
+    "target": [
+      "loongarch64-fuchsia"
+    ]
+  }
+]
