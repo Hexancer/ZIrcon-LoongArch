@@ -151,6 +151,7 @@ const map<string, string> type_to_default_suffix = {
     {"kernel-wrappers", ".kernel-wrappers.inc"},
     {"x86-asm", ".x86-64.S"},
     {"arm-asm", ".arm64.S"},
+    {"loongarch64-asm", ".loongarch64.S"},
     {"numbers", ".syscall-numbers.h"},
     {"trace", ".trace.inc"},
     {"rust", ".rs"},
