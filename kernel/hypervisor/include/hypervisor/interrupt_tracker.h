@@ -70,6 +70,9 @@ class InterruptBitmap {
     bool is_empty = bitmap_.Scan(0, kNumBits, false, &bitoff);
 #elif ARCH_X86
     bool is_empty = bitmap_.ReverseScan(0, kNumBits, false, &bitoff);
+#elif ARCH_LOONGARCH64
+    // FIXME
+    bool is_empty = true;
 #endif
     if (is_empty) {
       return InterruptType::INACTIVE;
