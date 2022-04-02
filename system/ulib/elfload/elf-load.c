@@ -25,6 +25,8 @@
 # define MY_MACHINE EM_X86_64
 #elif defined(__i386__)
 # define MY_MACHINE EM_386
+#elif defined(__loongarch64)
+# define MY_MACHINE EM_LOONGARCH
 #else
 # error what machine?
 #endif
