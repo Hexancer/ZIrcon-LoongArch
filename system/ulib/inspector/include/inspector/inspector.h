@@ -25,6 +25,8 @@ typedef struct inspector_dsoinfo inspector_dsoinfo_t;
 typedef zx_x86_64_exc_data_t inspector_excp_data_t;
 #elif defined(__aarch64__)
 typedef zx_arm64_exc_data_t inspector_excp_data_t;
+#elif defined(__loongarch64)
+typedef zx_loongarch64_exc_data_t inspector_excp_data_t;
 #else // unsupported arch
 typedef int inspector_excp_data_t;
 #endif

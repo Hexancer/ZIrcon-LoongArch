@@ -98,6 +98,11 @@ __EXPORT void inspector_print_debug_info(zx_handle_t process, zx_handle_t thread
     pc = regs->pc;
     sp = regs->sp;
     fp = regs->r[29];
+#elif defined(__loongarch64)
+    arch = "loongarch64";
+    pc = regs->pc;
+    sp = regs->sp;
+    fp = regs->r[22];
 #else
 #error unsupported architecture
 #endif
@@ -168,6 +173,9 @@ __EXPORT void inspector_print_debug_info(zx_handle_t process, zx_handle_t thread
         } else {
             violation = "not-present";
         }
+#elif defined(__loongarch64)
+        access_type = "unknown";
+        violation = "unknown";
 #else
 #error unsupported architecture
 #endif
@@ -189,6 +197,8 @@ __EXPORT void inspector_print_debug_info(zx_handle_t process, zx_handle_t thread
         printf(" far %#18" PRIx64 " esr %#18x\n",
                context.arch.u.arm_64.far, context.arch.u.arm_64.esr);
     }
+#elif defined(__loongarch64)
+    inspector_print_general_regs(stdout, regs, &context.arch.u.loongarch64);
 #else
 #error unsupported architecture
 #endif
