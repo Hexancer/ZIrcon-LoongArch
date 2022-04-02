@@ -180,6 +180,16 @@ source_set("math") {
       "aarch64/sqrtf.S",
     ]
   }
+  # TODO: Use FP insns
+  if (current_cpu == "loongarch64") {
+    sources += [
+      "loongarch64/fabs.S",
+      "loongarch64/fabsf.S",
+      "loongarch64/sqrt.S",
+      "loongarch64/sqrtf.S"
+    ]
+  }
+
   deps = [
     "$zx/third_party/ulib/musl:musl_internal",
     "$zx/third_party/ulib/musl/third_party/math",
