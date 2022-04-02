@@ -87,6 +87,8 @@ struct ModuleInfo {
 
 #if defined(__aarch64__)
 constexpr Elf64_Half kNativeElfMachine = EM_AARCH64;
+#elif defined(__loongarch64)
+constexpr Elf64_Half kNativeElfMachine = EM_LOONGARCH;
 #elif defined(__x86_64__)
 constexpr Elf64_Half kNativeElfMachine = EM_X86_64;
 #endif
