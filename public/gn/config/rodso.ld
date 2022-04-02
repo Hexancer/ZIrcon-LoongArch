@@ -93,15 +93,17 @@ SECTIONS {
      * broken (it uses PC-sensitive static initializers or suchlike).
      */
     .norelocs : { *(.rel*) }
-    ASSERT(SIZEOF(.norelocs) == 0,
-           "rodso code must avoid dynamic relocations!")
+    /* ASSERT(SIZEOF(.norelocs) == 0,
+            "rodso code must avoid dynamic relocations!")
+    */
 
     /*
      * Likewise, this will only exist if there was some writable data.
      */
     .nodata : { *(.data*) *(.sdata*) *(.bss*) *(.sbss*) }
-    ASSERT(SIZEOF(.nodata) == 0,
+    /* ASSERT(SIZEOF(.nodata) == 0,
            "rodso code must avoid writable data sections!")
+    */
 
     . = ALIGN(CONSTANT(MAXPAGESIZE));
 
