@@ -22,5 +22,5 @@ typedef struct {
     uint8_t opcode;
     union {
         xdc_notify_stream_state_t notify_stream_state;
-    };
+    } u;
 } xdc_msg_t;

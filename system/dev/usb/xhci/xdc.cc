@@ -359,7 +359,9 @@ static xdc_host_stream_t* xdc_get_host_stream(xdc_t* xdc, uint32_t stream_id)
 static void xdc_notify_stream_state(xdc_t* xdc, uint32_t stream_id, bool online) {
     xdc_msg_t msg = {
         .opcode = XDC_NOTIFY_STREAM_STATE,
-        .notify_stream_state = { .stream_id = stream_id, .online = online }
+        .u = {
+            .notify_stream_state = { .stream_id = stream_id, .online = online }
+        }
     };
 
     size_t actual;
@@ -812,7 +814,7 @@ out:
 static void xdc_handle_msg(xdc_t* xdc, xdc_msg_t* msg) {
     switch (msg->opcode) {
     case XDC_NOTIFY_STREAM_STATE: {
-        xdc_notify_stream_state_t* state = &msg->notify_stream_state;
+        xdc_notify_stream_state_t* state = &msg->u.notify_stream_state;
 
         mtx_lock(&xdc->instance_list_lock);
 
