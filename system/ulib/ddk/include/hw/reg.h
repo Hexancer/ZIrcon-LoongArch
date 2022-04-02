@@ -53,6 +53,34 @@ static inline uint64_t readll(const volatile void* a) {
     return v;
 }
 
+#elif defined(__loongarch64)
+
+static inline void writeb(uint8_t v, volatile void* a) {
+    *(volatile uint8_t*)a = v;
+}
+static inline void writew(uint16_t v, volatile void* a) {
+    *(volatile uint16_t*)a = v;
+}
+static inline void writel(uint32_t v, volatile void* a) {
+    *(volatile uint32_t*)a = v;
+}
+static inline void writell(uint64_t v, volatile void* a) {
+    *(volatile uint64_t*)a = v;
+}
+
+static inline uint8_t readb(const volatile void* a) {
+    return *(const volatile uint8_t*)a;
+}
+static inline uint16_t readw(const volatile void* a) {
+    return *(const volatile uint16_t*)a;
+}
+static inline uint32_t readl(const volatile void* a) {
+    return *(const volatile uint32_t*)a;
+}
+static inline uint64_t readll(const volatile void* a) {
+    return *(const volatile uint64_t*)a;
+}
+
 #else
 // TODO(MAC-251): Similar to arm64 above, the Fuchsia hypervisor's instruction decoder does not
 // support MMIO access via load/store instructions that use writeback, which the compiler may

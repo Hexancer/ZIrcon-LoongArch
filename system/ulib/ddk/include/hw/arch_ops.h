@@ -17,6 +17,12 @@
 #define hw_rmb()   __asm__ volatile ("lfence" ::: "memory")
 #define hw_wmb()   __asm__ volatile ("sfence" ::: "memory")
 
+#elif defined(__loongarch64)
+
+#define hw_mb()    __asm__ volatile("dbar 0" : : : "memory")
+#define hw_rmb()   __asm__ volatile("dbar 0" : : : "memory")
+#define hw_wmb()   __asm__ volatile("dbar 0" : : : "memory")
+
 #endif
 
 #endif  // HW_ARCH_OPS_H_
