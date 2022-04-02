@@ -143,6 +143,24 @@ typedef struct zx_thread_state_debug_regs {
     uint32_t esr;
 } zx_thread_state_debug_regs_t;
 
+#elif defined(__loongarch64)
+
+typedef struct zx_thread_state_general_regs {
+    uint64_t r[32];
+    uint64_t sp;
+    uint64_t pc;
+    uint64_t tp;
+} zx_thread_state_general_regs_t;
+
+typedef struct zx_thread_state_fp_regs {
+} zx_thread_state_fp_regs_t;
+
+typedef struct zx_thread_state_vector_regs {
+} zx_thread_state_vector_regs_t;
+
+typedef struct zx_thread_state_debug_regs {
+} zx_thread_state_debug_regs_t;
+
 #endif
 
 // Value for ZX_THREAD_STATE_SINGLE_STEP. The value can be 0 (not single-stepping), or 1
