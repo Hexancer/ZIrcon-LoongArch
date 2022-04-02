@@ -107,13 +107,13 @@ zx_status_t devmgr_launch_with_loader(const zx::job& job, const char* name, zx::
 
     actions.push_back((fdio_spawn_action_t){
         .action = FDIO_SPAWN_ACTION_SET_NAME,
-        .name = { .data = name },
+        .name = fdio_spawn_action_name { .data = name },
     });
 
     if (loader.is_valid()) {
         actions.push_back((fdio_spawn_action_t){
             .action = FDIO_SPAWN_ACTION_ADD_HANDLE,
-            .h = { .id = PA_HND(PA_LDSVC_LOADER, 0), .handle = loader.release() },
+            .h = fdio_spawn_action_h { .id = PA_HND(PA_LDSVC_LOADER, 0), .handle = loader.release() },
         });
     } else {
         spawn_flags |= FDIO_SPAWN_DEFAULT_LDSVC;
@@ -130,14 +130,14 @@ zx_status_t devmgr_launch_with_loader(const zx::job& job, const char* name, zx::
             if ((h = fs_clone(FSTAB[n].name).release()) != ZX_HANDLE_INVALID) {
                 actions.push_back((fdio_spawn_action_t){
                     .action = FDIO_SPAWN_ACTION_ADD_NS_ENTRY,
-                    .ns = { .prefix = FSTAB[n].mount, .handle = h },
+                    .ns = fdio_spawn_action_ns { .prefix = FSTAB[n].mount, .handle = h },
                 });
             }
         } break;
         case FdioAction::CloneDir:
             actions.push_back((fdio_spawn_action_t){
                 .action = FDIO_SPAWN_ACTION_CLONE_DIR,
-                .dir = { .prefix = FSTAB[n].mount },
+                .dir = fdio_spawn_action_dir { .prefix = FSTAB[n].mount },
             });
             break;
         default:
@@ -148,20 +148,20 @@ zx_status_t devmgr_launch_with_loader(const zx::job& job, const char* name, zx::
     if (debuglog.is_valid()) {
         actions.push_back((fdio_spawn_action_t){
             .action = FDIO_SPAWN_ACTION_ADD_HANDLE,
-            .h = { .id = PA_HND(PA_FD, FDIO_FLAG_USE_FOR_STDIO | 0),
+            .h = fdio_spawn_action_h { .id = PA_HND(PA_FD, FDIO_FLAG_USE_FOR_STDIO | 0),
                    .handle = debuglog.release() },
         });
     } else {
         actions.push_back((fdio_spawn_action_t){
             .action = FDIO_SPAWN_ACTION_TRANSFER_FD,
-            .fd = { .local_fd = stdiofd, .target_fd = FDIO_FLAG_USE_FOR_STDIO | 0 },
+            .fd = fdio_spawn_action_fd { .local_fd = stdiofd, .target_fd = FDIO_FLAG_USE_FOR_STDIO | 0 },
         });
     }
 
     for (size_t i = 0; i < hcount; ++i) {
         actions.push_back((fdio_spawn_action_t){
             .action = FDIO_SPAWN_ACTION_ADD_HANDLE,
-            .h = { .id = types[i], .handle = handles[i] },
+            .h = fdio_spawn_action_h { .id = types[i], .handle = handles[i] },
         });
     }
 

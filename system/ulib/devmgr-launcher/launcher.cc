@@ -96,40 +96,40 @@ zx_status_t Launch(Args args, zx::job* devmgr_job, zx::channel* devfs_root) {
     fbl::Vector<fdio_spawn_action_t> actions;
     actions.push_back(fdio_spawn_action_t{
         .action = FDIO_SPAWN_ACTION_SET_NAME,
-        .name = {.data = "test-devmgr"},
+        .name = fdio_spawn_action_name{.data = "test-devmgr"},
     });
     actions.push_back(fdio_spawn_action_t{
         .action = FDIO_SPAWN_ACTION_ADD_HANDLE,
-        .h = {.id = PA_HND(PA_JOB_DEFAULT, 0), .handle = job_copy.release()},
+        .h = fdio_spawn_action_h{.id = PA_HND(PA_JOB_DEFAULT, 0), .handle = job_copy.release()},
     });
     actions.push_back(fdio_spawn_action_t{
         .action = FDIO_SPAWN_ACTION_ADD_HANDLE,
-        .h = {.id = DEVMGR_LAUNCHER_DEVFS_ROOT_HND, .handle = devfs_server.release()},
+        .h = fdio_spawn_action_h{.id = DEVMGR_LAUNCHER_DEVFS_ROOT_HND, .handle = devfs_server.release()},
     });
 
     for (auto& ns : args.flat_namespace) {
         actions.push_back(fdio_spawn_action_t{
             .action = FDIO_SPAWN_ACTION_ADD_NS_ENTRY,
-            .ns = {.prefix = ns.first, .handle = ns.second.release()},
+            .ns = fdio_spawn_action_ns{.prefix = ns.first, .handle = ns.second.release()},
         });
     }
 
     actions.push_back(fdio_spawn_action_t{
         .action = FDIO_SPAWN_ACTION_CLONE_DIR,
-        .dir = {.prefix = "/boot"},
+        .dir = fdio_spawn_action_dir{.prefix = "/boot"},
     });
 
     if (args.use_system_svchost) {
         actions.push_back(fdio_spawn_action_t{
             .action = FDIO_SPAWN_ACTION_ADD_NS_ENTRY,
-            .ns = {.prefix = "/svc", .handle = svc_client.release()},
+            .ns = fdio_spawn_action_ns{.prefix = "/svc", .handle = svc_client.release()},
         });
     }
 
     if (!clone_stdio) {
         actions.push_back(fdio_spawn_action_t{
             .action = FDIO_SPAWN_ACTION_TRANSFER_FD,
-            .fd = {.local_fd = args.stdio.release(), .target_fd = FDIO_FLAG_USE_FOR_STDIO},
+            .fd = fdio_spawn_action_fd{.local_fd = args.stdio.release(), .target_fd = FDIO_FLAG_USE_FOR_STDIO},
         });
     }
 

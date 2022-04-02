@@ -145,6 +145,40 @@ zx_status_t fdio_spawn(zx_handle_t job,
 
 // Instructs |fdio_spawn_etc| which actions to take.
 typedef struct fdio_spawn_action fdio_spawn_action_t;
+struct fdio_spawn_action_fd {
+    // The file descriptor in this process to clone or transfer.
+    int local_fd;
+
+    // The file descriptor in the spawned process that will receive the
+    // clone or transfer.
+    int target_fd;
+};
+struct fdio_spawn_action_ns {
+    // The prefix in which to install the given handle in the namespace
+    // of the spawned process.
+    const char* prefix;
+
+    // The handle to install with the given prefix in the namespace of
+    // the spawned process.
+    zx_handle_t handle;
+};
+struct fdio_spawn_action_h {
+    // The process argument identifier of the handle to pass to the
+    // spawned process.
+    uint32_t id;
+
+    // The handle to pass to the process on startup.
+    zx_handle_t handle;
+};
+struct fdio_spawn_action_name {
+    // The name to assign to the spawned process.
+    const char* data;
+};
+struct fdio_spawn_action_dir {
+    // The directory to share with the spawned process. |prefix| may match zero or more
+    // entries in the callers flat namespace.
+    const char* prefix;
+};
 struct fdio_spawn_action {
     // The action to take.
     //
@@ -152,40 +186,11 @@ struct fdio_spawn_action {
     // be ignored (rather than generate an error).
     uint32_t action;
     union {
-        struct {
-            // The file descriptor in this process to clone or transfer.
-            int local_fd;
-
-            // The file descriptor in the spawned process that will receive the
-            // clone or transfer.
-            int target_fd;
-        } fd;
-        struct {
-            // The prefix in which to install the given handle in the namespace
-            // of the spawned process.
-            const char* prefix;
-
-            // The handle to install with the given prefix in the namespace of
-            // the spawned process.
-            zx_handle_t handle;
-        } ns;
-        struct {
-            // The process argument identifier of the handle to pass to the
-            // spawned process.
-            uint32_t id;
-
-            // The handle to pass to the process on startup.
-            zx_handle_t handle;
-        } h;
-        struct {
-            // The name to assign to the spawned process.
-            const char* data;
-        } name;
-        struct {
-            // The directory to share with the spawned process. |prefix| may match zero or more
-            // entries in the callers flat namespace.
-            const char* prefix;
-        } dir;
+        struct fdio_spawn_action_fd fd;
+        struct fdio_spawn_action_ns ns;
+        struct fdio_spawn_action_h h;
+        struct fdio_spawn_action_name name;
+        struct fdio_spawn_action_dir dir;
     };
 };
 
