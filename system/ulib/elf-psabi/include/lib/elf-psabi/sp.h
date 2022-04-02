@@ -24,7 +24,7 @@ static inline uintptr_t compute_initial_stack_pointer(uintptr_t base,
     // The x86-64 ABI requires %rsp % 16 = 8 on entry.  The zero word
     // at (%rsp) serves as the return address for the outermost frame.
     sp -= 8;
-#elif defined(__arm__) || defined(__aarch64__)
+#elif defined(__arm__) || defined(__aarch64__) || defined(__loongarch64)
     // The ARMv7 and ARMv8 ABIs both just require that SP be aligned.
 #else
 # error what machine?
