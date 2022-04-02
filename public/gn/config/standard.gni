@@ -8,6 +8,7 @@ import("$zx/public/gn/prebuilt.gni")
 standard_fuchsia_cpus = [
   "arm64",
   "x64",
+  "loongarch64",
 ]
 
 # All the {cpu, os} combinations supported as build or SDK hosts.  The
@@ -22,6 +23,10 @@ standard_build_hosts = [
     cpu = "x64"
     os = "linux"
   },
+  {
+    cpu = "loongarch64"
+    os = "linux"
+  }
 ]
 
 # Default value for $sysroot build argument.
