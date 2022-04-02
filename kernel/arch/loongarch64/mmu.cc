@@ -1243,9 +1243,9 @@ zx_status_t arm64_mmu_translate(vaddr_t va, paddr_t* pa, bool user, bool write) 
 //     // TODO: check that we've destroyed the aspace
 // }
 
-// vaddr_t LoongarchArchVmAspace::PickSpot(vaddr_t base, uint prev_region_mmu_flags,
-//                                   vaddr_t end, uint next_region_mmu_flags,
-//                                   vaddr_t align, size_t size, uint mmu_flags) {
+ vaddr_t LoongarchArchVmAspace::PickSpot(vaddr_t base, uint prev_region_mmu_flags,
+                                   vaddr_t end, uint next_region_mmu_flags,
+                                   vaddr_t align, size_t size, uint mmu_flags) {
 //     canary_.Assert();
-//     return PAGE_ALIGN(base);
-// }
+     return PAGE_ALIGN(base);
+ }

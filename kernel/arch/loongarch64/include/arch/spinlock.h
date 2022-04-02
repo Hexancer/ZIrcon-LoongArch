@@ -15,9 +15,9 @@ typedef struct spin_lock {
 typedef unsigned int spin_lock_saved_state_t;
 typedef unsigned int spin_lock_save_flags_t;
 
-void arch_spin_lock(spin_lock_t* lock);
-int arch_spin_trylock(spin_lock_t* lock);
-void arch_spin_unlock(spin_lock_t* lock);
+void arch_spin_lock(spin_lock_t* lock) TA_ACQ(lock);
+int arch_spin_trylock(spin_lock_t* lock) TA_TRY_ACQ(false, lock);
+void arch_spin_unlock(spin_lock_t* lock) TA_REL(lock);
 
 static inline uint arch_spin_lock_holder_cpu(spin_lock_t* lock) {
     return 0;

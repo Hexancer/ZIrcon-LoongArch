@@ -64,11 +64,18 @@ if (current_toolchain == default_toolchain) {
 
   source_set("loongarch64") {
     sources = [
-      "mmu.cc",
-      "spinlock.cc",
+      "arch.cc",
       "cache-ops.S",
+      "debugger.cc",
+      "exceptions_c.cc",
+      "mmu.cc",
+      "mp.cc",
+      "spinlock.cc",
+      "thread.cc",
+      "user_copy_c.cc"
     ]
     deps = [
+      "$zx/kernel/object",
       "$zx/system/ulib/bitmap",
     ]
   }

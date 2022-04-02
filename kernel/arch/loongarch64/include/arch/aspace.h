@@ -22,7 +22,7 @@ public:
                              vaddr_t end, uint next_region_mmu_flags,
                              vaddr_t align, size_t size, uint mmu_flags);
     static void ContextSwitch(LoongarchArchVmAspace* from, LoongarchArchVmAspace* to);
-    virtual paddr_t arch_table_phys() const;
+    paddr_t arch_table_phys() const { return 0; }
 };
 
 using ArchVmAspace = LoongarchArchVmAspace;
