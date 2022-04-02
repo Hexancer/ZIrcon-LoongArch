@@ -41,7 +41,7 @@ struct table_entry
   };
 
 #ifdef __linux
-#include "os-linux.h"
+#include "../os-linux.h"
 #endif
 
 static int

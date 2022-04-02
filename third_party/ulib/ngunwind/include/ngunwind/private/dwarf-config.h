@@ -46,6 +46,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 
 /****************************************************************************/
 
+#elif UNW_TARGET_LOONGARCH64
+
+/* Number of hardware registers.  We have:
+
+   - 32 integer registers
+   - 32 floating point registers
+   - 8 condition code registers
+   - 2 fake registers:
+	- ARG_POINTER_REGNUM
+	- FRAME_POINTER_REGNUM
+*/
+
+#define DWARF_NUM_PRESERVED_REGS        74
+
+#define dwarf_to_unw_regnum(reg) (((reg) <= UNW_LOONGARCH64_R31) ? (reg) : 0)
+
+/****************************************************************************/
+
 #elif UNW_TARGET_X86_64
 
 #ifdef CONFIG_MSABI_SUPPORT
