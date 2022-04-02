@@ -1,0 +1,13 @@
+#pragma once
+
+#define SHIFT_4K (12)
+#define PAGE_SIZE_SHIFT (SHIFT_4K)
+#define PAGE_SIZE (1L << PAGE_SIZE_SHIFT)
+
+
+#define MAX_CACHE_LINE 128
+
+#define ARCH_DEFAULT_STACK_SIZE 8192
+
+// FIXME
+#define ARCH_PHYSMAP_SIZE (1UL << 39)
