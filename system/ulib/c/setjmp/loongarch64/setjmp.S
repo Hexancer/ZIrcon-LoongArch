@@ -3,7 +3,7 @@
 #include <zircon/tls.h>
 
 ENTRY(setjmp)
-
+    break 0
 END(setjmp)
 
 ALIAS(setjmp, _setjmp)

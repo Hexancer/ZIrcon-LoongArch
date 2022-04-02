@@ -5,6 +5,7 @@
 #include "zircon_impl.h"
 #include "stdio_impl.h"
 
+#include <zircon/assert.h>
 #include <zircon/process.h>
 #include <zircon/syscalls.h>
 #include <pthread.h>
@@ -158,6 +159,7 @@ static NO_ASAN _Noreturn void finish_exit(pthread_t self) {
             [len]"r"(self->tcb_region.iov_len - PAGE_SIZE),
             [self]"r"(self));
 #elif defined(__loongarch64)
+    TODO();
     // The thread descriptor is at the start of the region, so the rest of
     // the space up to the guard page is available as the temporary stack.
     __asm__("add.d $sp, %[base], %[len]\n"

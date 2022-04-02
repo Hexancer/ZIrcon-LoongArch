@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <zircon/assert.h>
 #include <zircon/syscalls.h>
 
 #include <zircon/compiler.h>
@@ -112,6 +113,7 @@ zx_status_t _zx_cache_flush(const void* addr, size_t len, uint32_t options) {
 #elif defined(__loongarch64)
 
     // TODO: Use cacop to invalidate all cache
+    TODO();
 
 #else
 

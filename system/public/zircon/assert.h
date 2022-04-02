@@ -5,6 +5,8 @@
 #ifndef SYSROOT_ZIRCON_ASSERT_
 #define SYSROOT_ZIRCON_ASSERT_
 
+#define TODO() __builtin_trap()
+
 #ifdef _KERNEL
 #include <assert.h>
 #define ZX_PANIC(args...) PANIC(args)

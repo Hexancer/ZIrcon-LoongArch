@@ -1,3 +1,4 @@
+#include <arch.h>
 #include <arch/arch_ops.h>
 #include <arch/loongarch64.h>
 #include <arch/exception.h>
@@ -20,6 +21,7 @@ extern "C" void arch_iframe_process_pending_signals(iframe_t* iframe) {
 //    thread_process_pending_signals();
 //    thread->arch.suspended_general_regs = nullptr;
 //  }
+  TODO();
 }
 
 void arch_fill_in_exception_context(const arch_exception_context_t* arch_context, zx_exception_report_t* report) {
@@ -33,6 +35,7 @@ void arch_fill_in_exception_context(const arch_exception_context_t* arch_context
 //  } else {
 //    zx_context->arch.u.arm_64.far = 0;
 //  }
+  TODO();
 }
 
 void arch_install_context_regs(thread_t* thread, const arch_exception_context_t* context) {
@@ -43,8 +46,10 @@ void arch_install_context_regs(thread_t* thread, const arch_exception_context_t*
 //    thread->arch.suspended_general_regs = context->frame;
 //    thread->arch.debug_state.esr = context->esr;
 //  }
+  TODO();
 }
 
 void arch_remove_context_regs(thread_t* thread) {
 //  thread->arch.suspended_general_regs = nullptr;
+  TODO();
 }

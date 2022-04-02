@@ -50,6 +50,7 @@ constexpr auto kThreadRegister = &zx_thread_state_general_regs_t::tp;
 
 constexpr bool kShadowCallStack = true;
 void SetShadowCallStack(zx_thread_state_general_regs_t* regs, uintptr_t tos) {
+    TODO();
     // TODO: Top of stack ok?
     regs->sp = tos;
 }
@@ -59,6 +60,7 @@ auto RegisterAccessors(std::index_sequence<I...>) {
     struct Accessor {
         size_t i;
         auto& operator()(zx_thread_state_general_regs_t& regs) const {
+            TODO();
             return regs.r[i];
         }
     };
@@ -66,6 +68,7 @@ auto RegisterAccessors(std::index_sequence<I...>) {
 }
 
 auto ArgumentRegisters() {
+    TODO();
     return RegisterAccessors(std::make_index_sequence<8>());
 }
 

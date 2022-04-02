@@ -1,3 +1,5 @@
+#include <arch.h>
+
 #include <debug.h>
 #include <zircon/types.h>
 
@@ -8,6 +10,7 @@
 #include <platform/timer.h>
 
 zx_status_t platform_set_oneshot_timer(zx_time_t deadline) {
+    TODO();
 //  DEBUG_ASSERT(arch_ints_disabled());
 //
 //  if (deadline < 0) {
@@ -27,10 +30,12 @@ zx_status_t platform_set_oneshot_timer(zx_time_t deadline) {
 }
 
 void platform_stop_timer(void) {
+    TODO();
 //  write_ctl(0);
 }
 
 void platform_dputs_thread(const char* str, size_t len) {
+    TODO();
 //     if (uart_disabled) {
 //         return;
 //     }
@@ -38,6 +43,7 @@ void platform_dputs_thread(const char* str, size_t len) {
 }
 
 void platform_dputs_irq(const char* str, size_t len) {
+    TODO();
 //  if (uart_disabled) {
 //    return;
 //  }
@@ -45,6 +51,7 @@ void platform_dputs_irq(const char* str, size_t len) {
 }
 
 int platform_dgetc(char* c, bool wait) {
+    TODO();
 //  if (uart_disabled) {
 //    return ZX_ERR_NOT_SUPPORTED;
 //  }
@@ -52,28 +59,33 @@ int platform_dgetc(char* c, bool wait) {
 //  if (ret < 0)
 //    return ret;
 //  *c = static_cast<char>(ret);
-  return 0;
+    return 0;
 }
 size_t platform_recover_crashlog(size_t len, void* cookie,
                                  void (*func)(const void* data, size_t, size_t len, void* cookie)) {
 
+    TODO();
     return 0;
 }
 
 size_t hw_rng_get_entropy(void* buf, size_t len, bool block) {
-  return 0;
+    TODO();
+    return 0;
 }
 
 /* no built in framebuffer */
 zx_status_t display_get_info(struct display_info* info) {
-  return ZX_ERR_NOT_FOUND;
+    TODO();
+    return ZX_ERR_NOT_FOUND;
 }
 
 bool platform_serial_enabled(void) {
+    TODO();
 //  return !uart_disabled && uart_present();
-  return true;
+    return true;
 }
 
 bool platform_early_console_enabled() {
+  TODO();
   return false;
 }

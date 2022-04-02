@@ -8,6 +8,7 @@
 #include <elf.h>
 #include <type_traits>
 #include <zircon/tls.h>
+#include <zircon/assert.h>
 
 // The hermetic:: namespace is used for data types meant to be shared between a
 // controlling program and its hermetic compute modules.  Data is written by
@@ -100,6 +101,7 @@ struct Tcb {
     HermeticPtr<std::byte> unsafe_sp;
 
     static constexpr std::ptrdiff_t ThreadPointerOffset() {
+        TODO();
         return sizeof(Tcb);
     }
 };

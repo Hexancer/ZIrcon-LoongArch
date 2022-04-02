@@ -27,12 +27,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #include "unwind_i.h"
 #include "dwarf_i.h"
 
+#include <zircon/assert.h>
+
 HIDDEN define_lock (loongarch64_lock);
 HIDDEN int tdep_init_done;
 
 HIDDEN void
 tdep_init (void)
 {
+  TODO();
   intrmask_t saved_mask;
 
   sigfillset (&unwi_full_mask);

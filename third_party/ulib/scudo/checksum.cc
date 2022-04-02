@@ -9,6 +9,8 @@
 #include "checksum.h"
 #include "atomic_helpers.h"
 
+#include <zircon/assert.h>
+
 #if defined(__x86_64__) || defined(__i386__)
 #include <cpuid.h>
 #elif defined(__arm__) || defined(__aarch64__)
@@ -67,6 +69,7 @@ bool hasHardwareCRC32() {
 }
 #elif defined(__loongarch64)
 bool hasHardwareCRC32() {
+  TODO();
   return true;
 }
 #endif // defined(__x86_64__) || defined(__i386__)

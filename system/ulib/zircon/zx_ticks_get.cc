@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <zircon/assert.h>
 #include <zircon/syscalls.h>
 
 #include "private.h"
@@ -19,6 +20,7 @@ zx_ticks_t _zx_ticks_get(void) {
 #elif __x86_64__
     return __rdtsc();
 #elif __loongarch64
+    TODO();
     zx_ticks_t ticks;
     __asm__ volatile("rdtime.d %0, $r0" : "=r" (ticks));
     return ticks;

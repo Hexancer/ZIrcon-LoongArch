@@ -7,6 +7,8 @@
 
 #pragma once
 
+#define TODO() __builtin_trap()
+
 #include <zircon/compiler.h>
 #include <sys/types.h>
 

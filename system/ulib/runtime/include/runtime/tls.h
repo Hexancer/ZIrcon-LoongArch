@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <zircon/assert.h>
 #include <zircon/compiler.h>
 #include <zircon/syscalls.h>
 #include <zircon/syscalls/object.h>
@@ -34,6 +35,7 @@ __NO_SAFESTACK static inline void zxr_tp_set(zx_handle_t self, void* tp) {
 
 // TODO:
 __NO_SAFESTACK static inline void* zxr_tp_get(void) {
+    TODO();
     void* tp;
     __asm__ __volatile__("move $tp, %0"
                          : "=r"(tp));
@@ -41,6 +43,7 @@ __NO_SAFESTACK static inline void* zxr_tp_get(void) {
 }
 
 __NO_SAFESTACK static inline void zxr_tp_set(zx_handle_t self, void* tp) {
+    TODO();
 }
 
 #elif defined(__x86_64__)

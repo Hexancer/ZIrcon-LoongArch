@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <zircon/assert.h>
 #include <zircon/dlfcn.h>
 #include <zircon/process.h>
 #include <zircon/status.h>
@@ -173,6 +174,7 @@ static void debug_break(void) {
 #elif defined(__aarch64__)
     __asm__("brk 0");
 #elif defined(__loongarch64)
+    TODO();
     __asm__("dbcl 0");
 #else
 #error

@@ -27,6 +27,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #include <stdlib.h>
 #include <string.h>
 
+#include <zircon/assert.h>
+
 #include "unwind_i.h"
 
 static struct unw_addr_space local_addr_space;
@@ -38,6 +40,7 @@ HIDDEN unw_dyn_info_list_t _U_dyn_info_list;
 static inline void *
 uc_addr (ucontext_t *uc, int reg)
 {
+  TODO();
   // Technically this is cheating as sp is a separate field in the struct,
   // but it works.
   if (reg >= UNW_LOONGARCH64_R0 && reg <= UNW_LOONGARCH64_F31)
@@ -86,6 +89,7 @@ static int
 access_reg (unw_addr_space_t as, unw_regnum_t reg, unw_word_t *val, int write,
             void *arg)
 {
+  TODO();
   return -UNW_EBADREG;
 }
 
@@ -93,6 +97,7 @@ static int
 access_fpreg (unw_addr_space_t as, unw_regnum_t reg, unw_fpreg_t *val,
               int write, void *arg)
 {
+  TODO();
   return -UNW_EBADREG;
 }
 
@@ -101,10 +106,12 @@ get_static_proc_name (unw_addr_space_t as, unw_word_t ip,
                       char *buf, size_t buf_len, unw_word_t *offp,
                       void *arg)
 {
+  TODO();
   return 0;
 }
 
 HIDDEN void
 loongarch64_local_addr_space_init (void)
 {
+  TODO();
 }

@@ -22,6 +22,7 @@ void arch_setup_uspace_iframe(iframe_t* iframe,
 //  iframe->spsr = spsr;
 //
 //  iframe->mdscr = MSDCR_EL1_INITIAL_VALUE;
+  TODO();
 }
 
 void arch_enter_uspace(iframe_t* iframe) {
@@ -35,5 +36,6 @@ void arch_enter_uspace(iframe_t* iframe) {
 //  arch_disable_ints();
 //
 //  arm64_uspace_entry(iframe, ct->stack.top);
+  TODO();
   __UNREACHABLE;
 }

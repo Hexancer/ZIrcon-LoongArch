@@ -24,18 +24,22 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 
+#include <zircon/assert.h>
+
 #include "unwind_i.h"
 #include "dwarf_i.h"
 
 PROTECTED int
 unw_is_greg (int regnum)
 {
+  TODO();
   return (regnum >= UNW_LOONGARCH64_R0 && regnum <= UNW_LOONGARCH64_PC);
 }
 
 PROTECTED int
 unw_is_fpreg (int regnum)
 {
+  TODO();
   return (regnum >= UNW_LOONGARCH64_F0 && regnum <= UNW_LOONGARCH64_FCSR);
 }
 
@@ -43,6 +47,7 @@ HIDDEN int
 tdep_access_reg (struct cursor *c, unw_regnum_t reg, unw_word_t *valp,
                  int write)
 {
+  TODO();
   dwarf_loc_t loc = DWARF_NULL_LOC;
   unsigned int mask;
 

@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <zircon/assert.h>
 #include <zircon/syscalls.h>
 
 #include "inspector/inspector.h"
@@ -79,6 +80,7 @@ __EXPORT void inspector_print_general_regs(
      FILE* f, const zx_thread_state_general_regs_t* regs,
      const inspector_excp_data_t* excp_data) {
     printf("IMPLEMENT ME\n");
+    TODO();
 }
 
 #else   // unsupported arch

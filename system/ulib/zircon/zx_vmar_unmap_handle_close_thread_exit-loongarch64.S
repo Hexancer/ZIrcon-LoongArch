@@ -8,5 +8,5 @@
 
 // (vmar_handle: x0, addr: x1, len: x2, handle: x3)
 syscall_entry_begin zx_vmar_unmap_handle_close_thread_exit
-
+    break 0
 syscall_entry_end zx_vmar_unmap_handle_close_thread_exit

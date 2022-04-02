@@ -58,10 +58,10 @@ uint64_t kernel_relocated_base = 0xffffffff10000000;
 // The main translation table.
 // pte_t arm64_kernel_translation_table[MMU_KERNEL_PAGE_TABLE_ENTRIES_TOP] __ALIGNED(MMU_KERNEL_PAGE_TABLE_ENTRIES_TOP * 8);
 
-pte_t* arm64_get_kernel_ptable() {
+// pte_t* arm64_get_kernel_ptable() {
 //     return arm64_kernel_translation_table;
-        return 0;
-}
+//     return 0;
+// }
 
 // namespace {
 
@@ -135,6 +135,7 @@ pte_t* arm64_get_kernel_ptable() {
 
 // Convert user level mmu flags to flags that go in L1 descriptors.
 static pte_t mmu_flags_to_s1_pte_attr(uint flags) {
+    TODO();
     pte_t attr = 0;
 //     pte_t attr = MMU_PTE_ATTR_AF;
 
@@ -181,6 +182,7 @@ static pte_t mmu_flags_to_s1_pte_attr(uint flags) {
 }
 
 static void s1_pte_attr_to_mmu_flags(pte_t pte, uint* mmu_flags) {
+    TODO();
 //     switch (pte & MMU_PTE_ATTR_ATTR_INDEX_MASK) {
 //     case MMU_PTE_ATTR_STRONGLY_ORDERED:
 //         *mmu_flags |= ARCH_MMU_FLAG_UNCACHED;
@@ -288,9 +290,10 @@ static void s1_pte_attr_to_mmu_flags(pte_t pte, uint* mmu_flags) {
 // }
 
 zx_status_t LoongarchArchVmAspace::Query(vaddr_t vaddr, paddr_t* paddr, uint* mmu_flags) {
+    TODO();
 //     Guard<Mutex> al{&lock_};
 //     return QueryLocked(vaddr, paddr, mmu_flags);
-        return ZX_OK;
+    return ZX_OK;
 }
 
 // zx_status_t LoongarchArchVmAspace::QueryLocked(vaddr_t vaddr, paddr_t* paddr, uint* mmu_flags) {
@@ -507,6 +510,7 @@ zx_status_t LoongarchArchVmAspace::Query(vaddr_t vaddr, paddr_t* paddr, uint* mm
 // }
 
 static bool page_table_is_clear(volatile pte_t* page_table, uint page_size_shift) {
+    TODO();
 //     int i;
 //     int count = 1U << (page_size_shift - 3);
 //     pte_t pte;
@@ -893,6 +897,7 @@ static bool page_table_is_clear(volatile pte_t* page_table, uint page_size_shift
 
 zx_status_t LoongarchArchVmAspace::MapContiguous(vaddr_t vaddr, paddr_t paddr, size_t count,
                                            uint mmu_flags, size_t* mapped) {
+    TODO();
 //     canary_.Assert();
 //     LTRACEF("vaddr %#" PRIxPTR " paddr %#" PRIxPTR " count %zu flags %#x\n",
 //             vaddr, paddr, count, mmu_flags);
@@ -938,6 +943,7 @@ zx_status_t LoongarchArchVmAspace::MapContiguous(vaddr_t vaddr, paddr_t paddr, s
 
 zx_status_t LoongarchArchVmAspace::Map(vaddr_t vaddr, paddr_t* phys, size_t count, uint mmu_flags,
                                  size_t* mapped) {
+    TODO();
 //     canary_.Assert();
 //     LTRACEF("vaddr %#" PRIxPTR " count %zu flags %#x\n",
 //             vaddr, count, mmu_flags);
@@ -1009,6 +1015,7 @@ zx_status_t LoongarchArchVmAspace::Map(vaddr_t vaddr, paddr_t* phys, size_t coun
 }
 
 zx_status_t LoongarchArchVmAspace::Unmap(vaddr_t vaddr, size_t count, size_t* unmapped) {
+    TODO();
 //     canary_.Assert();
 //     LTRACEF("vaddr %#" PRIxPTR " count %zu\n", vaddr, count);
 
@@ -1046,6 +1053,7 @@ zx_status_t LoongarchArchVmAspace::Unmap(vaddr_t vaddr, size_t count, size_t* un
 }
 
 zx_status_t LoongarchArchVmAspace::Protect(vaddr_t vaddr, size_t count, uint mmu_flags) {
+    TODO();
 //     canary_.Assert();
 
 //     if (!IsValidVaddr(vaddr))
@@ -1076,6 +1084,7 @@ zx_status_t LoongarchArchVmAspace::Protect(vaddr_t vaddr, size_t count, uint mmu
 }
 
 zx_status_t LoongarchArchVmAspace::Init(vaddr_t base, size_t size, uint flags) {
+    TODO();
 //     canary_.Assert();
 //     LTRACEF("aspace %p, base %#" PRIxPTR ", size 0x%zx, flags 0x%x\n",
 //             this, base, size, flags);
@@ -1134,6 +1143,7 @@ zx_status_t LoongarchArchVmAspace::Init(vaddr_t base, size_t size, uint flags) {
 }
 
 zx_status_t LoongarchArchVmAspace::Destroy() {
+    TODO();
 //     canary_.Assert();
 //     LTRACEF("aspace %p\n", this);
 
@@ -1161,6 +1171,7 @@ zx_status_t LoongarchArchVmAspace::Destroy() {
 }
 
 void LoongarchArchVmAspace::ContextSwitch(LoongarchArchVmAspace* old_aspace, LoongarchArchVmAspace* aspace) {
+    TODO();
 //     if (TRACE_CONTEXT_SWITCH)
 //         TRACEF("aspace %p\n", aspace);
 
@@ -1190,6 +1201,7 @@ void LoongarchArchVmAspace::ContextSwitch(LoongarchArchVmAspace* old_aspace, Loo
 }
 
 void arch_zero_page(void* _ptr) {
+    TODO();
 //     uintptr_t ptr = (uintptr_t)_ptr;
 
 //     uint32_t zva_size = arm64_zva_size;
@@ -1201,6 +1213,7 @@ void arch_zero_page(void* _ptr) {
 }
 
 zx_status_t arm64_mmu_translate(vaddr_t va, paddr_t* pa, bool user, bool write) {
+    TODO();
 //     // disable interrupts around this operation to make the at/par instruction combination atomic
 //     spin_lock_saved_state_t state;
 //     arch_interrupt_save(&state, ARCH_DEFAULT_SPIN_LOCK_FLAG_INTERRUPTS);
@@ -1246,6 +1259,7 @@ zx_status_t arm64_mmu_translate(vaddr_t va, paddr_t* pa, bool user, bool write) 
  vaddr_t LoongarchArchVmAspace::PickSpot(vaddr_t base, uint prev_region_mmu_flags,
                                    vaddr_t end, uint next_region_mmu_flags,
                                    vaddr_t align, size_t size, uint mmu_flags) {
+    TODO();
 //     canary_.Assert();
      return PAGE_ALIGN(base);
  }

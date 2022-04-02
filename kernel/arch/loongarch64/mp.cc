@@ -1,3 +1,4 @@
+#include <arch.h>
 #include <arch/mp.h>
 #include <arch/ops.h>
 #include <assert.h>
@@ -8,6 +9,7 @@
 #include <zircon/types.h>
 
 zx_status_t arch_mp_send_ipi(mp_ipi_target_t target, cpu_mask_t mask, mp_ipi_t ipi) {
+    TODO();
 //  LTRACEF("target %d mask %#x, ipi %d\n", target, mask, ipi);
 //
 //  // translate the high level target + mask mechanism into just a mask

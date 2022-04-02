@@ -1,5 +1,6 @@
 #pragma once
 
+#include <arch.h>
 #include <arch/loongarch64/mp.h>
 #include <lib/zircon-internal/thread_annotations.h>
 
@@ -20,10 +21,12 @@ int arch_spin_trylock(spin_lock_t* lock) TA_TRY_ACQ(false, lock);
 void arch_spin_unlock(spin_lock_t* lock) TA_REL(lock);
 
 static inline uint arch_spin_lock_holder_cpu(spin_lock_t* lock) {
+    TODO();
     return 0;
 }
 
 static inline bool arch_spin_lock_held(spin_lock_t* lock) {
+    TODO();
     return 0;
 }
 
@@ -33,9 +36,13 @@ enum {
 
 
 static inline void
-arch_interrupt_save(spin_lock_saved_state_t* statep, spin_lock_save_flags_t flags) {}
+arch_interrupt_save(spin_lock_saved_state_t* statep, spin_lock_save_flags_t flags) {
+    TODO();
+}
 
 static inline void
-arch_interrupt_restore(spin_lock_saved_state_t old_state, spin_lock_save_flags_t flags) {}
+arch_interrupt_restore(spin_lock_saved_state_t old_state, spin_lock_save_flags_t flags) {
+    TODO();
+}
 
 __END_CDECLS

@@ -1,3 +1,4 @@
+#include <arch.h>
 #include <arch/loongarch64.h>
 //#include <arch/loongarch64/registers.h>
 //#include <arch/debugger.h>
@@ -11,10 +12,12 @@
 
 uint8_t arch_get_hw_breakpoint_count() {
 //  return loongarch64_hw_breakpoint_count();
+  TODO();
   return 0;
 }
 
 uint8_t arch_get_hw_watchpoint_count() {
 //  return arm64_hw_watchpoint_count();
+  TODO();
   return 0;
 }

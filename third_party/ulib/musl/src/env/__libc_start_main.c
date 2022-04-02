@@ -184,6 +184,7 @@ __NO_SAFESTACK _Noreturn void __libc_start_main(
             "m"(p), // Tell the compiler p's fields are all still alive.
             [arg]"r"(&p));
 #elif defined(__loongarch64)
+    TODO();
     __asm__("add.d $sp, %[base], %[len]\n"
             "move  $a0, %[arg]\n"
             "b start_main" : :

@@ -4,6 +4,8 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT
 
+#include <arch.h>
+
 #include <lib/userabi/vdso-constants.h>
 #include <lib/userabi/vdso.h>
 
@@ -148,7 +150,7 @@ public:
             code[i] = 0xd4200020; // 'brk #1' (what __builtin_trap() emits)
 
 #elif ARCH_LOONGARCH64
-
+        TODO();
         // Fixed-size instructions.
         ASSERT(address % 4 == 0);
         ASSERT(size % 4 == 0);

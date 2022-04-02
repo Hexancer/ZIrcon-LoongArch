@@ -49,18 +49,18 @@ __BEGIN_CDECLS
 #define USB_FEATURE_FORCE_LINKPM_ACCEPT 30
 
 // USB 2.0
-        struct usb_hub_desc_hs_t {
-            // variable length depending on number of ports
-            uint8_t  DeviceRemovable[4];
-            uint8_t  PortPwrCtrlMask[4];
-        }  __attribute__ ((packed));
+struct usb_hub_desc_hs_t {
+    // variable length depending on number of ports
+    uint8_t  DeviceRemovable[4];
+    uint8_t  PortPwrCtrlMask[4];
+}  __attribute__ ((packed));
 
-        // USB 3.0
-        struct usb_hub_desc_ss_t {
-            uint8_t bHubHdrDecLat;
-            uint16_t wHubDelay;
-            uint16_t DeviceRemovable;
-        } __attribute__ ((packed));
+// USB 3.0
+struct usb_hub_desc_ss_t {
+    uint8_t bHubHdrDecLat;
+    uint16_t wHubDelay;
+    uint16_t DeviceRemovable;
+} __attribute__ ((packed));
 
 typedef struct {
     uint8_t bDescLength;

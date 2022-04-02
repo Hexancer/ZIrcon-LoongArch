@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 .macro zircon_syscall num, name, caller
+    break 0
     li.d $a0, \num
     syscall 0
 // This symbol at the return address identifies this as an approved call site.

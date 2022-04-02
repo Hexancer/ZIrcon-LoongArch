@@ -8,6 +8,5 @@
 
 // (value_ptr: x0, wake_count: w1, new_value: w2, handle: w3)
 syscall_entry_begin zx_futex_wake_handle_close_thread_exit
-
-
+    break 0
 syscall_entry_end zx_futex_wake_handle_close_thread_exit

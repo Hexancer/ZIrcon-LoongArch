@@ -26,11 +26,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #include <string.h>
 #include <stdlib.h>
 
+#include <zircon/assert.h>
+
 #include "unwind_i.h"
 
 PROTECTED unw_addr_space_t
 unw_create_addr_space (unw_accessors_t *a, int byte_order)
 {
+  TODO();
   unw_addr_space_t as = NULL;
   return as;
 }

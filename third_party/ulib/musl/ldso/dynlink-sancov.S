@@ -19,6 +19,7 @@
         ldr x16, [x16, #:got_lo12:__sanitizer_cov_\name]
         br x16
 #elif defined(__loongarch64)
+        break 0
 // TODO: Complete this routine
 #else
 # error unsupported architecture

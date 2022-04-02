@@ -1,5 +1,6 @@
 #pragma once
 
+#include <arch.h>
 #include <zircon/types.h>
 #include <hypervisor/guest_physical_address_space.h>
 #include <hypervisor/id_allocator.h>
@@ -16,7 +17,7 @@ public:
     zx_status_t SetTrap(uint32_t kind, zx_vaddr_t addr, size_t len,
                         fbl::RefPtr<PortDispatcher> port, uint64_t key);
 
-    hypervisor::GuestPhysicalAddressSpace* AddressSpace() const { return gpas_.get(); }
+    hypervisor::GuestPhysicalAddressSpace* AddressSpace() const { TODO(); return gpas_.get(); }
 //     hypervisor::TrapMap* Traps() { return &traps_; }
 //     uint8_t Vmid() const { return vmid_; }
 

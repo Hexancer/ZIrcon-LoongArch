@@ -1,3 +1,4 @@
+#include <arch.h>
 #include <arch/loongarch64.h>
 #include <arch/loongarch64/mp.h>
 #include <debug.h>
@@ -8,6 +9,7 @@
 #include <trace.h>
 
 void arch_thread_initialize(thread_t* t, vaddr_t entry_point) {
+    TODO();
 //  // zero out the entire arch state
 //  t->arch = {};
 //
@@ -44,6 +46,7 @@ void arch_thread_initialize(thread_t* t, vaddr_t entry_point) {
 }
 
 void arch_dump_thread(thread_t* t) {
+    TODO();
 //  if (t->state != THREAD_RUNNING) {
 //    dprintf(INFO, "\tarch: ");
 //    dprintf(INFO, "sp 0x%lx\n", t->arch.sp);
@@ -51,6 +54,7 @@ void arch_dump_thread(thread_t* t) {
 }
 
 void* arch_thread_get_blocked_fp(struct thread* t) {
+    TODO();
 //  if (!WITH_FRAME_POINTERS)
 //    return nullptr;
 //

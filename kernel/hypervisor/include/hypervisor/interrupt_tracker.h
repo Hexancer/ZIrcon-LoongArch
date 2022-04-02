@@ -7,6 +7,7 @@
 #ifndef ZIRCON_KERNEL_HYPERVISOR_INCLUDE_HYPERVISOR_INTERRUPT_TRACKER_H_
 #define ZIRCON_KERNEL_HYPERVISOR_INCLUDE_HYPERVISOR_INTERRUPT_TRACKER_H_
 
+#include <arch.h>
 #include <bitmap/raw-bitmap.h>
 #include <bitmap/storage.h>
 #include <hypervisor/ktrace.h>
@@ -72,6 +73,7 @@ class InterruptBitmap {
     bool is_empty = bitmap_.ReverseScan(0, kNumBits, false, &bitoff);
 #elif ARCH_LOONGARCH64
     // FIXME
+    TODO();
     bool is_empty = true;
 #endif
     if (is_empty) {

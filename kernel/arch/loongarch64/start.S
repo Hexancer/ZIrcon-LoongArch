@@ -14,7 +14,7 @@
 // ignore it if this code were in .text.boot, so don't put it there).
 .text
 FUNCTION(_start)
-
+    break 0
 END_FUNCTION(_start)
 
 // This symbol is used by image.S
