@@ -119,11 +119,12 @@ config("compiler") {
         _libcxx_incdir = "${_libcxx_dir}/include/c++/v1"
         _clang_incdir  = "${_libcxx_dir}/include"
 
-        compiler_flags += [ "-nostdinc", "-nostdinc++",
+        compiler_flags += [ "-nostdinc",
                 "-I${_libcxx_incdir}",
                 "-I${_clang_incdir}",
                 "-L${_libcxx_libdir}",
                 ]
+        cflags_cc = [ "-nostdinc++" ]
       }
       ldflags += [
         "-Wl,--build-id",
@@ -397,8 +398,6 @@ config("default_warnings") {
     "-Wno-uninitialized", # Fix ./kernel/lib/ktrace/ktrace.cc:159
     "-Wno-nonnull",       # Fix ./system/ulib/fbl/include/fbl/function.h:30
     "-Wno-type-limits",   # Fix ./system/ulib/fit/include/lib/fit/bridge_internal.h:335
-    "-Wno-pessimizing-move", # Fix ./system/ulib/fbl/include/fbl/vector.h:226
-    "-Wno-redundant-move",# Fix ./system/dev/lib/operation/include/lib/operation/operation.h:196
     "-Wno-address",       # Fix ./system/dev/display/hikey-display/hi3660-dsi.cc:30
     "-Werror=unused-label",
     "-Werror=return-type",
@@ -414,6 +413,8 @@ config("default_warnings") {
     "-Wconversion",
     "-Wno-sign-conversion",
     "-Wextra-semi",
+    "-Wno-pessimizing-move", # Fix ./system/ulib/fbl/include/fbl/vector.h:226
+    "-Wno-redundant-move",# Fix ./system/dev/lib/operation/include/lib/operation/operation.h:196
   ]
   if (is_gcc) {
     cflags += [
