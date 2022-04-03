@@ -4,6 +4,7 @@ forward_variables_from({
                          enable_netsvc_debugging_features = true
                          goma_dir = "/home/pan/goma"
                          use_goma = false
+                         use_ccache = true
                          variants = [ "gcc" ]
                        },
                        "*")
