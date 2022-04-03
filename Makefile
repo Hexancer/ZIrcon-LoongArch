@@ -13,5 +13,11 @@ runarm:
 runloongarch64:
 	./scripts/run-zircon-loongarch64 -z ./out/legacy-image-loongarch64.zbi -t ./out/ls7a-boot-shim.elf
 
+gdbsloongarch64:
+	./scripts/run-zircon-loongarch64 -z ./out/legacy-image-loongarch64.zbi -t ./out/ls7a-boot-shim.elf --debugger
+
+gdbloongarch64:
+	gdb -ex "set architecture Loongarch64" -ex "target remote localhost:1234"
+
 clean:
 	buildtools/gn clean out
