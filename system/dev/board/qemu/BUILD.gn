@@ -18,5 +18,9 @@ driver("qemu") {
     data_deps = [
       "$zx/kernel/target/arm64/boot-shim:qemu",
     ]
+  } else if (current_cpu == "loongarch64") {
+    data_deps = [
+      "$zx/kernel/target/arm64/boot-shim:ls7a"
+    ]
   }
 }

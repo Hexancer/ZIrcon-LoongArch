@@ -4,5 +4,7 @@ hikey960
 qemu
 vim2
 imx8mevk
+[loongarch64]
+ls7a
 [x64]
 pc

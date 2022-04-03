@@ -252,6 +252,13 @@ template("image_binary") {
       output_name = target_name
     }
 
+    output_format = "binary"
+    if (output_extension == "elf") {
+      if (current_cpu == "loongarch64") {
+        output_format = "elf64-loongarch"
+      }
+    }
+
     output_file = "$output_dir/$output_name"
     if (output_extension != "") {
       output_file += ".$output_extension"
@@ -267,7 +274,7 @@ template("image_binary") {
     ]
     args = [
       "-O",
-      "binary",
+      output_format,
       "@" + rebase_path(rspfile, root_build_dir),
       rebase_path(output_file, root_build_dir),
     ]

@@ -5,7 +5,7 @@
 import("$zx/public/gn/toolchain/c_utils.gni")
 import("$zx/public/gn/toolchain/environment_redirect.gni")
 
-assert(current_cpu == "arm64")
+assert(current_cpu == "arm64" || current_cpu == "loongarch64")
 
 # The boot shims need to be compiled in the special environment for running
 # in physical memory with the MMU disabled.
@@ -13,7 +13,7 @@ if (toolchain.environment == "physmem") {
   source_set("common") {
     visibility = [ ":*" ]
     sources = [
-      "boot-shim.S",
+      "boot-shim-${current_cpu}.S",
       "debug.c",
       "devicetree.c",
       "util.c",
@@ -107,7 +107,11 @@ template("boot_shim") {
       ]
       output_dir = root_build_dir
       output_name = shim_name
-      output_extension = "bin"
+      if (defined(invoker.output_extension)) {
+        output_extension = invoker.output_extension
+      } else {
+        output_extension = "bin"
+      }
       metadata = {
         # For the //:images build_api_module().
         images = [
@@ -143,7 +147,7 @@ template("boot_shim") {
     }
   } else {
     environment_redirect(board) {
-      environment_label = "$zx/kernel/arch/arm64:physmem"
+      environment_label = "$zx/kernel/arch/${current_cpu}:physmem"
       direct = true
       deps = [
         ":$board",
@@ -175,6 +179,14 @@ boot_shim("visalia") {
 }
 
 boot_shim("qemu") {
+  image_metadata = {
+    name = "qemu-kernel"
+    type = "kernel"
+  }
+}
+
+boot_shim("ls7a") {
+  output_extension = "elf"
   image_metadata = {
     name = "qemu-kernel"
     type = "kernel"

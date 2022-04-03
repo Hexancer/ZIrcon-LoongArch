@@ -11,7 +11,7 @@ runarm:
 	./scripts/run-zircon-arm64 -z ./out/legacy-image-arm64.zbi -t ./out/qemu-boot-shim.bin
 
 runloongarch64:
-	./scripts/run-zircon-loongarch64 -z ./out/legacy-image-loongarch64.zbi -t ./out/qemu-boot-shim.bin
+	./scripts/run-zircon-loongarch64 -z ./out/legacy-image-loongarch64.zbi -t ./out/ls7a-boot-shim.bin
 
 clean:
 	buildtools/gn clean out
