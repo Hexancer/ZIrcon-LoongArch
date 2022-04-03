@@ -72,6 +72,8 @@ library("driver") {
 
   sources = []
 
+  configs += [ "$zx/public/gn/config:static-libc++" ]
+
   deps = [
     ":common",
   ]
