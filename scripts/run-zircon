@@ -6,6 +6,8 @@
 # license that can be found in the LICENSE file or at
 # https://opensource.org/licenses/MIT
 
+#set -x
+
 function HELP {
     echo "help:"
     echo "-a <arch>            : arm64, or x64"
@@ -336,6 +338,19 @@ case $ARCH in
         # append a gic version to the machine specifier
         if [[ $GIC != 0 ]]; then
             ARGS+=",gic_version=${GIC}"
+        fi
+
+        if (( !$SERIAL )); then
+          CMDLINE+="kernel.serial=none "
+        fi
+        ;;
+    loongarch64)
+        QEMU=${QEMUDIR}qemu-system-loongarch64
+        ARGS+=" -machine virt"
+        ARGS+=" -bios $DIR/../prebuilt/loongarch_bios_0310_debug.bin"
+
+        if (( !$GRAPHICS  )); then
+          ARGS+=" -vga none"
         fi
 
         if (( !$SERIAL )); then
