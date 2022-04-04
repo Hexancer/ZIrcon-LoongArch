@@ -27,11 +27,11 @@ if (toolchain.environment == "physmem") {
     visibility = [ ":*" ]
     defines = [ "KERNEL_ALIGN=0x10000" ]
     inputs = [
-      "boot-shim.ld",
+      "boot-shim-${current_cpu}.ld",
     ]
     ldflags = [
       "-Wl,--build-id=none",
-      "-Wl,-T," + rebase_path("boot-shim.ld", root_build_dir),
+      "-Wl,-T," + rebase_path("boot-shim-${current_cpu}.ld", root_build_dir),
       "-Wl,-defsym," + defines[0],
     ]
   }
