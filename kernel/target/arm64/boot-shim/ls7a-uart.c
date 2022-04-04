@@ -5,13 +5,17 @@
 #include <stdint.h>
 #include "debug.h"
 
-static volatile uint32_t* uart_fifo_dr = (uint32_t *)0x09000000;
-static volatile uint32_t* uart_fifo_fr = (uint32_t *)0x09000018;
+#define UART_LSR_TFE (1 << 5)
+
+static volatile uint8_t* uart_reg_dat = (uint8_t *)0x800000001fe001e0;          // Data register 0x1fe001e0
+static volatile uint8_t* uart_reg_lsr = (uint8_t *)(0x800000001fe001e0 + 0x05); // Line status register
 
 void uart_pputc(char c)
 {
-    /* spin while fifo is full */
-    while (*uart_fifo_fr & (1<<5))
-        ;
-    *uart_fifo_dr = c;
+    // TODO: this line spins if TFE bit is cleared,
+    //   in this way we need to wait for TX FIFO to be empty before sending data,
+    //   can we improve it?
+    while ((*uart_reg_lsr & UART_LSR_TFE) == 0) ;
+
+    *uart_reg_dat = c;
 }
