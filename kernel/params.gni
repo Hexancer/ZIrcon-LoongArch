@@ -19,8 +19,7 @@ declare_args() {
   } else if (current_cpu == "x64") {
     kernel_base = "0xffffffff80100000"  # Has KERNEL_LOAD_OFFSET baked into it.
   } else if (current_cpu == "loongarch64") {
-    # TODO: this is directly taken from LA linux image, set correct base address
-    kernel_base = "0x9000000001034804"
+    kernel_base = "0xffffffff00000000"
   }
 
   # Virtual address where the kernel address space begins.
@@ -30,8 +29,7 @@ declare_args() {
   } else if (current_cpu == "x64") {
     kernel_aspace_base = "0xffffff8000000000UL"  # -512GB
   } else if (current_cpu == "loongarch64") {
-    # TODO: find correct base address
-    kernel_aspace_base = "0x9000000000200000"
+    kernel_aspace_base = "0xffff000000000000"
   }
 
   # Enable kernel lock dependency tracking.
@@ -53,7 +51,7 @@ declare_args() {
 
   # Extra macro definitions for kernel code, e.g. "DISABLE_KASLR",
   # "ENABLE_KERNEL_LL_DEBUG".
-  kernel_extra_defines = []
+  kernel_extra_defines = [ "DISABLE_KASLR" ]
 }
 
 declare_args() {
