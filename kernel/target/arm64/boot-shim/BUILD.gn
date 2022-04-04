@@ -18,8 +18,12 @@ if (toolchain.environment == "physmem") {
       "devicetree.c",
       "util.c",
     ]
+    # TODO: add DTB to deps
     deps = [
       "$zx/kernel/lib/libc/string",
+    ]
+    include_dirs = [
+      "$zx/kernel/target/arm64/boot-shim",
     ]
   }
 

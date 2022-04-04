@@ -30,8 +30,6 @@
 
 .section .text.boot0,"ax"//ax是啥？
 FUNCTION(_start)
-    // typically points to device tree at entry
-
     /* Config direct window and set PG */
     li.d        $t0, CSR_DMW0_INIT   # UC, PLV0, 0x8000 xxxx xxxx xxxx
     csrwr       $t0, LOONGARCH_CSR_DMWIN0
@@ -50,14 +48,21 @@ virt_addr_jump:
 cache_disable:
 cache_disable_done:
     // setup stack
-    // x0: pointer to device tree
     la.abs  $sp, stack_end
+
+    // $a0 now points to device tree
+    la.abs  $a0, ls7a_dtb
     bl      boot_shim
 
     // x0: bootdata_t* to pass to kernel
     // x1: kernel entry point
     jirl    $r0, $ra, 0
 END_FUNCTION(_start)
+
+DATA(ls7a_dtb)
+.incbin "ls7a.dtb"
+DATA(ls7a_dtb_end)
+END_DATA(ls7a_dtb)
 
 .bss
 .balign 16
