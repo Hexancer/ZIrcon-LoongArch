@@ -537,6 +537,8 @@ static bool ZbiZxTestOverflowAtPageBoundary() {
                                ZBI_TYPE_KERNEL_ARM64,
 #elif defined(__x86_64__)
                                ZBI_TYPE_KERNEL_X64,
+#elif defined(__loongarch64)
+                               ZBI_TYPE_KERNEL_LOONGARCH64,
 #endif
                                /*extra=*/0, /*flags=*/0, kernel_data),
             ZBI_RESULT_OK);

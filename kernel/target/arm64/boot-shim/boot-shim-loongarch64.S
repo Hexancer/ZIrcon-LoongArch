@@ -50,6 +50,9 @@ cache_disable_done:
     // setup stack
     la.abs  $sp, stack_end
 
+    // call routine to parse initrd base
+    bl loongarch_setup_initrd_start
+
     // $a0 now points to device tree
     la.abs  $a0, ls7a_dtb
     bl      boot_shim

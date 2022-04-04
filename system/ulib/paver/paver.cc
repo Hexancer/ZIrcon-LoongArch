@@ -328,7 +328,8 @@ zx_status_t WriteVmoToSkipBlock(const zx::vmo& vmo, size_t vmo_size,
 bool ValidateKernelZbi(const uint8_t* buffer, size_t size, Arch arch) {
     const auto payload = reinterpret_cast<const zircon_kernel_t*>(buffer);
     const uint32_t expected_kernel =
-        (arch == Arch::X64) ? ZBI_TYPE_KERNEL_X64 : ZBI_TYPE_KERNEL_ARM64;
+        ((arch == Arch::X64) ? ZBI_TYPE_KERNEL_X64 :
+         (arch == Arch::Loongarch64) ? ZBI_TYPE_KERNEL_LOONGARCH64 : ZBI_TYPE_KERNEL_ARM64));
 
     const auto crc_valid = [](const zbi_header_t* hdr) {
         const uint32_t crc = crc32(0, reinterpret_cast<const uint8_t*>(hdr + 1), hdr->length);

@@ -109,6 +109,7 @@ typedef struct {
     macro(ZBI_TYPE_CONTAINER, "CONTAINER", ".bin") \
     macro(ZBI_TYPE_KERNEL_X64, "KERNEL_X64", ".bin") \
     macro(ZBI_TYPE_KERNEL_ARM64, "KERNEL_ARM64", ".bin") \
+    macro(ZBI_TYPE_KERNEL_LOONGARCH64, "KERNEL_LOONGARCH64", ".bin") \
     macro(ZBI_TYPE_DISCARD, "DISCARD", ".bin") \
     macro(ZBI_TYPE_STORAGE_RAMDISK, "RAMDISK", ".bin") \
     macro(ZBI_TYPE_STORAGE_BOOTFS, "BOOTFS", ".bin") \

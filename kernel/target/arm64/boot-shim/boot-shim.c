@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
+#include <ctype.h>
 #include <zircon/boot/driver-config.h>
 
 // uncomment to dump device tree at boot
@@ -156,6 +157,45 @@ static int prop_callback(const char *name, uint8_t *data, uint32_t size, void *c
     return 0;
 }
 
+#ifdef __loongarch64
+static uintptr_t loongarch_initrd_start = 0;
+static size_t loongarch_initrd_size = 0;
+
+// we cannot use strtoll in stdlib
+static long long strtoll(char* ptr, char **endptr, int base) {
+    long long result = 0;
+    while (isspace(*ptr)) ptr++;
+    if (base == 16) {
+        ptr += 2; // skip "0x"
+    }
+    while(isdigit(*ptr)) {
+        result = result * base + (*ptr - '0');
+        ptr++;
+    }
+    *endptr = ptr;
+    return result;
+}
+
+void loongarch_setup_initrd_start(int argc, char **argv) {
+    // This will be called from assembly startup code before boot-shim
+    const char *cmdline = argv[1];
+    uart_puts(cmdline);
+
+    // parse initrd start
+    char *pinitrd = strstr(cmdline, "initrd=") + strlen("initrd=");
+    loongarch_initrd_start = strtoll(pinitrd, &pinitrd, 16);
+
+    // parse initrd size
+    pinitrd++; // skip comma
+    loongarch_initrd_size = strtoll(pinitrd, &pinitrd, 10);
+
+    // uart_print_hex(loongarch_initrd_start);
+    // uart_pputc('\n');
+    // uart_print_hex(loongarch_initrd_size);
+    // uart_pputc('\n');
+}
+#endif
+
 // Parse the device tree to find our ZBI, kernel command line, and RAM size.
 static void* read_device_tree(void* device_tree, device_tree_context_t* ctx) {
     ctx->node = NODE_NONE;
@@ -179,6 +219,11 @@ static void* read_device_tree(void* device_tree, device_tree_context_t* ctx) {
 #endif
 #if USE_DEVICE_TREE_GIC_VERSION
     set_gic_version(ctx->gic_version);
+#endif
+
+#ifdef __loongarch64
+    // Here we need to override initrd_start, since LA bios pass it in $a1;
+    ctx->initrd_start = loongarch_initrd_start;
 #endif
 
     // Use the device tree initrd as the ZBI.
@@ -286,7 +331,8 @@ boot_shim_return_t boot_shim(void* device_tree) {
         zbi_header_t* bad_hdr;
         zbi_result_t check = zbi_check(zbi, &bad_hdr);
         if (check == ZBI_RESULT_OK && zbi->length > sizeof(zbi_header_t) &&
-            zbi[1].type == ZBI_TYPE_KERNEL_ARM64) {
+            (zbi[1].type == ZBI_TYPE_KERNEL_ARM64 ||
+             zbi[1].type == ZBI_TYPE_KERNEL_LOONGARCH64)) {
             kernel = (zircon_kernel_t*) zbi;
         } else {
             // No valid ZBI in device tree.
@@ -304,7 +350,8 @@ boot_shim_return_t boot_shim(void* device_tree) {
             fail("no ZBI from device tree and no valid ZBI embedded\n");
         }
         if (embedded_zbi.hdr_file.length > sizeof(zbi_header_t) &&
-            embedded_zbi.hdr_kernel.type == ZBI_TYPE_KERNEL_ARM64) {
+            (embedded_zbi.hdr_kernel.type == ZBI_TYPE_KERNEL_ARM64 ||
+             embedded_zbi.hdr_kernel.type == ZBI_TYPE_KERNEL_LOONGARCH64)) {
             kernel = &embedded_zbi;
         } else {
             fail("no ARM64 kernel in ZBI from device tree or embedded ZBI\n");

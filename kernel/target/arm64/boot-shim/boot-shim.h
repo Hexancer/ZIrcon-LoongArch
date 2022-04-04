@@ -15,4 +15,8 @@ typedef struct {
     uint64_t entry;                     // Returned in x1.
 } boot_shim_return_t;
 
+#ifdef __loongarch64
+void loongarch_setup_initrd_start(int argc, char **argv);
+#endif
+
 boot_shim_return_t boot_shim(void* device_tree);
