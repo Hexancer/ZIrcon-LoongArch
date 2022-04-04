@@ -4,11 +4,11 @@
 
 #define HAS_DEVICE_TREE 1
 #define USE_DEVICE_TREE_CPU_COUNT 1
-#define USE_DEVICE_TREE_GIC_VERSION 1
+#define USE_DEVICE_TREE_GIC_VERSION 0
 #define PRINT_DEVICE_TREE 0
 
-#define MAX_CPU_COUNT 16
-//static size_t cpu_count = 0;
+#define MAX_CPU_COUNT 1 // Only uniprocessor supported now
+static size_t cpu_count = 0;
 
 static const zbi_mem_range_t mem_config[] = {
     {
@@ -61,13 +61,6 @@ static const zbi_platform_id_t platform_id = {
     .pid = PDEV_PID_QEMU,
     .board_name = "qemu",
 };
-
-//static int saved_gic_version = -1;
-
-static void set_gic_version(int gic_version) {
-  __builtin_trap();
-//    saved_gic_version = gic_version;
-}
 
 static void add_cpu_topology(zbi_header_t* zbi) {
   __builtin_trap();
@@ -136,8 +129,7 @@ static void append_board_boot_item(zbi_header_t* bootdata) {
 }
 
 static void set_cpu_count(uint32_t new_count) {
-  __builtin_trap();
-//    if (new_count > 0) {
-//        cpu_count = new_count;
-//    }
+    if (new_count > 0) {
+        cpu_count = new_count;
+    }
 }
