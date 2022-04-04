@@ -366,7 +366,7 @@ boot_shim_return_t boot_shim(void* device_tree) {
     }
 
     // Add board-specific ZBI items.
-    append_board_boot_item(zbi);
+    append_board_boot_item(zbi);//调用对应开发板的append_board_item函数：向zbi文件中加入硬编码的硬件驱动信息
 
     // Append items from device tree.
     append_from_device_tree(zbi, &ctx);

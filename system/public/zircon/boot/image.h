@@ -22,21 +22,33 @@
 // zbi_header_t.length does not include the zbi_header_t itself, but does
 // include any type-specific headers as part of the payload.  All fields in
 // all header formats are little-endian.
+/*Zircon Boot Image由启动项和头容器组成，启动项紧跟着头容器。每个启动项都有一个头（zbi_header_t），
+然后是一个zbi_header_t.length字节的有效负载，可以是任何大小。zbi_header_t.type字段
+指出如何解释有效负载。许多类型指定了一个额外的特定于类型的头，该头开始一个可变大小的负载。
+zbi_header_t.length不包括zbi_header_t本身，但包括作为有效负载一部分的任何特定类型的头。
+所有头格式的所有字段都是little endian。*/
 //
 // Padding bytes appear after each item as needed to align the payload size
 // up to a ZBI_ALIGNMENT (8-byte) boundary.  This padding is not reflected
 // in the zbi_header_t.length value.
+/*每个项的后部都有填充字节，根据需要将负载大小对齐到ZBI_ALIGNMENT(8字节)边界。
+这个填充没有反映在zbi_header_t.length的值中。*/
 //
 // A "complete" ZBI can be booted by a Zircon-compatible boot loader.
 // It contains one ZBI_TYPE_KERNEL_{ARCH} boot item that must come first,
 // followed by any number of additional boot items, which must include
 // exactly one ZBI_TYPE_STORAGE_BOOTFS item.
+/*一个“完整的”ZBI可以由一个与zircon兼容的引导加载程序引导。它包含一个必须在前面的
+ZBI_TYPE_KERNEL_{ARCH}启动项，后面跟着任意数量的其他启动项，这些启动项必须恰好包含一个
+ZBI_TYPE_STORAGE_BOOTFS启动项。*/
 //
 // A partial ZBI cannot be booted, and is only used during the build process.
 // It contains one or more boot items and can be combined with other ZBIs to
 // make a complete ZBI.
-
+/*部分ZBI不能引导，只能在构建过程中使用。它包含一个或多个启动项，并且可以与其他ZBI组合在
+一起，从而形成一个完整的ZBI。*/
 // All items begin at an 8-byte aligned offset into the image.
+//所有项目都以8字节对齐的偏移量开始。
 #ifdef __ASSEMBLER__
 #define ZBI_ALIGNMENT           (8)
 #else
@@ -72,6 +84,7 @@ static inline uint32_t ZBI_ALIGN(uint32_t n) {
 #ifndef __ASSEMBLER__
 // Each header must be 8-byte aligned.  The length field specifies the
 // actual payload length and does not include the size of padding.
+//每个头必须是8字节对齐的。length字段指定实际有效负载长度，不包括填充的大小。
 typedef struct {
     // ZBI_TYPE_* constant, see below.
     uint32_t type;
@@ -79,6 +92,7 @@ typedef struct {
     // Size of the payload immediately following this header.  This
     // does not include the header itself nor any alignment padding
     // after the payload.
+    //紧接着这个header的payload的大小。这不包括header本身，也不包括payload后的任何对齐填充。
     uint32_t length;
 
     // Type-specific extra data.  Each type specifies the use of this
@@ -89,6 +103,8 @@ typedef struct {
     // It should contain ZBI_FLAG_CRC32 for any item where it's feasible
     // to compute the CRC32 at build time.  Other flags are specific to
     // each type; see below.
+    //项的Flags。这必须始终包括ZBI_FLAG_version。它应该包含ZBI_FLAG_CRC32，用于
+    //在构建时计算CRC32是可行的任何项目。其他标志针对每种类型；见下文。
     uint32_t flags;
 
     // For future expansion.  Set to 0.
@@ -134,7 +150,15 @@ typedef struct {
     macro(ZBI_TYPE_DRV_BOARD_PRIVATE, "DRV_BOARD_PRIVATE", ".bin") \
     macro(ZBI_TYPE_BOOT_CONFIG, "BOOT_CONFIG", ".bin") \
     macro(ZBI_TYPE_BOOT_VERSION, "BOOT_VERSION", ".bin")
-
+/*ZBI{
+    container header->length,extra,flags ...
+    boot item1->{ zbi_header_t {zbi_header_t.length,zbi_header_t.type ...} + payload + padding bytes }
+    boot item2-> ^^^^^
+    boot item3-> ^^^^^
+    boot itemN
+                     
+    }                 
+*/
 // Each ZBI starts with a container header.
 //     length:          Total size of the image after this header.
 //                      This includes all item headers, payloads, and padding.
@@ -147,7 +171,7 @@ typedef struct {
 // Define a container header in assembly code.  The symbol name is defined
 // as a local label; use .global symbol to make it global.  The length
 // argument can use assembly label arithmetic like any immediate operand.
-#ifdef __ASSEMBLER__
+#ifdef __ASSEMBLER__ //为什么定义__ASSEMBLER__??
 #define ZBI_CONTAINER_HEADER(symbol, length)    \
     .balign ZBI_ALIGNMENT;                      \
     symbol:                                     \
@@ -179,6 +203,21 @@ typedef struct {
 // immediately after the ZBI_TYPE_CONTAINER header.  The contiguous memory
 // image of the kernel is formed from the ZBI_TYPE_CONTAINER header, the
 // ZBI_TYPE_KERNEL_{ARCH} header, and the payload.
+
+/*
+内核映像。在完整的ZBI中，该项目必须始终位于第一位，紧跟在ZBI_TYPE_CONTAINER头之后。
+内核的连续内存映像由ZBI_TYPE_CONTAINER头、ZBI_TYPE_kernel_{ARCH}头和有效负载payload组成。
+*/
+/*
+ZBI{
+    container header->length,extra,flags ...
+    kernel image(KERNEL_X64)->{ zbi_header_t {zbi_header_t.length,zbi_header_t.type ...} + payload + padding bytes }
+    boot item2-> ^^^^^
+    boot item3-> ^^^^^
+    boot itemN
+                     
+    }                 
+*/
 //
 // The boot loader loads the whole image starting with the container header
 // through to the end of the kernel item's payload into contiguous physical
@@ -189,6 +228,13 @@ typedef struct {
 // address (where the container header is found) that is aligned to the
 // machine's page size.  The precise protocol for transferring control to
 // the kernel's entry point varies by machine.
+/*
+引导加载程序bootloader将整个映像image从容器头一直加载到内核项有效负载的末尾，加载到连续的物理内存中。
+然后，它在内存中的其他地方构造一个部分ZBI，它有一个自己的ZBI_TYPE_容器头，
+后面是booted ZBI中的所有其他项，再加上启动加载程序合成的用于描述机器的其他项。
+此部分ZBI必须放置在与机器页面大小对齐的地址（找到容器标题的位置）。
+将控制转移到内核入口点的精确协议因机器而异
+*/
 //
 // On all machines, the kernel requires some amount of scratch memory to be
 // available immediately after the kernel image at boot.  It needs this
@@ -198,6 +244,12 @@ typedef struct {
 // leave available for the kernel's use.  The boot loader must place its
 // constructed ZBI or other reserved areas at least this many bytes after
 // the kernel image.
+/*
+在所有机器上，启动时内核需要在内核映像处于启动后立即提供一定量的临时内存。
+在有机会从引导加载程序读取任何内存映射信息之前，它需要这个空间来进行早期设置工作。
+“reserve_memory_size”字段告诉引导加载程序在内核的加载映像之后必须留出多少空间供内核使用。
+引导加载程序必须将其构造的ZBI或其他保留区域至少放在内核映像之后这么多字节
+*/
 //
 // x86-64
 //
@@ -211,6 +263,12 @@ typedef struct {
 //     The %rsi register (or %esi, since the high 32 bits must be zero)
 //     holds the physical address of the bootloader-constructed ZBI.
 //     All other registers are unspecified.
+
+/*
+内核假定它是在0x100000（1MB）的固定物理地址加载的。zbi_kernel_t.entry是内核将启动的PC位置的绝对物理地址。
+处理器处于64位模式，直接虚拟到物理映射覆盖加载内核和引导加载程序构造的ZBI的物理内存，
+该内存必须低于4GB。%rsi寄存器（或%esi，因为高32位必须为零）保存引导加载程序ZBI的物理地址。
+所有其他寄存器均未指明。*/
 //
 //  ARM64
 //
@@ -222,6 +280,12 @@ typedef struct {
 //     can be loaded anywhere in physical memory.  The x0 register
 //     holds the physical address of the bootloader-constructed ZBI.
 //     All other registers are unspecified.
+/*
+zbi_kernel_t.entry是从映像的开头（即zbi_TYPE_kernel_ARM64头之前的zbi_TYPE_容器头）
+到映像中内核将启动的PC位置的偏移量。处理器处于EL1或以上的物理地址模式。
+内核映像和ZBI构建的引导加载程序都可以加载到物理内存中的任何位置。x0寄存器保存引导加载程序ZBI的物理地址。
+所有其他寄存器均未指明。
+*/
 //
 #define ZBI_TYPE_KERNEL_PREFIX      (0x004e524b) // KRN\0
 #define ZBI_TYPE_KERNEL_MASK        (0x00FFFFFF)
@@ -256,6 +320,10 @@ typedef struct {
 // stage is now looking at the ZBI.  An earlier stage already "consumed"
 // this information, but avoided copying data around to remove it from
 // the ZBI item stream.
+/*
+一个应该被忽略的被丢弃的项目。这用于已经处理的项目，无论哪个阶段正在查看ZBI，
+都应该忽略该项目。早期阶段已经“消耗”了这些信息，但避免了复制数据以将其从ZBI项目流中删除。
+*/
 #define ZBI_TYPE_DISCARD        (0x50494b53) // SKIP
 
 
@@ -293,6 +361,9 @@ typedef struct {
 // A virtual disk image.  This is meant to be treated as if it were a
 // storage device.  The payload (after decompression) is the contents of
 // the storage device, in whatever format that might be.
+/*
+虚拟磁盘映像。这意味着将其视为存储设备。有效载荷（解压后）是存储设备的内容，可以是任何格式。
+*/
 #define ZBI_TYPE_STORAGE_RAMDISK        (0x4b534452) // RDSK
 
 // The /boot filesystem in BOOTFS format, specified in <zircon/boot/bootfs.h>.
@@ -318,6 +389,11 @@ typedef struct {
 // first items in the complete ZBI containing the kernel; then items in
 // the ZBI synthesized by the boot loader.  The kernel interprets the
 // [whole command line](../../../../docs/kernel_cmdline.md).
+/*内核命令行片段，以NUL结尾的UTF-8字符串。可以显示多个ZBI_类型_CMDLINE项目。
+它们被视为在每个项目之间以“”连接，顺序如下：包含内核的完整ZBI中的第一个项目；
+然后由引导加载程序合成ZBI中的项。内核解释
+//[整个命令行]（../../../../docs/kernel_cmdline.md）。
+*/
 #define ZBI_TYPE_CMDLINE                (0x4c444d43) // CMDL
 
 // The crash log from the previous boot, a UTF-8 string.
@@ -395,6 +471,7 @@ typedef enum {
     ZBI_TOPOLOGY_ARCH_UNDEFINED = 0, // Intended primarily for testing.
     ZBI_TOPOLOGY_ARCH_X86 = 1,
     ZBI_TOPOLOGY_ARCH_ARM = 2,
+    ZBI_TOPOLOGY_ARCH_LOONGARCH = 3
 } zbi_topology_architecture_t;
 
 typedef struct {
@@ -414,6 +491,10 @@ typedef struct {
 }  zbi_topology_arm_info_t;
 
 typedef struct {
+    // TODO: anything to add here? 按qemu的来可以先模仿ARM很多可以复用
+} zbi_topology_loongarch_info_t;
+
+typedef struct {
     // Indexes here correspond to the logical_ids index for the thread.
     uint32_t apic_ids[ZBI_MAX_SMT];
     uint32_t apic_id_count;
@@ -431,6 +512,7 @@ typedef struct {
     union {
         zbi_topology_arm_info_t arm;
         zbi_topology_x86_info_t x86;
+        zbi_topology_loongarch_info_t loongarch;
     } architecture_info;
 
 } zbi_topology_processor_t;

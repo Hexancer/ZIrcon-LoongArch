@@ -69,11 +69,14 @@ cache_disable_done:
     adr     tmp, stack_end
     mov     sp, tmp
 
-    // x0: pointer to device tree
+    // x0: pointer to device tree 来自bootloader 见system/public/zircon/boot/image.h
+//    The x0 register
+//     holds the physical address of the bootloader-constructed ZBI.
+//     All other registers are unspecified.
     bl      boot_shim
 
-    // x0: bootdata_t* to pass to kernel
-    // x1: kernel entry point
+    // x0: bootdata_t* to pass to kernel zbi文件首地址
+    // x1: kernel entry point 内核首地址
     br      x1
 END_FUNCTION(_start)
 

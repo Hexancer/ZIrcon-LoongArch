@@ -15,7 +15,7 @@ void uart_pputc(char c)
     // TODO: this line spins if TFE bit is cleared,
     //   in this way we need to wait for TX FIFO to be empty before sending data,
     //   can we improve it?
-    while ((*uart_reg_lsr & UART_LSR_TFE) == 0) ;
+    while ((*uart_reg_lsr & UART_LSR_TFE) == 0) ;//wait for fifo to be empty
 
-    *uart_reg_dat = c;
+    *uart_reg_dat = c;//sending data
 }

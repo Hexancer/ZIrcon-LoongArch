@@ -21,7 +21,7 @@
  *  x9-x15  Scratch
  *  x19-x28 Globals
  */
-tmp                     .req x9
+tmp                     .req x9 //别名 name .req register name 为寄存器定义一个别名
 tmp2                    .req x10
 wtmp2                   .req w10
 
@@ -33,13 +33,28 @@ kernel_vaddr            .req x22
 // This code is purely position-independent and generates no relocations
 // that need boot-time fixup; gen-kaslr-fixup.sh ensures this (and would
 // ignore it if this code were in .text.boot, so don't put it there).
+//这段代码纯粹是位置无关代码，并且不会产生需要启动时修复的重定位代码，gen-kaslr-fixup.sh
+//保证了这一点，请不要把代码放到.text.boot中。
 .text
 FUNCTION(_start)
     /* Save the Boot info for the primary CPU only */
+    //mpidr_el1, 64位 ：多核标志处理器，我们只要关心其中 AFF0 和 AFF1 。AFF0 [0 - 7 bit] 位，
+    //表示当前 CPU 内核的当前的线程编号，由于直到最新的 A76 都不支持超线程技术，
+    //所以这个默认为 0，无需关心；AFF1 [8-11 bit] 当前 CPU 簇中当前 CPU 内核的编号，
+    //0 号就是 prime CPU 内核，AFF1 [12-15]恒为0。
+
+    // ubfx 无符号位域提取指令, 两种语法
+    //UBFX Wd, Wn, #lsb, #width ; 32-bit
+    //UBFX Xd, Xn, #lsb, #width ; 64-bit √
+    //从Wn寄存器的第lsb位开始，提取width位到Wd寄存器，剩余高位用0填充。
     mrs     cpuid, mpidr_el1
     ubfx    cpuid, cpuid, #0, #15 /* mask Aff0 and Aff1 fields */
-    cbnz    cpuid, .Lno_save_bootinfo
+    cbnz    cpuid, .Lno_save_bootinfo //判断是否为prime核心也即0号内核
+    //如果不是 prim 核心(0 号核心)，则不需要启动内核，也就不需要准备内核启动参数，
+    //直接执行核心初始化工作
     /* save x0 in zbi_paddr */
+    //prim 核心走这里，准备并保存内核启动参数
+    //计算 zbi_paddr 段中数据的地址，保存在 x0 中，下同
     adrp    tmp, zbi_paddr
     str     x0, [tmp, #:lo12:zbi_paddr]
     /* save entry point physical address in kernel_entry_paddr */
@@ -49,42 +64,58 @@ FUNCTION(_start)
     adrp    tmp2, arch_boot_el
     mrs     x2, CurrentEL
     str     x2, [tmp2, #:lo12:arch_boot_el]
+    //总之，x0 - x4 现在保存了核心初始化需要的参数，为跳转到 C 世界作准备。
 .Lno_save_bootinfo:
-
-    bl      arm64_elX_to_el1
-    bl      arch_invalidate_cache_all
-
+    //配置其他异常等级 elx 进入 el1 的环境 *
+    //由于 arm64_elX_to_el1 程序末尾执行了 eret 跳转到了 EL1 等级，那么下面代码在 EL1 运行。
+    bl      arm64_elX_to_el1 //切换到EL1特权态
+    bl      arch_invalidate_cache_all //使缓存失效
+    
     /* enable caches so atomics and spinlocks work */
+    //启用缓存，使原子操作和自旋锁生效
     mrs     tmp, sctlr_el1
+    //打开指令缓存
     orr     tmp, tmp, #(1<<12) /* Enable icache */
+    //打开数据缓存
     orr     tmp, tmp, #(1<<2)  /* Enable dcache/ucache */
     msr     sctlr_el1, tmp
 
     // This can be any arbitrary (page-aligned) address >= KERNEL_ASPACE_BASE.
     // TODO(SEC-31): Choose it randomly.
-    adr_global  tmp, kernel_relocated_base
-    ldr     kernel_vaddr, [tmp]
 
+    //加载 kernel_relocated_base 段地址
+    //内核重定向的基地址，即内核开始的虚拟地址
+    adr_global  tmp, kernel_relocated_base
+    ldr     kernel_vaddr, [tmp] //赋值给 kernel_vaddr
+    
     // Load the base of the translation tables.
-    adr_global page_table0, tt_trampoline
-    adr_global page_table1, arm64_kernel_translation_table
+    adr_global page_table0, tt_trampoline //tt_trampoline 相当于一级页表？？？TODO
+    adr_global page_table1, arm64_kernel_translation_table//虚拟地址内存页地址转换表
 
     // Send secondary cpus over to a waiting spot for the primary to finish.
+    //如果不是 prim CPU 内核，则跳转到 Lmmu_enable_secondary 后等待 prim 内核运行完下面代码
     cbnz    cpuid, .Lmmu_enable_secondary
-
+    
+    //下面的代码只有 prim CPU 内核执行
+    
     // The fixup code appears right after the kernel image (at __data_end in
     // our view).  Note this code overlaps with the kernel's bss!  It
     // expects x0 to contain the actual runtime address of __code_start.
-    mov     x0, kernel_vaddr
-    bl      __data_end
+
+    mov     x0, kernel_vaddr //将内核代码开始的虚拟地址保存到 x0 中
+    bl      __data_end //跳转到 __data_end *
+    //__data_end 指向 image.S - apply_fixups 方法
 
     /* clear out the kernel's bss using current physical location */
     /* NOTE: Relies on __bss_start and _end being 16 byte aligned */
+    //检查内核 bss 段是否被清除，猜测是因为前面 bss 段所在内存已经被操作过 
 .Ldo_bss:
-    adr_global tmp, __bss_start
-    adr_global tmp2, _end
-    sub     tmp2, tmp2, tmp
-    cbz     tmp2, .Lbss_loop_done
+    //见 kernel.ld
+    adr_global tmp, __bss_start//计算保存内核 .bss 段开始地址
+    adr_global tmp2, _end//计算保存内核 .bss 段结束地址
+    sub     tmp2, tmp2, tmp//计算 .bss 段大小
+    cbz     tmp2, .Lbss_loop_done//.bss 段大小为 0 则跳转 Lbss_loop_done
+//不为 0 则循环等待
 .Lbss_loop:
     sub     tmp2, tmp2, #16
     stp     xzr, xzr, [tmp], #16
@@ -92,6 +123,7 @@ FUNCTION(_start)
 .Lbss_loop_done:
 
     /* set up a functional stack pointer */
+    //设定内核栈地址,准备调用 C 代码
     adr_global tmp, boot_cpu_kstack_end
     mov     sp, tmp
 
@@ -100,6 +132,7 @@ FUNCTION(_start)
     bl      boot_alloc_init
 
     /* save the physical address the kernel is loaded at */
+    //保存内核开始地址到 kernel_base_phys 全局变量
     adr_global x0, __code_start
     adr_global x1, kernel_base_phys
     str     x0, [x1]
@@ -108,12 +141,33 @@ FUNCTION(_start)
 
     /* clear out the kernel translation table */
     mov     tmp, #0
+//清除内核虚地址转换表
 .Lclear_top_page_table_loop:
+
+//遍历转换表中的所有条目并设置 0
+    /**
+        等价于
+        for(int tmp = 0;tmp < MMU_KERNEL_PAGE_TABLE_ENTRIES_TOP;tmp++) {
+            page_table1[tmp] = 0;
+        }
+    关于 xzr 寄存器 https://community.arm.com/processors/f/discussions/3185/wzr-xzr-register-s-purpose
+    **/
     str     xzr, [page_table1, tmp, lsl #3]
     add     tmp, tmp, #1
     cmp     tmp, #MMU_KERNEL_PAGE_TABLE_ENTRIES_TOP
     bne     .Lclear_top_page_table_loop
 
+    /**
+        在初始化阶段，我们mapping三段地址，
+        第一段是identity mapping，其实就是把物理地址mapping到物理地址上去，在打开MMU的时候需要这样的mapping（ARM ARCH强烈推荐这么做的）。
+        第二段是kernel image mapping，内核代码欢快的执行当然需要将kernel running需要的地址（kernel txt、dernel rodata、data、bss等等）进行映射了。
+        第三段是blob memory对应的mapping。
+    **/
+
+
+    //准备调用 C 函数 arm64_boot_map
+    //1.该函数任务是帮内核映射物理内存
+    //先准备 5 个参数 x0-x4 寄存器保存函数参数
     /* void arm64_boot_map(pte_t* kernel_table0, vaddr_t vaddr, paddr_t paddr, size_t len, pte_t flags); */
 
     /* map a large run of physical memory at the base of the kernel's address space */
@@ -122,8 +176,11 @@ FUNCTION(_start)
     mov     x2, 0
     mov     x3, ARCH_PHYSMAP_SIZE
     movlit  x4, MMU_PTE_KERNEL_DATA_FLAGS
+    //调用 arm64_boot_map *
     bl      arm64_boot_map
 
+    //类似上
+    //2.映射内核的地址
     /* map the kernel to a fixed address */
     /* note: mapping the kernel here with full rwx, this will get locked down later in vm initialization; */
     mov     x0, page_table1
@@ -141,6 +198,8 @@ FUNCTION(_start)
     /* Zero tt_trampoline translation tables */
     mov     tmp, #0
 .Lclear_tt_trampoline:
+    //同上清除 tt_trampoline 转换表
+    //循环 page_table0 置 0
     str     xzr, [page_table0, tmp, lsl#3]
     add     tmp, tmp, #1
     cmp     tmp, #MMU_PAGE_TABLE_ENTRIES_IDENT
@@ -155,29 +214,48 @@ FUNCTION(_start)
     str     tmp2, [page_table0, tmp, lsl #3]  /* tt_trampoline[paddr index] = pt entry */
 
     /* mark page tables as set up, so secondary cpus can fall through */
+    //标记页表已经设置完毕，通知其他 CPU 内核可以继续往下跑了
     adr_global tmp, page_tables_not_ready
     str     wzr, [tmp]
 
     /* make sure it's flushed */
     dc      cvac, tmp
     dmb     sy
-
+    //prime CPU 内核跳入 Lpage_tables_ready
     b       .Lpage_tables_ready
 
+//其他 CPU 内核在这里自旋等待页表初始化完成
 .Lmmu_enable_secondary:
     adr_global tmp, page_tables_not_ready
     /* trap any secondary cpus until the primary has set up the page tables */
 .Lpage_tables_not_ready:
     ldr     wtmp2, [tmp]
     cbnz    wtmp2, .Lpage_tables_not_ready
+
+//注意！所有 CPU 都会执行到这里
 .Lpage_tables_ready:
 
+    //建议看 http://www.wowotech.net/armv8a_arch/__cpu_setup.html
+    
+    //下面主要是对 MMU 和 Cache 的配置
+    //这里需要重置一下 MMU 和 Cache 的状态以清除里面的残余数据
+    //主要因为在进入 Kernel 代码之前，Bootloader 可能使用过 MMU 和 Cache，
+    //所以 ICache 和 TLB 中可能还有前面留下来的残余垃圾数据
     /* set up the mmu */
 
+    //使 TLB 失效以清除数据
     /* Invalidate TLB */
     tlbi    vmalle1is
+    //内存栅栏，防止指令重排
     isb
     dsb     sy
+    
+
+    //初始化 Memory attributes 配置
+    //Memory attributes 简单来说就是将 Memory 加上了几种属性，每种属性都会影响 Memory 的
+    //读写策略.因为 Memory 读写策略是非常复杂的，比如一段内存区域指向的是一个 FIFO 设备，对
+    //内存的读写有严格的时序要求，则需要配置 Memory attributes 来禁止CPU 读写重排，Cache 
+    //等等优化，因为这些对于这段 Memory 没有意义，还会影响数据的读写的正确性
 
     /* Initialize Memory Attribute Indirection Register */
     movlit  tmp, MMU_MAIR_VAL
@@ -189,23 +267,33 @@ FUNCTION(_start)
     movlit  tmp, MMU_TCR_FLAGS_IDENT
     msr     tcr_el1, tmp
     isb
-
+    //下面代码打开 MMU
+    //建议参考 http://www.wowotech.net/linux_kenrel/turn-on-mmu.html
     /* Write ttbr with phys addr of the translation table */
+    /*idmap_pg_dir是为turn on MMU准备的一致性映射，物理地址的高16bit都是0，因此identity
+    mapping必定是选择TTBR0_EL1指向的各级地址翻译表。后续当系统运行之后，在进程切换的时候，
+    会修改TTBR0的值，切换到真实的进程地址空间上去。
+    TTBR1用于kernel space，所有的内核线程都是共享一个空间就是swapper_pg_dir*/
     msr     ttbr0_el1, page_table0
     msr     ttbr1_el1, page_table1
+    //内存栅栏
     isb
 
     /* Read SCTLR */
+    //保存 EL1 状态的异常向量表
     mrs     tmp, sctlr_el1
-
+    
     /* Turn on the MMU */
+    //打开 MMU
     orr     tmp, tmp, #(1<<0)
 
     /* Write back SCTLR */
+    //恢复 EL1 状态的异常向量表
     msr     sctlr_el1, tmp
 .Lmmu_on_pc:
     isb
-
+    
+    //因为前面刚打开了 MMU，则下面的地址都要是虚拟地址了，首先要映射 PC 的地址到虚拟地址
     // Map our current physical PC to the virtual PC and jump there.
     // PC = next_PC - __code_start + kernel_vaddr
     adr     tmp, .Lmmu_on_vaddr
@@ -223,9 +311,11 @@ FUNCTION(_start)
     /* Invalidate TLB */
     tlbi    vmalle1
     isb
-
+    
+    //如果不是 prim 内核，则直接跳到 secondary_boot 代码，跳过 lk_main
     cbnz    cpuid, .Lsecondary_boot
 
+    //重新设置 prime CPU 的内核栈指针，因为现在 MMU 已经打开，需要使用虚拟地址
     // set up the boot stack for real
     adr_global tmp, boot_cpu_kstack_end
     mov     sp, tmp
@@ -237,6 +327,7 @@ FUNCTION(_start)
     // having to compile-time disable safe-stack and stack-protector
     // code generation features for all the C code in the bootstrap
     // path, which (unlike on x86, e.g.) is enough to get annoying.
+    //配置 Stack Guard，其实就是在栈末尾设置一个页中断，如果程序读写到这里，代表栈溢出，触发异常
     adr_global tmp, boot_cpu_fake_thread_pointer_location
     msr     tpidr_el1, tmp
 
@@ -249,11 +340,12 @@ FUNCTION(_start)
     str     x0, [tmp, #ZX_TLS_STACK_GUARD_OFFSET]
     // Don't leak the value to other code.
     mov     x0, xzr
-
+    //跳转到内核 C 代码入口
     bl  lk_main
     b   .
 
 .Lsecondary_boot:
+    //配置其他 CPU 内核的栈指针
     bl      arm64_get_secondary_sp
     cbz     x0, .Lunsupported_cpu_trap
     mov     sp, x0
@@ -262,6 +354,7 @@ FUNCTION(_start)
     bl      arm64_secondary_entry
 
 .Lunsupported_cpu_trap:
+    //其他 CPU 内核初始化完毕
     wfe
     b       .Lunsupported_cpu_trap
 END_FUNCTION(_start)
@@ -270,6 +363,7 @@ END_FUNCTION(_start)
 
 // These are logically .bss (uninitialized data).  But they're set before
 // clearing the .bss, so put them in .data so they don't get zeroed.
+//静态数据，内核启动默认参数
 .data
     .balign 64
 DATA(arch_boot_el)
