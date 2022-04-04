@@ -55,11 +55,17 @@ cache_disable_done:
 
     // $a0 now points to device tree
     la.abs  $a0, ls7a_dtb
+boot_shim_jump:
     bl      boot_shim
 
-    // x0: bootdata_t* to pass to kernel
-    // x1: kernel entry point
-    jirl    $r0, $ra, 0
+    // return from boot_shim
+    // $a0: zbi addr
+    // $a1: kernel entry point
+kernel_jump:
+    jirl    $r0, $a1, 0
+
+    // should never reach here
+    break   0
 END_FUNCTION(_start)
 
 DATA(ls7a_dtb)
