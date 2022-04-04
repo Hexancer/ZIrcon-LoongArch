@@ -39,3 +39,14 @@ void arch_enter_uspace(iframe_t* iframe) {
   TODO();
   __UNREACHABLE;
 }
+
+void arch_early_init() {
+  TODO();
+    // arm64_cpu_early_init();
+
+    // platform_init_mmu_mappings();
+}
+
+void arch_init() TA_NO_THREAD_SAFETY_ANALYSIS {
+  TODO();
+}

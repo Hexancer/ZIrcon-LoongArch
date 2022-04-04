@@ -65,6 +65,7 @@ if (current_toolchain == default_toolchain) {
   source_set("loongarch64") {
     sources = [
       "arch.cc",
+      "boot-mmu.cc",
       "cache-ops.S",
       "debugger.cc",
       "exceptions_c.cc",
