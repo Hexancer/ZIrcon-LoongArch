@@ -9,24 +9,6 @@
 #define __has_feature(x) 0
 #endif
 
-#define CSR_DMW0_PLV0		0x0000000000000001  // _CONST64_(1 << 0)
-#define CSR_DMW0_VSEG		0x0000000000008000  // _CONST64_(0x8000)
-#define CSR_DMW0_BASE		0x8000000000000000  // (CSR_DMW0_VSEG << DMW_PABITS)
-#define CSR_DMW0_INIT		0x8000000000000001  // (CSR_DMW0_BASE | CSR_DMW0_PLV0)
-
-#define CSR_DMW1_PLV0		0x0000000000000001  // _CONST64_(1 << 0)
-#define CSR_DMW1_MAT		0x0000000000000010  // _CONST64_(1 << 4)
-#define CSR_DMW1_VSEG		0x0000000000009000  // _CONST64_(0x9000)
-#define CSR_DMW1_BASE		0x9000000000000000  // (CSR_DMW1_VSEG << DMW_PABITS)
-#define CSR_DMW1_INIT		0x9000000000000011  // (CSR_DMW1_BASE | CSR_DMW1_MAT | CSR_DMW1_PLV0)
-
-#define LOONGARCH_CSR_DMWIN0		0x180	/* 64 direct map win0: MEM & IF */
-#define LOONGARCH_CSR_DMWIN1		0x181	/* 64 direct map win1: MEM & IF */
-#define LOONGARCH_CSR_DMWIN2		0x182	/* 64 direct map win2: MEM */
-#define LOONGARCH_CSR_DMWIN3		0x183	/* 64 direct map win3: MEM */
-
-#define LOONGARCH_CSR_CRMD		0x0	/* Current mode info */
-
 #define STACK_SIZE  4096
 
 // This code is purely position-independent and generates no relocations
