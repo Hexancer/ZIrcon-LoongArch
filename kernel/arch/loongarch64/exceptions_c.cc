@@ -10,6 +10,16 @@
 #include <zircon/syscalls/exception.h>
 #include <zircon/types.h>
 
+typedef struct context_t {
+  uint64_t gpr[BASE_NUM];
+  uint64_t csr[CSR_NUM];
+  uint64_t fpr[FP_BASE_NUM];
+} context_t;
+
+extern "C" void loongarch64_handle_exception(struct context_t *ctx) {
+  while (1) {}
+}
+
 /* called from assembly */
 extern "C" void arch_iframe_process_pending_signals(iframe_t* iframe) {
 //  DEBUG_ASSERT(iframe != nullptr);

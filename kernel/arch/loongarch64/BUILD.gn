@@ -68,6 +68,7 @@ if (current_toolchain == default_toolchain) {
       "boot-mmu.cc",
       "cache-ops.S",
       "debugger.cc",
+      "exceptions.S",
       "exceptions_c.cc",
       "mmu.cc",
       "mp.cc",

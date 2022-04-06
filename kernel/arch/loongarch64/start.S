@@ -81,8 +81,8 @@ clear_bss_done:
     la.pcrel $t0, entry_tlb_refill
     csrwr    $t0, LOONGARCH_CSR_TLBRENTRY
 
-    // la.pcrel $t0, entry_exception
-    // csrwr    $t0, LOONGARCH_CSR_EENTRY
+    la.pcrel $t0, entry_exception
+    csrwr    $t0, LOONGARCH_CSR_EENTRY
 
 
     // invalidate TLB entries
@@ -109,23 +109,6 @@ paging_jump:
     // should never reach here
     break 0
 END_FUNCTION(_start)
-
-
-FUNCTION(entry_tlb_refill)
-	csrwr	$t0, LOONGARCH_CSR_TLBRSAVE
-	csrrd	$t0, LOONGARCH_CSR_PGD
-	lddir	$t0, $t0, 3
-	lddir	$t0, $t0, 1
-	ldpte	$t0, 0
-	ldpte	$t0, 1
-	tlbfill
-	csrrd	$t0, LOONGARCH_CSR_TLBRSAVE
-	ertn
-END_FUNCTION(entry_tlb_refill)
-
-FUNCTION(entry_exception)
-    break 0
-END_FUNCTION(entry_exception)
 
 
 // These are logically .bss (uninitialized data).  But they're set before
