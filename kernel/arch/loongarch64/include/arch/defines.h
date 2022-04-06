@@ -22,6 +22,22 @@
 #define PLV_MASK			0x3
 
 #define LOONGARCH_CSR_CRMD      0
+#define  CSR_CRMD_DACM_SHIFT		7
+#define  CSR_CRMD_DACM_WIDTH		2
+#define  CSR_CRMD_DACM			(_ULCAST_(0x3) << CSR_CRMD_DACM_SHIFT)
+#define  CSR_CRMD_DACF_SHIFT		5
+#define  CSR_CRMD_DACF_WIDTH		2
+#define  CSR_CRMD_DACF			(_ULCAST_(0x3) << CSR_CRMD_DACF_SHIFT)
+#define  CSR_CRMD_PG_SHIFT		4
+#define  CSR_CRMD_PG			(_ULCAST_(0x1) << CSR_CRMD_PG_SHIFT)
+#define  CSR_CRMD_DA_SHIFT		3
+#define  CSR_CRMD_DA			(_ULCAST_(0x1) << CSR_CRMD_DA_SHIFT)
+#define  CSR_CRMD_IE_SHIFT		2
+#define  CSR_CRMD_IE			(_ULCAST_(0x1) << CSR_CRMD_IE_SHIFT)
+#define  CSR_CRMD_PLV_SHIFT		0
+#define  CSR_CRMD_PLV_WIDTH		2
+#define  CSR_CRMD_PLV			(_ULCAST_(0x3) << CSR_CRMD_PLV_SHIFT)
+
 #define LOONGARCH_CSR_PRMD      1
 #define LOONGARCH_CSR_EUEN      2
 #define LOONGARCH_CSR_ECFG      4
