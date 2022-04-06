@@ -8,17 +8,15 @@
 __BEGIN_CDECLS
 
 
-#define READ_PERCPU_FIELD32(field) 0
-#define WRITE_PERCPU_FIELD32(field, value)
+#define READ_PERCPU_FIELD32(field) (__builtin_trap(),0)
+#define WRITE_PERCPU_FIELD32(field, value) __builtin_trap()
 
 static inline cpu_num_t arch_curr_cpu_num(void) {
-    TODO();
     return 0;
 }
 
 static inline uint arch_max_num_cpus(void) {
-    TODO();
-    return 0;
+    return 1;
 }
 
 __END_CDECLS
