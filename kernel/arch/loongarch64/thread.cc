@@ -45,6 +45,21 @@ void arch_thread_initialize(thread_t* t, vaddr_t entry_point) {
 //  }
 }
 
+__NO_SAFESTACK void arch_thread_construct_first(thread_t* t) {
+    // make sure the thread saves a copy of the current cpu pointer
+    t->arch.current_percpu_ptr = loongarch64_read_percpu_ptr();
+
+    // Force the thread pointer immediately to the real struct.  This way
+    // our callers don't have to avoid safe-stack code or risk losing track
+    // of the unsafe_sp value.  The caller's unsafe_sp value is visible at
+    // TPIDR_EL1 + ZX_TLS_UNSAFE_SP_OFFSET as expected, though TPIDR_EL1
+    // happens to have changed.  (We're assuming that the compiler doesn't
+    // decide to cache the TPIDR_EL1 value across this function call, which
+    // would be pointless since it's just one instruction to fetch it afresh.)
+    set_current_thread(t);
+}
+
+
 void arch_dump_thread(thread_t* t) {
     TODO();
 //  if (t->state != THREAD_RUNNING) {
