@@ -1,6 +1,7 @@
 #include <arch.h>
 #include <arch/arch_ops.h>
 #include <arch/loongarch64.h>
+#include <arch/loongarch64/debug.h>
 #include <arch/exception.h>
 #include <arch/user_copy.h>
 
@@ -17,6 +18,16 @@ typedef struct context_t {
 } context_t;
 
 extern "C" void loongarch64_handle_exception(struct context_t *ctx) {
+  DEBUG(1, "Hello from exception handler");
+
+  DEBUG(1, "CRMD  %llx",  ctx->csr[LOONGARCH_CSR_CRMD]);
+  DEBUG(1, "PRMD  %llx",  ctx->csr[LOONGARCH_CSR_PRMD]);
+  DEBUG(1, "EPC   %llx",  ctx->csr[LOONGARCH_CSR_EPC]);
+  DEBUG(1, "ECFG  %llx",  ctx->csr[LOONGARCH_CSR_ECFG]);
+  DEBUG(1, "ESTAT %llx",  ctx->csr[LOONGARCH_CSR_ESTAT]);
+  DEBUG(1, "BADV  %llx",  ctx->csr[LOONGARCH_CSR_BADV]);
+  DEBUG(1, "BADI  %llx",  ctx->csr[LOONGARCH_CSR_BADI]);
+  
   while (1) {}
 }
 

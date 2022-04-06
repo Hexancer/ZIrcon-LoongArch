@@ -67,6 +67,7 @@ if (current_toolchain == default_toolchain) {
       "arch.cc",
       "boot-mmu.cc",
       "cache-ops.S",
+      "debug.cc",
       "debugger.cc",
       "exceptions.S",
       "exceptions_c.cc",
