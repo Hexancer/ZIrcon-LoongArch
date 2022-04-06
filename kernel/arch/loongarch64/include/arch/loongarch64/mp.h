@@ -5,12 +5,7 @@
 #include <kernel/align.h>
 #include <kernel/cpu.h>
 
-
 __BEGIN_CDECLS
-
-
-#define READ_PERCPU_FIELD32(field) (__builtin_trap(),0)
-#define WRITE_PERCPU_FIELD32(field, value) __builtin_trap()
 
 struct loongarch64_percpu {
     // cpu number
@@ -37,6 +32,24 @@ static inline struct loongarch64_percpu* loongarch64_read_percpu_ptr(void) {
     return __loongarch64_percpu;
 }
 
+static inline uint32_t loongarch64_read_percpu_u32(size_t offset) {
+    uint32_t val;
+
+    // mark as volatile to force a read of the field to make sure
+    // the compiler always emits a read when asked and does not cache
+    // a copy between
+    __asm__ volatile("ld.w  %[val], $r21, %[offset]"
+                     : [val] "=r"(val)
+                     : [offset] "Ir"(offset));
+    return val;
+}
+
+static inline void loongarch64_write_percpu_u32(size_t offset, uint32_t val) {
+    __asm__("st.w  %[val], $r21, %[offset]"
+            ::[val] "r"(val), [offset] "Ir"(offset)
+            : "memory");
+}
+
 static inline cpu_num_t arch_curr_cpu_num(void) {
     return 0;
 }
@@ -44,5 +57,12 @@ static inline cpu_num_t arch_curr_cpu_num(void) {
 static inline uint arch_max_num_cpus(void) {
     return 1;
 }
+
+#define READ_PERCPU_FIELD32(field) \
+    loongarch64_read_percpu_u32(offsetof(struct loongarch64_percpu, field))
+
+#define WRITE_PERCPU_FIELD32(field, value) \
+    loongarch64_write_percpu_u32(offsetof(struct loongarch64_percpu, field), (value))
+
 
 __END_CDECLS
