@@ -9,7 +9,7 @@
 
 #define ARCH_DEFAULT_STACK_SIZE 8192
 
-#define ARCH_PHYSMAP_SIZE (1UL << 39)
+#define ARCH_PHYSMAP_SIZE (1UL << 32)
 
 #define PLV_KERN 			0
 #define PLV_USER			3

@@ -150,6 +150,16 @@ extern pte_t loongarch64_kernel_translation_table[MMU_KERNEL_PAGE_TABLE_ENTRIES_
 extern uint64_t kernel_relocated_base;
 
 extern "C" zx_status_t loongarch64_map_kernel_aspace() {
+    // map identity phys addr space
+    loongarch64_boot_map(
+        loongarch64_kernel_translation_table,
+        0,
+        0,
+        ARCH_PHYSMAP_SIZE,
+        _PAGE_VALID | _PAGE_GLOBAL | _PAGE_WRITE | _PAGE_NO_EXEC | _PAGE_KERN // TODO: which flag to use?
+    );
+
+    // map kernel code
     loongarch64_boot_map(
         loongarch64_kernel_translation_table,
         kernel_relocated_base,
@@ -158,14 +168,14 @@ extern "C" zx_status_t loongarch64_map_kernel_aspace() {
         _PAGE_VALID | _PAGE_GLOBAL | _PAGE_WRITE | _PAGE_KERN // TODO: which flag to use?
     );
 
-    // TODO: This will cause trap, figure out why
-    // loongarch64_boot_map(
-    //     loongarch64_kernel_translation_table,
-    //     KERNEL_ASPACE_BASE,
-    //     0,
-    //     ARCH_PHYSMAP_SIZE,
-    //     _PAGE_VALID | _PAGE_GLOBAL | _PAGE_WRITE | _PAGE_NO_EXEC | _PAGE_KERN // TODO: which flag to use?
-    // );
+    // map kernel virt addr space
+    loongarch64_boot_map(
+        loongarch64_kernel_translation_table,
+        KERNEL_ASPACE_BASE,
+        0,
+        ARCH_PHYSMAP_SIZE,
+        _PAGE_VALID | _PAGE_GLOBAL | _PAGE_WRITE | _PAGE_NO_EXEC | _PAGE_KERN // TODO: which flag to use?
+    );
 
     return ZX_OK;
 }

@@ -51,7 +51,10 @@ declare_args() {
 
   # Extra macro definitions for kernel code, e.g. "DISABLE_KASLR",
   # "ENABLE_KERNEL_LL_DEBUG".
-  kernel_extra_defines = [ "DISABLE_KASLR" ]
+  kernel_extra_defines = [ 
+    "DISABLE_KASLR",
+    "ENABLE_KERNEL_LL_DEBUG"
+  ]
 }
 
 declare_args() {

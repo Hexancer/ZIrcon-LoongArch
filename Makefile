@@ -10,14 +10,17 @@ run:
 runarm:
 	./scripts/run-zircon-arm64 -z ./out/legacy-image-arm64.zbi -t ./out/qemu-boot-shim.bin
 
-runloongarch64:
+runla64:
 	./scripts/run-zircon-loongarch64 -z ./out/legacy-image-loongarch64.zbi -t ./out/ls7a-boot-shim.elf
 
-gdbsloongarch64:
+gdbsla64:
 	./scripts/run-zircon-loongarch64 -z ./out/legacy-image-loongarch64.zbi -t ./out/ls7a-boot-shim.elf --debugger
 
-gdbloongarch64:
+gdbla64shim:
 	gdb -ex "set architecture Loongarch64" -ex "target remote localhost:1234" ./out/ls7a-boot-shim.elf
+
+gdbla64kernel:
+	gdb -ex "set architecture Loongarch64" -ex "target remote localhost:1234" ./out/kernel-loongarch64-gcc/obj/kernel/zircon.elf
 
 clean:
 	buildtools/gn clean out
