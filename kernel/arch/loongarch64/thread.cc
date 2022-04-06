@@ -59,6 +59,22 @@ __NO_SAFESTACK void arch_thread_construct_first(thread_t* t) {
     set_current_thread(t);
 }
 
+__NO_SAFESTACK void arch_context_switch(thread_t* oldthread,
+                                        thread_t* newthread) {
+    TODO();
+    // LTRACEF("old %p (%s), new %p (%s)\n", oldthread, oldthread->name, newthread, newthread->name);
+    // __dsb(ARM_MB_SY); /* broadcast tlb operations in case the thread moves to another cpu */
+
+    // /* set the current cpu pointer in the new thread's structure so it can be
+    //  * restored on exception entry.
+    //  */
+    // newthread->arch.current_percpu_ptr = arm64_read_percpu_ptr();
+
+    // arm64_fpu_context_switch(oldthread, newthread);
+    // arm64_debug_state_context_switch(oldthread, newthread);
+    // arm64_context_switch(&oldthread->arch.sp, newthread->arch.sp);
+}
+
 
 void arch_dump_thread(thread_t* t) {
     TODO();

@@ -8,6 +8,10 @@
 #include <trace.h>
 #include <zircon/types.h>
 
+void arch_prepare_current_cpu_idle_state(bool idle) {
+    // no-op
+}
+
 zx_status_t arch_mp_reschedule(cpu_mask_t mask) {
     return arch_mp_send_ipi(MP_IPI_TARGET_MASK, mask, MP_IPI_RESCHEDULE);
 }
