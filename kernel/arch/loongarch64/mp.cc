@@ -8,6 +8,10 @@
 #include <trace.h>
 #include <zircon/types.h>
 
+zx_status_t arch_mp_reschedule(cpu_mask_t mask) {
+    return arch_mp_send_ipi(MP_IPI_TARGET_MASK, mask, MP_IPI_RESCHEDULE);
+}
+
 zx_status_t arch_mp_send_ipi(mp_ipi_target_t target, cpu_mask_t mask, mp_ipi_t ipi) {
     TODO();
 //  LTRACEF("target %d mask %#x, ipi %d\n", target, mask, ipi);

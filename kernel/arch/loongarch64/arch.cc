@@ -50,3 +50,8 @@ void arch_early_init() {
 void arch_init() TA_NO_THREAD_SAFETY_ANALYSIS {
   TODO();
 }
+
+__NO_RETURN int arch_idle_thread_routine(void*) {
+    for (;;)
+        __asm__ volatile("idle 0");
+}
