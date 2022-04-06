@@ -1,3 +1,8 @@
+GDB_EXEC_OPTS = -ex "cd out/" \
+		-ex "set architecture Loongarch64" \
+                -ex "target remote localhost:1234"
+		
+
 build: config
 	cd out && ../buildtools/ninja
 
@@ -17,10 +22,10 @@ gdbsla64:
 	./scripts/run-zircon-loongarch64 -z ./out/legacy-image-loongarch64.zbi -t ./out/ls7a-boot-shim.elf --debugger
 
 gdbla64shim:
-	gdb -ex "set architecture Loongarch64" -ex "target remote localhost:1234" ./out/ls7a-boot-shim.elf
+	gdb $(GDB_EXEC_OPTS) ./out/ls7a-boot-shim.elf
 
 gdbla64kernel:
-	gdb -ex "set architecture Loongarch64" -ex "target remote localhost:1234" ./out/kernel-loongarch64-gcc/obj/kernel/zircon.elf
+	gdb $(GDB_EXEC_OPTS) ./out/kernel-loongarch64-gcc/obj/kernel/zircon.elf
 
 clean:
 	buildtools/gn clean out
