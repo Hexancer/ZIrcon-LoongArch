@@ -8,6 +8,9 @@
 #include <trace.h>
 #include <zircon/types.h>
 
+// per cpu structures, each cpu will point to theirs using the r21 register
+loongarch64_percpu loongarch64_percpu_array[SMP_MAX_CPUS];
+
 void arch_prepare_current_cpu_idle_state(bool idle) {
     // no-op
 }

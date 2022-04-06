@@ -102,6 +102,9 @@ clear_bss_done:
 
 paging_jump:
     // now we have setup page table and jump to paging virtual address
+
+    // set the per cpu pointer for cpu 0
+    la.pcrel    $r21,  loongarch64_percpu_array
     
     // enter C routine
     b lk_main
