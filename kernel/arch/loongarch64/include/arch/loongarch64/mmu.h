@@ -28,7 +28,6 @@
 /**
  * Page Table Entry bits
  */
-#define _ULCAST_ (unsigned long)
 
 #define	_PAGE_VALID_SHIFT	0
 #define	_PAGE_DIRTY_SHIFT	1
