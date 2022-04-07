@@ -25,7 +25,7 @@ static const zbi_mem_range_t mem_config[] = {
 
 static const dcfg_simple_t uart_driver = {
     .mmio_phys = 0x1fe001e0,
-    .irq = 67, // TODO: irq number
+    .irq = 66, // TODO: irq number
 };
 
 // static const dcfg_arm_gicv3_driver_t gicv3_driver = {
@@ -51,10 +51,9 @@ static const dcfg_simple_t uart_driver = {
 //     .use_hvc = true,
 // };
 
-// static const dcfg_arm_generic_timer_driver_t timer_driver = {
-//     .irq_phys = 30,
-//     .irq_virt = 27,
-// };
+static const dcfg_loongarch_generic_timer_driver_t timer_driver = {
+    .irq_phys = 27, // TODO: irq number
+};
 
 static const zbi_platform_id_t platform_id = {
     .vid = PDEV_VID_QEMU,

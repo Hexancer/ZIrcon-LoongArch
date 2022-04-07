@@ -271,32 +271,6 @@ static void process_zbi(zbi_header_t* root, bool early) {
     image.ForEach(early ? process_zbi_item_early : process_zbi_item_late, nullptr);
 }
 
-
-zx_status_t platform_set_oneshot_timer(zx_time_t deadline) {
-    TODO();
-//  DEBUG_ASSERT(arch_ints_disabled());
-//
-//  if (deadline < 0) {
-//    deadline = 0;
-//  }
-//
-//  // Add one to the deadline, since with very high probability the deadline
-//  // straddles a counter tick.
-//  const uint64_t cntpct_deadline = zx_time_to_cntpct(deadline) + 1;
-//
-//  // Even if the deadline has already passed, the ARMv8-A timer will fire the
-//  // interrupt.
-//  write_cval(cntpct_deadline);
-//  write_ctl(1);
-
-  return 0;
-}
-
-void platform_stop_timer(void) {
-    TODO();
-//  write_ctl(0);
-}
-
 void platform_early_init(void) {
     // if the zbi_paddr variable is -1, it was not set
     // in start.S, so we are in a bad place.
