@@ -25,6 +25,12 @@ public:
     paddr_t arch_table_phys() const { return 0; }
 
 private:
+    inline bool IsValidVaddr(vaddr_t vaddr) {
+        return (vaddr >= base_ && vaddr <= base_ + size_ - 1);
+    }
+
+    zx_status_t QueryLocked(vaddr_t vaddr, paddr_t* paddr, uint* mmu_flags) TA_REQ(lock_);
+
     fbl::Canary<fbl::magic("VAAS")> canary_;
 
     DECLARE_MUTEX(LoongarchArchVmAspace) lock_;
