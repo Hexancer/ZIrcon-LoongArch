@@ -192,7 +192,7 @@ extern "C" zx_status_t loongarch64_map_kernel_aspace() {
         kernel_relocated_base,
         ((paddr_t)__code_start) & UINT32_MAX,
         _end - __code_start,
-        _PAGE_VALID | _PAGE_GLOBAL | _PAGE_WRITE | _PAGE_DIRTY | _PAGE_KERN // TODO: which flag to use?
+        _PAGE_VALID | _PAGE_GLOBAL | _PAGE_WRITE | _PAGE_DIRTY | _PAGE_KERN | _CACHE_CC // TODO: which flag to use?
     );
 
     // map kernel virt addr space
