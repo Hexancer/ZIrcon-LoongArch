@@ -13,19 +13,19 @@ static size_t cpu_count = 0;
 static const zbi_mem_range_t mem_config[] = {
     {
         .type = ZBI_MEM_RANGE_RAM,
-        .paddr = 0x90000000,
-        .length = 0x40000000,
+        .paddr = 0x90000000UL,
+        .length = 0x40000000UL,
     },
     {
         .type = ZBI_MEM_RANGE_PERIPHERAL,
         .paddr = 0,
-        .length = 0x100000000, // DMA range, can we use it?
+        .length = 0x100000000UL, // DMA range, can we use it?
     },
 };
 
 static const dcfg_simple_t uart_driver = {
     .mmio_phys = 0x1fe001e0,
-    .irq = 0, // TODO: irq number
+    .irq = 67, // TODO: irq number
 };
 
 // static const dcfg_arm_gicv3_driver_t gicv3_driver = {
