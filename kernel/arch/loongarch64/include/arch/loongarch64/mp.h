@@ -18,6 +18,9 @@ struct loongarch64_percpu {
     uint32_t num_spinlocks;
 } __CPU_ALIGN;
 
+void arch_init_cpu_map(uint cluster_count, const uint* cluster_cpus);
+void arch_register_mpid(uint cpu_id, uint64_t mpid);
+void loongarch64_init_percpu_early(void);
 
 // Use the x21 register to always point at the local cpu structure to allow fast access
 // a per cpu structure.

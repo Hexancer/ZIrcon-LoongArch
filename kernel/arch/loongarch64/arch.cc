@@ -1,5 +1,7 @@
 #include <arch.h>
+#include <arch/loongarch64/feature.h>
 #include <kernel/thread.h>
+#include <platform.h>
 #include <zircon/types.h>
 
 void arch_setup_uspace_iframe(iframe_t* iframe,
@@ -35,16 +37,28 @@ void arch_enter_uspace(iframe_t* iframe) {
 //
 //  arch_disable_ints();
 //
-//  arm64_uspace_entry(iframe, ct->stack.top);
+//  loongarch64_uspace_entry(iframe, ct->stack.top);
   TODO();
   __UNREACHABLE;
 }
 
-void arch_early_init() {
-  TODO();
-    // arm64_cpu_early_init();
+static void loongarch64_cpu_early_init() {
+    // Make sure the per cpu pointer is set up.
+    loongarch64_init_percpu_early();
 
-    // platform_init_mmu_mappings();
+
+    // Set the vector base.
+    // TODO: switch to vectored exceptions
+
+    // Save all of the features of the cpu.
+    loongarch64_feature_init();
+
+}
+
+void arch_early_init() {
+    loongarch64_cpu_early_init();
+
+    platform_init_mmu_mappings();
 }
 
 void arch_init() TA_NO_THREAD_SAFETY_ANALYSIS {

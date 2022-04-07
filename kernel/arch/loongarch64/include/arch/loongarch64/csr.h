@@ -31,3 +31,8 @@ static inline uint64_t csr_xchgq(uint64_t val, uint64_t mask, uint32_t reg)
 {
 	return __dcsrxchg(val, mask, reg);
 }
+
+static inline uint32_t read_cpucfg(uint32_t reg)
+{
+	return __cpucfg(reg);
+}

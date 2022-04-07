@@ -1,5 +1,12 @@
 #pragma once
 
+extern __inline unsigned int
+__attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
+__cpucfg (unsigned int _1)
+{
+  return (unsigned int) __builtin_loongarch_cpucfg ((unsigned int) _1);
+}
+
 /* Assembly instruction format:          rd, csr_num */
 /* Data types in instruction templates:  unsigned int, uimm14_32 */
 #define __csrrd(/*uimm14_32*/ _1)	((unsigned int)__builtin_loongarch_csrrd(_1))

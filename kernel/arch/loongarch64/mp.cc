@@ -38,3 +38,9 @@ zx_status_t arch_mp_send_ipi(mp_ipi_target_t target, cpu_mask_t mask, mp_ipi_t i
 //  return interrupt_send_ipi(mask, ipi);
   return ZX_OK;
 }
+
+void loongarch64_init_percpu_early(void) {
+    uint cpu = arch_curr_cpu_num();
+
+    loongarch64_write_percpu_ptr(&loongarch64_percpu_array[cpu]);
+}
