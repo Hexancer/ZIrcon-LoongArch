@@ -22,20 +22,6 @@ FUNCTION(_start)
     la.pcrel $t0, kernel_entry_paddr
     st.d     $a1, $t0, 0
 
-    // config direct window and set PG
-    //   this should have been done by boot-shim,
-    //   but we still repeat it here
-    li.d        $t0, CSR_DMW0_INIT   # Uncached, PLV0, 0x8000 xxxx xxxx xxxx
-    csrwr       $t0, LOONGARCH_CSR_DMWIN0
-    li.d        $t0, CSR_DMW1_INIT   # Cached,   PLV0, 0x9000 xxxx xxxx xxxx
-    csrwr       $t0, LOONGARCH_CSR_DMWIN1
-
-    la.pcrel    $t0,   dmw_jmup           // 把标号dmw_jump的地方的代码地址装入寄存器t0
-    li.d        $t1,   CSR_DMW1_BASE
-    or          $t0,   $t0, $t1           // 通过有缓存直接映射窗口(DMW1)执行接下来的指令
-    jirl        $zero, $t0, 0             // 跳转到t0，此时t0是链接是用的高位没有抹去0的虚拟地址，而前面设置的窗口保证了它能访问到bios将其装入的那段物理内存
-dmw_jmup:
-
     // clear bss segment
     la.pcrel    $t0, __bss_start            // zero out [__bss_start, _end)
     la.pcrel    $t1, _end
@@ -52,6 +38,23 @@ clear_bss_done:
     /* make sure the boot allocator is given a chance to figure out where
      * we are loaded in physical memory. */
     bl       boot_alloc_init
+
+    // config direct window and set PG
+    //   this should have been done by boot-shim,
+    //   but we still repeat it here
+    li.d        $t0, CSR_DMW0_INIT   # Uncached, PLV0, 0x8000 xxxx xxxx xxxx
+    csrwr       $t0, LOONGARCH_CSR_DMWIN0
+    li.d        $t0, CSR_DMW1_INIT   # Cached,   PLV0, 0x9000 xxxx xxxx xxxx
+    csrwr       $t0, LOONGARCH_CSR_DMWIN1
+
+    la.pcrel    $t0,   dmw_jmup           // 把标号dmw_jump的地方的代码地址装入寄存器t0
+    li.d        $t1,   CSR_DMW1_BASE
+    or          $t0,   $t0, $t1           // 通过有缓存直接映射窗口(DMW1)执行接下来的指令
+    jirl        $zero, $t0, 0             // 跳转到t0，此时t0是链接是用的高位没有抹去0的虚拟地址，而前面设置的窗口保证了它能访问到bios将其装入的那段物理内存
+dmw_jmup:
+
+    // setup stack pointer again with virt addr
+    la.pcrel $sp, boot_cpu_kstack_end
     
     /* save the physical address the kernel is loaded at */
     //保存内核开始地址到 kernel_base_phys 全局变量
