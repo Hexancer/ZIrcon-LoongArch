@@ -63,75 +63,74 @@ pte_t* loongarch64_get_kernel_ptable() {
     return 0;
 }
 
-// namespace {
+namespace {
 
-// class AsidAllocator {
-// public:
-// //     AsidAllocator() { bitmap_.Reset(MMU_ARM64_MAX_USER_ASID + 1); }
-//     AsidAllocator() { bitmap_.Reset(0); }
-//     ~AsidAllocator() = default;
+class AsidAllocator {
+public:
+    AsidAllocator() { bitmap_.Reset(MMU_LOONGARCH64_MAX_USER_ASID + 1); }
+    ~AsidAllocator() = default;
 
-//     zx_status_t Alloc(uint16_t* asid);
-//     zx_status_t Free(uint16_t asid);
+    zx_status_t Alloc(uint16_t* asid);
+    zx_status_t Free(uint16_t asid);
 
-// private:
-//     DISALLOW_COPY_ASSIGN_AND_MOVE(AsidAllocator);
+private:
+    DISALLOW_COPY_ASSIGN_AND_MOVE(AsidAllocator);
 
-//     DECLARE_MUTEX(AsidAllocator) lock_;
-//     uint16_t last_ TA_GUARDED(lock_) = MMU_ARM64_FIRST_USER_ASID - 1;
+    DECLARE_MUTEX(AsidAllocator) lock_;
+    uint16_t last_ TA_GUARDED(lock_) = MMU_LOONGARCH64_FIRST_USER_ASID - 1;
 
-//     bitmap::RawBitmapGeneric<bitmap::FixedStorage<MMU_ARM64_MAX_USER_ASID + 1>> bitmap_ TA_GUARDED(lock_);
+    bitmap::RawBitmapGeneric<bitmap::FixedStorage<MMU_LOONGARCH64_MAX_USER_ASID + 1>> bitmap_ TA_GUARDED(lock_);
 
-//     static_assert(MMU_ARM64_ASID_BITS <= 16, "");
-// };
+    static_assert(MMU_LOONGARCH64_ASID_BITS <= 10, "");
+};
 
-// zx_status_t AsidAllocator::Alloc(uint16_t* asid) {
-//     uint16_t new_asid;
+zx_status_t AsidAllocator::Alloc(uint16_t* asid) {
+    uint16_t new_asid;
 
-//     // use the bitmap allocator to allocate ids in the range of
-//     // [MMU_ARM64_FIRST_USER_ASID, MMU_ARM64_MAX_USER_ASID]
-//     // start the search from the last found id + 1 and wrap when hitting the end of the range
-//     {
-//         Guard<Mutex> al{&lock_};
+    // use the bitmap allocator to allocate ids in the range of
+    // [MMU_LOONGARCH64_FIRST_USER_ASID, MMU_LOONGARCH64_MAX_USER_ASID]
+    // start the search from the last found id + 1 and wrap when hitting the end of the range
+    {
+        Guard<Mutex> al{&lock_};
 
-//         size_t val;
-//         bool notfound = bitmap_.Get(last_ + 1, MMU_ARM64_MAX_USER_ASID + 1, &val);
-//         if (unlikely(notfound)) {
-//             // search again from the start
-//             notfound = bitmap_.Get(MMU_ARM64_FIRST_USER_ASID, MMU_ARM64_MAX_USER_ASID + 1, &val);
-//             if (unlikely(notfound)) {
-//                 TRACEF("ARM64: out of ASIDs\n");
-//                 return ZX_ERR_NO_MEMORY;
-//             }
-//         }
-//         bitmap_.SetOne(val);
+        size_t val;
+        bool notfound = bitmap_.Get(last_ + 1, MMU_LOONGARCH64_MAX_USER_ASID + 1, &val);
+        if (unlikely(notfound)) {
+            // search again from the start
+            notfound = bitmap_.Get(MMU_LOONGARCH64_FIRST_USER_ASID, MMU_LOONGARCH64_MAX_USER_ASID + 1, &val);
+            if (unlikely(notfound)) {
+                TRACEF("LOONGARCH64: out of ASIDs\n");
+                return ZX_ERR_NO_MEMORY;
+            }
+        }
+        bitmap_.SetOne(val);
 
-//         DEBUG_ASSERT(val <= UINT16_MAX);
+        DEBUG_ASSERT(val <= MMU_LOONGARCH64_GLOBAL_ASID);
 
-//         new_asid = (uint16_t)val;
-//         last_ = new_asid;
-//     }
+        new_asid = (uint16_t)val;
+        last_ = new_asid;
+    }
 
-//     LTRACEF("new asid %#x\n", new_asid);
+    LTRACEF("new asid %#x\n", new_asid);
 
-//     *asid = new_asid;
+    *asid = new_asid;
 
-//     return ZX_OK;
-// }
+    return ZX_OK;
+}
 
-// zx_status_t AsidAllocator::Free(uint16_t asid) {
-//     LTRACEF("free asid %#x\n", asid);
+zx_status_t AsidAllocator::Free(uint16_t asid) {
+    LTRACEF("free asid %#x\n", asid);
 
-//     Guard<Mutex> al{&lock_};
+    Guard<Mutex> al{&lock_};
 
-//     bitmap_.ClearOne(asid);
+    bitmap_.ClearOne(asid);
 
-//     return ZX_OK;
-// }
+    return ZX_OK;
+}
 
-// AsidAllocator asid;
+AsidAllocator asid;
 
-// } // namespace
+} // namespace
 
 // Convert user level mmu flags to flags that go in L1 descriptors.
 static pte_t mmu_flags_to_s1_pte_attr(uint flags) {
@@ -1084,60 +1083,59 @@ zx_status_t LoongarchArchVmAspace::Protect(vaddr_t vaddr, size_t count, uint mmu
 }
 
 zx_status_t LoongarchArchVmAspace::Init(vaddr_t base, size_t size, uint flags) {
-    TODO();
-//     canary_.Assert();
-//     LTRACEF("aspace %p, base %#" PRIxPTR ", size 0x%zx, flags 0x%x\n",
-//             this, base, size, flags);
+    canary_.Assert();
+    LTRACEF("aspace %p, base %#" PRIxPTR ", size 0x%zx, flags 0x%x\n",
+            this, base, size, flags);
 
-//     Guard<Mutex> a{&lock_};
+    Guard<Mutex> a{&lock_};
 
-//     // Validate that the base + size is sane and doesn't wrap.
-//     DEBUG_ASSERT(size > PAGE_SIZE);
-//     DEBUG_ASSERT(base + size - 1 > base);
+    // Validate that the base + size is sane and doesn't wrap.
+    DEBUG_ASSERT(size > PAGE_SIZE);
+    DEBUG_ASSERT(base + size - 1 > base);
 
-//     flags_ = flags;
-//     if (flags & ARCH_ASPACE_FLAG_KERNEL) {
-//         // At the moment we can only deal with address spaces as globally defined.
-//         DEBUG_ASSERT(base == ~0UL << MMU_KERNEL_SIZE_SHIFT);
-//         DEBUG_ASSERT(size == 1UL << MMU_KERNEL_SIZE_SHIFT);
+    flags_ = flags;
+    if (flags & ARCH_ASPACE_FLAG_KERNEL) {
+        // At the moment we can only deal with address spaces as globally defined.
+        DEBUG_ASSERT(base == ~0UL << MMU_KERNEL_SIZE_SHIFT);
+        DEBUG_ASSERT(size == 1UL << MMU_KERNEL_SIZE_SHIFT);
 
-//         base_ = base;
-//         size_ = size;
-//         tt_virt_ = arm64_kernel_translation_table;
-//         tt_phys_ = vaddr_to_paddr(const_cast<pte_t*>(tt_virt_));
-//         asid_ = (uint16_t)MMU_ARM64_GLOBAL_ASID;
-//     } else {
-//         if (flags & ARCH_ASPACE_FLAG_GUEST) {
-//             DEBUG_ASSERT(base + size <= 1UL << MMU_GUEST_SIZE_SHIFT);
-//         } else {
-//             DEBUG_ASSERT(base + size <= 1UL << MMU_USER_SIZE_SHIFT);
-//             if (asid.Alloc(&asid_) != ZX_OK)
-//                 return ZX_ERR_NO_MEMORY;
-//         }
+        base_ = base;
+        size_ = size;
+        tt_virt_ = loongarch64_kernel_translation_table;
+        tt_phys_ = vaddr_to_paddr(const_cast<pte_t*>(tt_virt_));
+        asid_ = (uint16_t)MMU_LOONGARCH64_GLOBAL_ASID;
+    } else {
+        if (flags & ARCH_ASPACE_FLAG_GUEST) {
+            DEBUG_ASSERT(base + size <= 1UL << MMU_GUEST_SIZE_SHIFT);
+        } else {
+            DEBUG_ASSERT(base + size <= 1UL << MMU_USER_SIZE_SHIFT);
+            if (asid.Alloc(&asid_) != ZX_OK)
+                return ZX_ERR_NO_MEMORY;
+        }
 
-//         base_ = base;
-//         size_ = size;
+        base_ = base;
+        size_ = size;
 
-//         paddr_t pa;
-//         vm_page_t* page;
-//         zx_status_t status = pmm_alloc_page(0, &page, &pa);
-//         if (status != ZX_OK) {
-//             return status;
-//         }
-//         page->set_state(VM_PAGE_STATE_MMU);
+        paddr_t pa;
+        vm_page_t* page;
+        zx_status_t status = pmm_alloc_page(0, &page, &pa);
+        if (status != ZX_OK) {
+            return status;
+        }
+        page->set_state(VM_PAGE_STATE_MMU);
 
-//         volatile pte_t* va = static_cast<volatile pte_t*>(paddr_to_physmap(pa));
+        volatile pte_t* va = static_cast<volatile pte_t*>(paddr_to_physmap(pa));
 
-//         tt_virt_ = va;
-//         tt_phys_ = pa;
+        tt_virt_ = va;
+        tt_phys_ = pa;
 
-//         // zero the top level translation table.
-//         // XXX remove when PMM starts returning pre-zeroed pages.
-//         arch_zero_page(const_cast<pte_t*>(tt_virt_));
-//     }
-//     pt_pages_ = 1;
+        // zero the top level translation table.
+        // XXX remove when PMM starts returning pre-zeroed pages.
+        arch_zero_page(const_cast<pte_t*>(tt_virt_));
+    }
+    pt_pages_ = 1;
 
-//     LTRACEF("tt_phys %#" PRIxPTR " tt_virt %p\n", tt_phys_, tt_virt_);
+    LTRACEF("tt_phys %#" PRIxPTR " tt_virt %p\n", tt_phys_, tt_virt_);
 
     return ZX_OK;
 }

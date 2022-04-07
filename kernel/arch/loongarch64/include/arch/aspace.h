@@ -23,6 +23,27 @@ public:
                              vaddr_t align, size_t size, uint mmu_flags);
     static void ContextSwitch(LoongarchArchVmAspace* from, LoongarchArchVmAspace* to);
     paddr_t arch_table_phys() const { return 0; }
+
+private:
+    fbl::Canary<fbl::magic("VAAS")> canary_;
+
+    DECLARE_MUTEX(LoongarchArchVmAspace) lock_;
+
+    uint16_t asid_ = MMU_LOONGARCH64_UNUSED_ASID;
+
+    // Pointer to the translation table.
+    paddr_t tt_phys_ = 0;
+    volatile pte_t* tt_virt_ = nullptr;
+
+    // Upper bound of the number of pages allocated to back the translation
+    // table.
+    size_t pt_pages_ = 0;
+
+    uint flags_ = 0;
+
+    // Range of address space.
+    vaddr_t base_ = 0;
+    size_t size_ = 0;
 };
 
 using ArchVmAspace = LoongarchArchVmAspace;
