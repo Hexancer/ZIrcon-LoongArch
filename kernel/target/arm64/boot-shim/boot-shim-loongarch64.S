@@ -62,11 +62,6 @@ boot_shim_jump:
     // $a0: zbi addr
     // $a1: kernel entry point (phys addr)
 
-    // convert phys addr to DMW1 addr
-    li.d    $t0, 0x9000000000000000
-    or      $a0, $a0, $t0
-    or      $a1, $a1, $t0
-
 kernel_jump:
     jirl    $r0, $a1, 0
 
