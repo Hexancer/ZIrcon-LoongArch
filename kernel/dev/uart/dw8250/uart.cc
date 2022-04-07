@@ -3,7 +3,13 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT
 
+#if defined(__aarch64__)
 #include <arch/arm64/periphmap.h>
+#elif defined(__loongarch64)
+#include <arch/loongarch64/periphmap.h>
+#else
+#error unsupported architecture
+#endif
 #include <dev/interrupt.h>
 #include <dev/uart.h>
 #include <kernel/thread.h>
@@ -21,6 +27,16 @@
 
 // clang-format off
 // UART Registers
+
+#define REGSHIFT 0
+
+#if REGSHIFT == 0
+#define uart_reg_t uint8_t
+#elif REGSHIFT == 1
+#define uart_reg_t uint16_t
+#elif REGSHIFT == 2
+#define urat_reg_t uint32_t
+#endif
 
 #define UART_RBR                    (0x0)   // RX Buffer Register (read-only)
 #define UART_THR                    (0x0)   // TX Buffer Register (write-only)
@@ -54,35 +70,35 @@
 #define UART_RXTRI_AD               (0x50)  // RX Trigger Address
 
 // IER
-#define UART_IER_ERBFI              (1 << 0)
-#define UART_IER_ETBEI              (1 << 1)
-#define UART_IER_ELSI               (1 << 2)
-#define UART_IER_EDSSI              (1 << 3)
-#define UART_IER_XOFFI              (1 << 5)
-#define UART_IER_RTSI               (1 << 6)
-#define UART_IER_CTSI               (1 << 7)
-#define UART_IIR_NO_INT_PENDING     (0x01)
+#define UART_IER_ERBFI              ((uart_reg_t)(1 << 0))
+#define UART_IER_ETBEI              ((uart_reg_t)(1 << 1))
+#define UART_IER_ELSI               ((uart_reg_t)(1 << 2))
+#define UART_IER_EDSSI              ((uart_reg_t)(1 << 3))
+#define UART_IER_XOFFI              ((uart_reg_t)(1 << 5))
+#define UART_IER_RTSI               ((uart_reg_t)(1 << 6))
+#define UART_IER_CTSI               ((uart_reg_t)(1 << 7))
+#define UART_IIR_NO_INT_PENDING     ((uart_reg_t)(0x01))
 
 // IIR
-#define UART_IIR_RLS                (0x06)  // Receiver Line Status
-#define UART_IIR_RDA                (0x04)  // Receive Data Available
-#define UART_IIR_CTI                (0x0C)  // Character Timeout Indicator
-#define UART_IIR_THRE               (0x02)  // Transmit Holding Register Empty
-#define UART_IIR_MS                 (0x00)  // Check Modem Status Register
-#define UART_IIR_SW_FLOW_CTRL       (0x10)  // Receive XOFF characters
-#define UART_IIR_HW_FLOW_CTRL       (0x20)  // CTS or RTS Rising Edge
-#define UART_IIR_FIFO_EN            (0xc0)
-#define UART_IIR_INT_MASK           (0x1f)
+#define UART_IIR_RLS                ((uart_reg_t)(0x06))  // Receiver Line Status
+#define UART_IIR_RDA                ((uart_reg_t)(0x04))  // Receive Data Available
+#define UART_IIR_CTI                ((uart_reg_t)(0x0C))  // Character Timeout Indicator
+#define UART_IIR_THRE               ((uart_reg_t)(0x02))  // Transmit Holding Register Empty
+#define UART_IIR_MS                 ((uart_reg_t)(0x00))  // Check Modem Status Register
+#define UART_IIR_SW_FLOW_CTRL       ((uart_reg_t)(0x10))  // Receive XOFF characters
+#define UART_IIR_HW_FLOW_CTRL       ((uart_reg_t)(0x20))  // CTS or RTS Rising Edge
+#define UART_IIR_FIFO_EN            ((uart_reg_t)(0xc0))
+#define UART_IIR_INT_MASK           ((uart_reg_t)(0x1f))
 
 // LSR
-#define UART_LSR_DR                 (1 << 0)
-#define UART_LSR_OE                 (1 << 1)
-#define UART_LSR_PE                 (1 << 2)
-#define UART_LSR_FE                 (1 << 3)
-#define UART_LSR_BI                 (1 << 4)
-#define UART_LSR_THRE               (1 << 5)
-#define UART_LSR_TEMT               (1 << 6)
-#define UART_LSR_FIFOERR            (1 << 7)
+#define UART_LSR_DR                 ((uart_reg_t)(1 << 0))
+#define UART_LSR_OE                 ((uart_reg_t)(1 << 1))
+#define UART_LSR_PE                 ((uart_reg_t)(1 << 2))
+#define UART_LSR_FE                 ((uart_reg_t)(1 << 3))
+#define UART_LSR_BI                 ((uart_reg_t)(1 << 4))
+#define UART_LSR_THRE               ((uart_reg_t)(1 << 5))
+#define UART_LSR_TEMT               ((uart_reg_t)(1 << 6))
+#define UART_LSR_FIFOERR            ((uart_reg_t)(1 << 7))
 // clang-format on
 
 #define RXBUF_SIZE 32
@@ -98,7 +114,7 @@ static event_t uart_dputc_event = EVENT_INITIAL_VALUE(uart_dputc_event,
                                                       true,
                                                       EVENT_FLAG_AUTOUNSIGNAL);
 static spin_lock_t uart_spinlock = SPIN_LOCK_INITIAL_VALUE;
-#define UARTREG(reg) (*(volatile uint32_t*)((uart_base) + (reg)))
+#define UARTREG(reg) (*(volatile uart_reg_t*)((uart_base) + ((reg >> 2) << (REGSHIFT))))
 
 static interrupt_eoi dw8250_uart_irq(void* arg) {
     // read interrupt status and mask
@@ -106,13 +122,13 @@ static interrupt_eoi dw8250_uart_irq(void* arg) {
         if (cbuf_space_avail(&uart_rx_buf) == 0) {
             break;
         }
-        char c = UARTREG(UART_RBR) & 0xFF;
+        char c = (char)(UARTREG(UART_RBR) & 0xFF);
         cbuf_write_char(&uart_rx_buf, c);
     }
 
     // Signal if anyone is waiting to TX
     if (UARTREG(UART_LSR) & UART_LSR_THRE) {
-        UARTREG(UART_IER) &= ~UART_IER_ETBEI; // Disable TX interrupt
+        UARTREG(UART_IER) &= (uart_reg_t)~UART_IER_ETBEI; // Disable TX interrupt
         spin_lock(&uart_spinlock);
         // TODO(andresoportus): Revisit all UART drivers usage of events, from event.h:
         // 1. The reschedule flag is not supposed to be true in interrupt context.
