@@ -347,7 +347,7 @@ case $ARCH in
     loongarch64)
         QEMU=${QEMUDIR}qemu-system-loongarch64
         ARGS+=" -machine virt"
-        ARGS+=" -bios $DIR/../prebuilt/loongarch_bios_0310_debug.bin"
+        ARGS+=" -bios $DIR/../prebuilt/loongarch_bios_0310.bin"
 
         if (( !$GRAPHICS  )); then
           ARGS+=" -vga none"
