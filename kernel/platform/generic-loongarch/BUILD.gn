@@ -13,7 +13,15 @@ source_set("generic-loongarch") {
   deps = [
     "$zx/kernel/dev/hw_rng",
     "$zx/kernel/dev/interrupt",
+    "$zx/kernel/dev/pdev",
     "$zx/kernel/dev/timer/loongarch_generic",
+    "$zx/kernel/dev/uart/dw8250",
     "$zx/kernel/lib/console",
+    "$zx/kernel/lib/debuglog",
+    "$zx/kernel/lib/fbl",
+    "$zx/kernel/lib/memory_limit",
+    "$zx/kernel/lib/topology",
+    "$zx/kernel/object",
+    "$zx/system/ulib/libzbi",
   ]
 }

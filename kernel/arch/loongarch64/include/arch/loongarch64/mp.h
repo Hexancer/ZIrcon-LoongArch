@@ -57,6 +57,9 @@ static inline cpu_num_t arch_curr_cpu_num(void) {
     return 0;
 }
 
+static inline void arch_set_num_cpus(uint cpu_count) {
+}
+
 static inline uint arch_max_num_cpus(void) {
     return 1;
 }
