@@ -1,4 +1,5 @@
 GDB_EXEC_OPTS = -ex "cd out/" \
+		-ex "set output-radix 16" \
 		-ex "set architecture Loongarch64" \
                 -ex "target remote localhost:1234"
 		
