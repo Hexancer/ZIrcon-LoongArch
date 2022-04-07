@@ -189,6 +189,15 @@ void loongarch_setup_initrd_start(int argc, char **argv) {
     pinitrd++; // skip comma
     loongarch_initrd_size = strtoll(pinitrd, &pinitrd, 10);
 
+    // relocate initrd to phys mem, as PCI_MEM don't fully support writes
+    uintptr_t pmem_base = mem_config[0].paddr;
+    memmove((void*)pmem_base, (void*)loongarch_initrd_start, loongarch_initrd_size);
+    loongarch_initrd_start = pmem_base;
+    
+    uart_puts("relocate initrd to ");
+    uart_print_hex(pmem_base);
+    uart_puts("\n");
+
     // uart_print_hex(loongarch_initrd_start);
     // uart_pputc('\n');
     // uart_print_hex(loongarch_initrd_size);
