@@ -4,6 +4,8 @@
 
 #include <arch/defines.h>
 #include <sys/types.h>
+#include <zircon/types.h>
+#include <zircon/compiler.h>
 
 #define MMU_KERNEL_SIZE_SHIFT 39
 #define MMU_USER_SIZE_SHIFT   39
@@ -72,5 +74,16 @@
 		  ((_ULCAST_(1) << (_PAGE_PFN_END_SHIFT)) - 1))
 
 typedef uint64_t pte_t;
+
+__BEGIN_CDECLS
+
+pte_t* loongarch64_get_kernel_ptable();
+
+zx_status_t loongarch64_boot_map_v(const vaddr_t vaddr,
+                                   const paddr_t paddr,
+                             	   const size_t len,
+                             	   const pte_t flags);
+
+__END_CDECLS
 
 #endif // __ASSEMBLER__

@@ -74,6 +74,7 @@ if (current_toolchain == default_toolchain) {
       "feature.cc",
       "mmu.cc",
       "mp.cc",
+      "periphmap.cc",
       "spinlock.cc",
       "start.S",
       "thread.cc",

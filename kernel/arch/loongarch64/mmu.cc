@@ -58,10 +58,10 @@ uint64_t kernel_relocated_base = 0xffffffff10000000;
 // The main translation table.
 pte_t loongarch64_kernel_translation_table[MMU_KERNEL_PAGE_TABLE_ENTRIES_TOP] __ALIGNED(MMU_KERNEL_PAGE_TABLE_ENTRIES_TOP * 8);
 
-// pte_t* arm64_get_kernel_ptable() {
-//     return arm64_kernel_translation_table;
-//     return 0;
-// }
+pte_t* loongarch64_get_kernel_ptable() {
+    return loongarch64_kernel_translation_table;
+    return 0;
+}
 
 // namespace {
 

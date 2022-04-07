@@ -146,6 +146,33 @@ extern "C" zx_status_t loongarch64_boot_map(pte_t* kernel_table0,
     return _loongarch64_boot_map(kernel_table0, vaddr, paddr, len, flags, alloc, phys_to_virt);
 }
 
+// called a bit later in the boot process once the kernel is in virtual memory to map early kernel data
+extern "C" zx_status_t loongarch64_boot_map_v(const vaddr_t vaddr,
+                                        const paddr_t paddr,
+                                        const size_t len,
+                                        const pte_t flags) {
+
+    // assumed to be running with virtual memory enabled, so use a slightly different set of routines
+    // to allocate and find the virtual mapping of memory
+    auto alloc = []() -> paddr_t {
+        // allocate a page out of the boot allocator, asking for a physical address
+        paddr_t pa = boot_alloc_page_phys();
+
+        // zero the memory using the physmap
+        void* ptr = paddr_to_physmap(pa & (ARCH_PHYSMAP_SIZE -1));
+        memset(ptr, 0, MMU_KERNEL_PAGE_TABLE_ENTRIES * sizeof(pte_t));
+
+        return pa;
+    };
+
+    auto phys_to_virt = [](paddr_t pa) -> pte_t* {
+        return reinterpret_cast<pte_t*>(paddr_to_physmap(pa));
+    };
+
+    return _loongarch64_boot_map(loongarch64_get_kernel_ptable(), vaddr, paddr, len, flags, alloc, phys_to_virt);
+}
+
+
 extern pte_t loongarch64_kernel_translation_table[MMU_KERNEL_PAGE_TABLE_ENTRIES_TOP] __ALIGNED(MMU_KERNEL_PAGE_TABLE_ENTRIES_TOP * 8);
 extern uint64_t kernel_relocated_base;
 
