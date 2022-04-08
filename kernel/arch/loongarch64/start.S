@@ -22,6 +22,12 @@ FUNCTION(_start)
     la.pcrel $t0, kernel_entry_paddr
     st.d     $a1, $t0, 0
 
+    /* save the physical address the kernel is loaded at */
+    //保存内核开始地址到 kernel_base_phys 全局变量
+    la.pcrel $t0, __code_start
+    la.pcrel $t1, kernel_base_phys
+    st.d     $t0, $t1, 0
+
     // clear bss segment
     la.pcrel    $t0, __bss_start            // zero out [__bss_start, _end)
     la.pcrel    $t1, _end
@@ -55,12 +61,6 @@ dmw_jmup:
 
     // setup stack pointer again with virt addr
     la.pcrel $sp, boot_cpu_kstack_end
-    
-    /* save the physical address the kernel is loaded at */
-    //保存内核开始地址到 kernel_base_phys 全局变量
-    la.pcrel $t0, __code_start
-    la.pcrel $t1, kernel_base_phys
-    st.d     $t0, $t1, 0
 
     // TODO: do aslr fixup in the future
 
