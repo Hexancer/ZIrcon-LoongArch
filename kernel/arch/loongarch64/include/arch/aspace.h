@@ -29,6 +29,22 @@ private:
         return (vaddr >= base_ && vaddr <= base_ + size_ - 1);
     }
 
+    volatile pte_t* GetPageTable(uint page_size_shift,
+                                 vaddr_t pt_index, volatile pte_t* page_table) TA_REQ(lock_);
+
+    zx_status_t AllocPageTable(paddr_t* paddrp, uint page_size_shift) TA_REQ(lock_);
+
+    void FreePageTable(void* vaddr, paddr_t paddr, uint page_size_shift) TA_REQ(lock_);
+
+    ssize_t MapPageTable(vaddr_t vaddr_in, vaddr_t vaddr_rel_in,
+                         paddr_t paddr_in, size_t size_in, pte_t attrs,
+                         uint index_shift, uint page_size_shift,
+                         volatile pte_t* page_table) TA_REQ(lock_);
+
+    ssize_t UnmapPageTable(vaddr_t vaddr, vaddr_t vaddr_rel, size_t size,
+                           uint index_shift, uint page_size_shift,
+                           volatile pte_t* page_table) TA_REQ(lock_);
+
     zx_status_t ProtectPageTable(vaddr_t vaddr_in, vaddr_t vaddr_rel_in, size_t size_in,
                                  pte_t attrs, uint index_shift, uint page_size_shift,
                                  volatile pte_t* page_table) TA_REQ(lock_);
@@ -37,6 +53,14 @@ private:
                             pte_t* attrs, vaddr_t* vaddr_base,
                             uint* top_size_shift, uint* top_index_shift,
                             uint* page_size_shift);
+
+    ssize_t MapPages(vaddr_t vaddr, paddr_t paddr, size_t size, pte_t attrs,
+                     vaddr_t vaddr_base, uint top_size_shift, uint top_index_shift,
+                     uint page_size_shift) TA_REQ(lock_);
+
+    ssize_t UnmapPages(vaddr_t vaddr, size_t size, vaddr_t vaddr_base,
+                       uint top_size_shift, uint top_index_shift,
+                       uint page_size_shift) TA_REQ(lock_);
 
     zx_status_t ProtectPages(vaddr_t vaddr, size_t size, pte_t attrs,
                              vaddr_t vaddr_base, uint top_size_shift,

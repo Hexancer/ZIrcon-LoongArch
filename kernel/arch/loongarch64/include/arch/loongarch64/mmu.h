@@ -15,6 +15,8 @@
 #define MMU_KERNEL_PAGE_SIZE_SHIFT   (PAGE_SIZE_SHIFT)
 #define MMU_USER_PAGE_SIZE_SHIFT     (PAGE_SIZE_SHIFT)
 #define MMU_GUEST_PAGE_SIZE_SHIFT    (PAGE_SIZE_SHIFT)
+#define MMU_MAX_PAGE_SIZE_SHIFT      (PAGE_SIZE_SHIFT)
+
 
 // Addr space size of specified level page table entry
 #define MMU_LX_X(page_shift, level) ((4 - (level)) * ((page_shift) - 3) + 3)
@@ -115,6 +117,8 @@ typedef uint64_t pte_t;
 
 // Zero PTE is always invalid
 #define MMU_PTE_INVALID              ((pte_t)(0))
+#define MMU_PTE_DESCRIPTOR_INVALID   MMU_PTE_INVALID
+
 
 // Metadata range in PTE
 // #define MMU_PTE_DESCRIPTOR_INVALID    (0)
