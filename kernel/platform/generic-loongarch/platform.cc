@@ -3,6 +3,7 @@
 #include <arch.h>
 #include <arch/loongarch64/debug.h>
 #include <kernel/cmdline.h>
+#include <lk/init.h>
 #include <object/resource_dispatcher.h>
 
 #include <dev/display.h>
@@ -347,6 +348,24 @@ void platform_early_init(void) {
     // tell the boot allocator to mark ranges we've reserved as off limits
     boot_reserve_wire();
 }
+
+// Called after the heap is up but before the system is multithreaded.
+void platform_init_pre_thread(uint) {
+    process_zbi(zbi_root, !kProcessZbiEarly);
+}
+
+LK_INIT_HOOK(platform_init_pre_thread, platform_init_pre_thread, LK_INIT_LEVEL_VM)
+
+void platform_init(void) {
+    // topology_cpu_init();
+}
+
+// after the fact create a region to reserve the peripheral map(s)
+static void platform_init_postvm(uint level) {
+    reserve_periph_ranges();
+}
+
+LK_INIT_HOOK(platform_postvm, platform_init_postvm, LK_INIT_LEVEL_VM)
 
 void platform_dputs_thread(const char* str, size_t len) {
     if (uart_disabled) {
