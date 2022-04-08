@@ -1,0 +1,39 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Remote Attach",
+            "type": "cppdbg",
+            "request": "launch",
+            "remote": true,
+            "program": "${workspaceFolder}/out/kernel-loongarch64-gcc/obj/kernel/zircon.elf",
+            "MIMode": "gdb",
+            "stopAtConnect": true,
+            "cwd": "${workspaceFolder}/out",
+            "miDebuggerPath": "gdb",
+            "miDebuggerServerAddress": "localhost:1234",
+            "miDebuggerArgs": " -ex 'handle all print nostop noignore'",
+            "setupCommands": [
+                {
+                    "description": "Use hex output",
+                    "text": "set output-radix 16",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "Set target architecture",
+                    "text": "set architecture Loongarch64",
+                    "ignoreFailures": false
+                },
+                {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true,
+                }
+            ]
+        },
+
+    ]
+}
