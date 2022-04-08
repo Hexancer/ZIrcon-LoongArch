@@ -29,7 +29,22 @@ private:
         return (vaddr >= base_ && vaddr <= base_ + size_ - 1);
     }
 
+    zx_status_t ProtectPageTable(vaddr_t vaddr_in, vaddr_t vaddr_rel_in, size_t size_in,
+                                 pte_t attrs, uint index_shift, uint page_size_shift,
+                                 volatile pte_t* page_table) TA_REQ(lock_);
+
+    void MmuParamsFromFlags(uint mmu_flags,
+                            pte_t* attrs, vaddr_t* vaddr_base,
+                            uint* top_size_shift, uint* top_index_shift,
+                            uint* page_size_shift);
+
+    zx_status_t ProtectPages(vaddr_t vaddr, size_t size, pte_t attrs,
+                             vaddr_t vaddr_base, uint top_size_shift,
+                             uint top_index_shift, uint page_size_shift) TA_REQ(lock_);
+
     zx_status_t QueryLocked(vaddr_t vaddr, paddr_t* paddr, uint* mmu_flags) TA_REQ(lock_);
+
+    void FlushTLBEntry(vaddr_t vaddr, bool terminal) TA_REQ(lock_);
 
     fbl::Canary<fbl::magic("VAAS")> canary_;
 

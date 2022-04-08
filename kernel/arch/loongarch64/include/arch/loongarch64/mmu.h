@@ -117,11 +117,14 @@ typedef uint64_t pte_t;
 #define MMU_PTE_INVALID              ((pte_t)(0))
 
 // Metadata range in PTE
-#define MMU_PTE_DESCRIPTOR_INVALID    (0)
-#define MMU_PTE_DESCRIPTOR_MASK       (0xfffUL)
+// #define MMU_PTE_DESCRIPTOR_INVALID    (0)
+#define MMU_PTE_DESCRIPTOR_MASK       (0xffUL)
+#define MMU_PTE_DESCRIPTOR_TABLE      (0)      // We don't use these bits in page dir
 
 // PA range in PTE
 #define MMU_PTE_OUTPUT_ADDR_MASK      _PFN_MASK
+
+#define MMU_PTE_PERMISSION_MASK      (_PAGE_NO_READ | _PAGE_NO_EXEC | _PAGE_RPLV | MMU_PTE_DESCRIPTOR_MASK)
 
 
 __BEGIN_CDECLS

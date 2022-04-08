@@ -8,8 +8,9 @@
 
 #define SHIFT_4K (12)
 #define PAGE_SIZE_SHIFT (SHIFT_4K)
-#define PAGE_SIZE (1L << PAGE_SIZE_SHIFT)
 
+#define PAGE_SIZE (1L << PAGE_SIZE_SHIFT)
+#define PAGE_MASK (PAGE_SIZE - 1)
 
 #define MAX_CACHE_LINE 128
 

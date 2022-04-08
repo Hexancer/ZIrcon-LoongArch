@@ -14,8 +14,24 @@ static inline void arch_spinloop_pause(void) {
     TODO();
 }
 
-#define mb()
-#define smp_mb()
+#define __sync()	__asm__ __volatile__("dbar 0" : : : "memory")
+
+#define fast_wmb()	__sync()
+#define fast_rmb()	__sync()
+#define fast_mb()	__sync()
+#define fast_iob()	__sync()
+#define wbflush()	__sync()
+
+#define wmb()		fast_wmb()
+#define rmb()		fast_rmb()
+#define mb()		fast_mb()
+#define iob()		fast_iob()
+
+#define __smp_mb()	__asm__ __volatile__("dbar 0" : : : "memory")
+#define __smp_rmb()	__asm__ __volatile__("dbar 0" : : : "memory")
+#define __smp_wmb()	__asm__ __volatile__("dbar 0" : : : "memory")
+#define smp_mb()    __smp_mb()
+
 
 static inline uint64_t arch_cycle_count(void) {
     TODO();

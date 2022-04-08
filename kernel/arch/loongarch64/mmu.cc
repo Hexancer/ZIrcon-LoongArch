@@ -134,7 +134,8 @@ AsidAllocator asid;
 
 // Convert user level mmu flags to flags that go in L1 descriptors.
 static pte_t mmu_flags_to_pte_attr(uint flags) {
-    pte_t attr = 0;
+    // TODO: remove dirty flag after finishing irq handler
+    pte_t attr = _PAGE_VALID | _PAGE_DIRTY;
 
     switch (flags & ARCH_MMU_FLAG_CACHE_MASK) {
     case ARCH_MMU_FLAG_CACHED:
@@ -426,27 +427,20 @@ static bool page_table_is_clear(volatile pte_t* page_table, uint page_size_shift
 
 // use the appropriate TLB flush instruction to globally flush the modified entry
 // terminal is set when flushing at the final level of the page table.
-// void LoongarchArchVmAspace::FlushTLBEntry(vaddr_t vaddr, bool terminal) {
-//     if (flags_ & ARCH_ASPACE_FLAG_GUEST) {
-//         paddr_t vttbr = arm64_vttbr(asid_, tt_phys_);
-//         __UNUSED zx_status_t status = arm64_el2_tlbi_ipa(vttbr, vaddr, terminal);
-//         DEBUG_ASSERT(status == ZX_OK);
-//     } else if (asid_ == MMU_ARM64_GLOBAL_ASID) {
-//         // flush this address on all ASIDs
-//         if (terminal) {
-//             ARM64_TLBI(vaale1is, vaddr >> 12);
-//         } else {
-//             ARM64_TLBI(vaae1is, vaddr >> 12);
-//         }
-//     } else {
-//         // flush this address for the specific asid
-//         if (terminal) {
-//             ARM64_TLBI(vale1is, vaddr >> 12 | (vaddr_t)asid_ << 48);
-//         } else {
-//             ARM64_TLBI(vae1is, vaddr >> 12 | (vaddr_t)asid_ << 48);
-//         }
-//     }
-// }
+void LoongarchArchVmAspace::FlushTLBEntry(vaddr_t vaddr, bool terminal) {
+    if (flags_ & ARCH_ASPACE_FLAG_GUEST) {
+        TODO();
+        // paddr_t vttbr = arm64_vttbr(asid_, tt_phys_);
+        // __UNUSED zx_status_t status = arm64_el2_tlbi_ipa(vttbr, vaddr, terminal);
+        // DEBUG_ASSERT(status == ZX_OK);
+    } else if (asid_ == MMU_LOONGARCH64_GLOBAL_ASID) {
+        // flush this address on all ASIDs
+        __asm__ __volatile__("invtlb 0x06, %0, %1" : : "r"(asid_), "r"(vaddr));
+    } else {
+        // flush this address for the specific asid
+        __asm__ __volatile__("invtlb 0x05, %0, %1" : : "r"(asid_), "r"(vaddr) :);
+    }
+}
 
 // NOTE: caller must DSB afterwards to ensure TLB entries are flushed
 // ssize_t LoongarchArchVmAspace::UnmapPageTable(vaddr_t vaddr, vaddr_t vaddr_rel,
@@ -604,84 +598,71 @@ static bool page_table_is_clear(volatile pte_t* page_table, uint page_size_shift
 // }
 
 // NOTE: caller must DSB afterwards to ensure TLB entries are flushed
-// zx_status_t LoongarchArchVmAspace::ProtectPageTable(vaddr_t vaddr_in, vaddr_t vaddr_rel_in,
-//                                               size_t size_in, pte_t attrs,
-//                                               uint index_shift, uint page_size_shift,
-//                                               volatile pte_t* page_table) {
-//     volatile pte_t* next_page_table;
-//     vaddr_t index;
-//     vaddr_t vaddr = vaddr_in;
-//     vaddr_t vaddr_rel = vaddr_rel_in;
-//     size_t size = size_in;
-//     size_t chunk_size;
-//     vaddr_t vaddr_rem;
-//     vaddr_t block_size;
-//     vaddr_t block_mask;
-//     paddr_t page_table_paddr;
-//     pte_t pte;
+zx_status_t LoongarchArchVmAspace::ProtectPageTable(vaddr_t vaddr_in, vaddr_t vaddr_rel_in,
+                                              size_t size_in, pte_t attrs,
+                                              uint index_shift, uint page_size_shift,
+                                              volatile pte_t* page_table) {
+    volatile pte_t* next_page_table;
+    vaddr_t index;
+    vaddr_t vaddr = vaddr_in;
+    vaddr_t vaddr_rel = vaddr_rel_in;
+    size_t size = size_in;
+    size_t chunk_size;
+    vaddr_t vaddr_rem;
+    vaddr_t block_size;
+    vaddr_t block_mask;
+    paddr_t page_table_paddr;
+    pte_t pte;
 
-//     LTRACEF("vaddr %#" PRIxPTR ", vaddr_rel %#" PRIxPTR ", size %#" PRIxPTR
-//             ", attrs %#" PRIx64
-//             ", index shift %u, page_size_shift %u, page_table %p\n",
-//             vaddr, vaddr_rel, size, attrs,
-//             index_shift, page_size_shift, page_table);
+    LTRACEF("vaddr %#" PRIxPTR ", vaddr_rel %#" PRIxPTR ", size %#" PRIxPTR
+            ", attrs %#" PRIx64
+            ", index shift %u, page_size_shift %u, page_table %p\n",
+            vaddr, vaddr_rel, size, attrs,
+            index_shift, page_size_shift, page_table);
 
-//     // vaddr_rel and size must be page aligned
-//     DEBUG_ASSERT(((vaddr_rel | size) & ((1UL << page_size_shift) - 1)) == 0);
+    // vaddr_rel and size must be page aligned
+    DEBUG_ASSERT(((vaddr_rel | size) & ((1UL << page_size_shift) - 1)) == 0);
 
-//     while (size) {
-//         block_size = 1UL << index_shift;
-//         block_mask = block_size - 1;
-//         vaddr_rem = vaddr_rel & block_mask;
-//         chunk_size = MIN(size, block_size - vaddr_rem);
-//         index = vaddr_rel >> index_shift;
-//         pte = page_table[index];
+    while (size) {
+        block_size = 1UL << index_shift;
+        block_mask = block_size - 1;
+        vaddr_rem = vaddr_rel & block_mask;
+        chunk_size = MIN(size, block_size - vaddr_rem);
+        index = vaddr_rel >> index_shift;
+        pte = page_table[index];
 
-//         if (index_shift > page_size_shift &&
-//                 (pte & MMU_PTE_DESCRIPTOR_MASK) == MMU_PTE_L012_DESCRIPTOR_BLOCK &&
-//                 chunk_size != block_size) {
-//             zx_status_t s = SplitLargePage(vaddr, index_shift, page_size_shift, index, page_table);
-//             if (likely(s == ZX_OK)) {
-//                 pte = page_table[index];
-//             } else {
-//                 // If split fails, just unmap the whole block and let a
-//                 // subsequent page fault clean it up.
-//                 UnmapPageTable(vaddr - vaddr_rel, 0, block_size,
-//                                index_shift, page_size_shift, page_table);
-//                 pte = 0;
-//             }
-//         }
+        if (index_shift > page_size_shift &&
+            (pte & MMU_PTE_DESCRIPTOR_MASK) == MMU_PTE_DESCRIPTOR_TABLE) {
+            page_table_paddr = pte & MMU_PTE_OUTPUT_ADDR_MASK;
+            next_page_table = static_cast<volatile pte_t*>(paddr_to_physmap(page_table_paddr));
+            ProtectPageTable(vaddr, vaddr_rem, chunk_size, attrs,
+                             index_shift - (page_size_shift - 3),
+                             page_size_shift, next_page_table);
+        } else if (pte) {
+            LTRACEF("pte %p[%#" PRIxPTR "] = %#" PRIx64 "\n",
+                    page_table, index, pte);
+            pte = (pte & ~MMU_PTE_PERMISSION_MASK) | attrs;
+            LTRACEF("pte %p[%#" PRIxPTR "] = %#" PRIx64 "\n",
+                    page_table, index, pte);
+            page_table[index] = pte;
 
-//         if (index_shift > page_size_shift &&
-//             (pte & MMU_PTE_DESCRIPTOR_MASK) == MMU_PTE_L012_DESCRIPTOR_TABLE) {
-//             page_table_paddr = pte & MMU_PTE_OUTPUT_ADDR_MASK;
-//             next_page_table = static_cast<volatile pte_t*>(paddr_to_physmap(page_table_paddr));
-//             ProtectPageTable(vaddr, vaddr_rem, chunk_size, attrs,
-//                              index_shift - (page_size_shift - 3),
-//                              page_size_shift, next_page_table);
-//         } else if (pte) {
-//             pte = (pte & ~MMU_PTE_PERMISSION_MASK) | attrs;
-//             LTRACEF("pte %p[%#" PRIxPTR "] = %#" PRIx64 "\n",
-//                     page_table, index, pte);
-//             page_table[index] = pte;
+            // ensure that the update is observable from hardware page table walkers
+            wmb();
 
-//             // ensure that the update is observable from hardware page table walkers
-//             __dmb(ARM_MB_ISHST);
+            // flush the terminal TLB entry
+            FlushTLBEntry(vaddr, true);
+        } else {
+            LTRACEF("page table entry does not exist, index %#" PRIxPTR
+                    ", %#" PRIx64 "\n",
+                    index, pte);
+        }
+        vaddr += chunk_size;
+        vaddr_rel += chunk_size;
+        size -= chunk_size;
+    }
 
-//             // flush the terminal TLB entry
-//             FlushTLBEntry(vaddr, true);
-//         } else {
-//             LTRACEF("page table entry does not exist, index %#" PRIxPTR
-//                     ", %#" PRIx64 "\n",
-//                     index, pte);
-//         }
-//         vaddr += chunk_size;
-//         vaddr_rel += chunk_size;
-//         size -= chunk_size;
-//     }
-
-//     return ZX_OK;
-// }
+    return ZX_OK;
+}
 
 // internal routine to map a run of pages
 // ssize_t LoongarchArchVmAspace::MapPages(vaddr_t vaddr, paddr_t paddr, size_t size,
@@ -733,63 +714,68 @@ static bool page_table_is_clear(volatile pte_t* page_table, uint page_size_shift
         // return ZX_OK;
 // }
 
-// zx_status_t LoongarchArchVmAspace::ProtectPages(vaddr_t vaddr, size_t size, pte_t attrs,
-                                        //   vaddr_t vaddr_base, uint top_size_shift,
-                                        //   uint top_index_shift, uint page_size_shift) {
-//     vaddr_t vaddr_rel = vaddr - vaddr_base;
-//     vaddr_t vaddr_rel_max = 1UL << top_size_shift;
+zx_status_t LoongarchArchVmAspace::ProtectPages(vaddr_t vaddr, size_t size, pte_t attrs,
+                                          vaddr_t vaddr_base, uint top_size_shift,
+                                          uint top_index_shift, uint page_size_shift) {
+    vaddr_t vaddr_rel = vaddr - vaddr_base;
+    vaddr_t vaddr_rel_max = 1UL << top_size_shift;
 
-//     LTRACEF("vaddr %#" PRIxPTR ", size %#" PRIxPTR ", attrs %#" PRIx64
-//             ", asid %#x\n",
-//             vaddr, size, attrs, asid_);
+    LTRACEF("vaddr %#" PRIxPTR ", size %#" PRIxPTR ", attrs %#" PRIx64
+            ", asid %#x\n",
+            vaddr, size, attrs, asid_);
 
-//     if (vaddr_rel > vaddr_rel_max - size || size > vaddr_rel_max) {
-//         TRACEF("vaddr %#" PRIxPTR ", size %#" PRIxPTR " out of range vaddr %#" PRIxPTR ", size %#" PRIxPTR "\n",
-//                vaddr, size, vaddr_base, vaddr_rel_max);
-//         return ZX_ERR_INVALID_ARGS;
-//     }
+    if (vaddr_rel > vaddr_rel_max - size || size > vaddr_rel_max) {
+        TRACEF("vaddr %#" PRIxPTR ", size %#" PRIxPTR " out of range vaddr %#" PRIxPTR ", size %#" PRIxPTR "\n",
+               vaddr, size, vaddr_base, vaddr_rel_max);
+        return ZX_ERR_INVALID_ARGS;
+    }
 
-//     LOCAL_KTRACE("mmu protect", (vaddr & ~PAGE_MASK) | ((size >> PAGE_SIZE_SHIFT) & PAGE_MASK));
+    LOCAL_KTRACE("mmu protect", (vaddr & ~PAGE_MASK) | ((size >> PAGE_SIZE_SHIFT) & PAGE_MASK));
 
-//     zx_status_t ret = ProtectPageTable(vaddr, vaddr_rel, size, attrs,
-//                                        top_index_shift, page_size_shift,
-//                                        tt_virt_);
-//     __dsb(ARM_MB_SY);
-//     return ret;
-        // return ZX_OK;
-// }
+    zx_status_t ret = ProtectPageTable(vaddr, vaddr_rel, size, attrs,
+                                       top_index_shift, page_size_shift,
+                                       tt_virt_);
+    smp_mb();
+    return ret;
+}
 
-// void LoongarchArchVmAspace::MmuParamsFromFlags(uint mmu_flags,
-//                                          pte_t* attrs, vaddr_t* vaddr_base,
-//                                          uint* top_size_shift, uint* top_index_shift,
-//                                          uint* page_size_shift) {
-// 
-//     if (flags_ & ARCH_ASPACE_FLAG_KERNEL) {
-//         if (attrs) {
-//             *attrs = mmu_flags_to_s1_pte_attr(mmu_flags);
-//         }
-//         *vaddr_base = ~0UL << MMU_KERNEL_SIZE_SHIFT;
-//         *top_size_shift = MMU_KERNEL_SIZE_SHIFT;
-//         *top_index_shift = MMU_KERNEL_TOP_SHIFT;
-//         *page_size_shift = MMU_KERNEL_PAGE_SIZE_SHIFT;
-//     } else if (flags_ & ARCH_ASPACE_FLAG_GUEST) {
-//         if (attrs) {
-//             *attrs = mmu_flags_to_s2_pte_attr(mmu_flags);
-//         }
-//         *vaddr_base = 0;
-//         *top_size_shift = MMU_GUEST_SIZE_SHIFT;
-//         *top_index_shift = MMU_GUEST_TOP_SHIFT;
-//         *page_size_shift = MMU_GUEST_PAGE_SIZE_SHIFT;
-//     } else {
-//         if (attrs) {
-//             *attrs = mmu_flags_to_s1_pte_attr(mmu_flags);
-//         }
-//         *vaddr_base = 0;
-//         *top_size_shift = MMU_USER_SIZE_SHIFT;
-//         *top_index_shift = MMU_USER_TOP_SHIFT;
-//         *page_size_shift = MMU_USER_PAGE_SIZE_SHIFT;
-//     }
-// }
+void LoongarchArchVmAspace::MmuParamsFromFlags(uint mmu_flags,
+                                         pte_t* attrs, vaddr_t* vaddr_base,
+                                         uint* top_size_shift, uint* top_index_shift,
+                                         uint* page_size_shift) {
+
+    if (flags_ & ARCH_ASPACE_FLAG_KERNEL) {
+        if (attrs) {
+            *attrs = mmu_flags_to_pte_attr(mmu_flags);
+        }
+        *vaddr_base = ~0UL << MMU_KERNEL_SIZE_SHIFT;
+        *top_size_shift = MMU_KERNEL_SIZE_SHIFT;
+        *top_index_shift = MMU_KERNEL_TOP_SHIFT;
+        *page_size_shift = MMU_KERNEL_PAGE_SIZE_SHIFT;
+        LTRACEF("kernel mmu params: base %016lx top size %u shift %u pgshift %u\n",
+                *vaddr_base, *top_size_shift, *top_index_shift, *page_size_shift);
+    } else if (flags_ & ARCH_ASPACE_FLAG_GUEST) {
+        if (attrs) {
+            *attrs = mmu_flags_to_pte_attr(mmu_flags);
+        }
+        *vaddr_base = 0;
+        *top_size_shift = MMU_GUEST_SIZE_SHIFT;
+        *top_index_shift = MMU_GUEST_TOP_SHIFT;
+        *page_size_shift = MMU_GUEST_PAGE_SIZE_SHIFT;
+        LTRACEF("guest mmu params: base %016lx top size %u shift %u pgshift %u\n",
+                *vaddr_base, *top_size_shift, *top_index_shift, *page_size_shift);
+    } else {
+        if (attrs) {
+            *attrs = mmu_flags_to_pte_attr(mmu_flags);
+        }
+        *vaddr_base = 0;
+        *top_size_shift = MMU_USER_SIZE_SHIFT;
+        *top_index_shift = MMU_USER_TOP_SHIFT;
+        *page_size_shift = MMU_USER_PAGE_SIZE_SHIFT;
+        LTRACEF("user mmu params: base %016lx top size %u shift %u pgshift %u\n",
+                *vaddr_base, *top_size_shift, *top_index_shift, *page_size_shift);
+    }
+}
 
 zx_status_t LoongarchArchVmAspace::MapContiguous(vaddr_t vaddr, paddr_t paddr, size_t count,
                                            uint mmu_flags, size_t* mapped) {
@@ -949,32 +935,31 @@ zx_status_t LoongarchArchVmAspace::Unmap(vaddr_t vaddr, size_t count, size_t* un
 }
 
 zx_status_t LoongarchArchVmAspace::Protect(vaddr_t vaddr, size_t count, uint mmu_flags) {
-    TODO();
-//     canary_.Assert();
+    canary_.Assert();
 
-//     if (!IsValidVaddr(vaddr))
-//         return ZX_ERR_INVALID_ARGS;
+    if (!IsValidVaddr(vaddr))
+        return ZX_ERR_INVALID_ARGS;
 
-//     if (!IS_PAGE_ALIGNED(vaddr))
-//         return ZX_ERR_INVALID_ARGS;
+    if (!IS_PAGE_ALIGNED(vaddr))
+        return ZX_ERR_INVALID_ARGS;
 
-//     if (!(mmu_flags & ARCH_MMU_FLAG_PERM_READ))
-//         return ZX_ERR_INVALID_ARGS;
+    if (!(mmu_flags & ARCH_MMU_FLAG_PERM_READ))
+        return ZX_ERR_INVALID_ARGS;
 
-//     Guard<Mutex> a{&lock_};
+    Guard<Mutex> a{&lock_};
 
     int ret = 0;
-//     {
-//         pte_t attrs;
-//         vaddr_t vaddr_base;
-//         uint top_size_shift, top_index_shift, page_size_shift;
-//         MmuParamsFromFlags(mmu_flags, &attrs, &vaddr_base, &top_size_shift, &top_index_shift,
-//                            &page_size_shift);
+    {
+        pte_t attrs;
+        vaddr_t vaddr_base;
+        uint top_size_shift, top_index_shift, page_size_shift;
+        MmuParamsFromFlags(mmu_flags, &attrs, &vaddr_base, &top_size_shift, &top_index_shift,
+                           &page_size_shift);
 
-//         ret = ProtectPages(vaddr, count * PAGE_SIZE,
-//                            attrs, vaddr_base,
-//                            top_size_shift, top_index_shift, page_size_shift);
-//     }
+        ret = ProtectPages(vaddr, count * PAGE_SIZE,
+                           attrs, vaddr_base,
+                           top_size_shift, top_index_shift, page_size_shift);
+    }
 
     return ret;
 }
