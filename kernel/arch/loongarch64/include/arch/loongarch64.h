@@ -3,8 +3,11 @@
 #ifndef __ASSEMBLER__
 
 #include <arch/loongarch64/iframe.h>
+#include <sys/types.h>
 
 #include <zircon/types.h>
+
+__BEGIN_CDECLS
 
 typedef struct {
     // uint8_t ctype;
@@ -29,5 +32,26 @@ typedef struct {
 struct arch_exception_context {
     struct iframe_t* frame;
 };
+
+// Register state layout used by loongarch64_context_switch().
+struct loongarch64_context_switch_frame {
+    // TODO: What else regs do we need to save?
+    uint64_t ra;   // link register
+    uint64_t tp;   // thread id register, ARM also has TPIDRRO_EL0, a RO software thread id
+    uint64_t r22;  // callee-saved regs
+    uint64_t r23;
+    uint64_t r24;
+    uint64_t r25;
+    uint64_t r26;
+    uint64_t r27;
+    uint64_t r28;
+    uint64_t r29;
+    uint64_t r30;
+    uint64_t r31;
+};
+
+void loongarch64_context_switch(vaddr_t* old_sp, vaddr_t new_sp);
+
+__END_CDECLS
 
 #endif // __ASSEMBLER__

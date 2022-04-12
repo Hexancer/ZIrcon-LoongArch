@@ -165,9 +165,27 @@
 #define CSR_DMW1_INIT		0x9000000000000011  // (CSR_DMW1_BASE | CSR_DMW1_MAT | CSR_DMW1_PLV0)
 
 
-
 #define LOONGARCH_CSR_KS0          0x30
 #define LOONGARCH_CSR_KS1          0x31
+
+/* Timer registers */
+#define LOONGARCH_CSR_TMID		0x40	/* Timer ID */
+
+#define LOONGARCH_CSR_TCFG		0x41	/* Timer config */
+#define  CSR_TCFG_VAL_SHIFT		2
+#define	 CSR_TCFG_VAL_WIDTH		48
+#define  CSR_TCFG_VAL			(_ULCAST_(0x3fffffffffff) << CSR_TCFG_VAL_SHIFT)
+#define  CSR_TCFG_PERIOD_SHIFT		1
+#define  CSR_TCFG_PERIOD		(_ULCAST_(0x1) << CSR_TCFG_PERIOD_SHIFT)
+#define  CSR_TCFG_EN			(_ULCAST_(0x1))
+
+#define LOONGARCH_CSR_TVAL		0x42	/* Timer value */
+
+#define LOONGARCH_CSR_CNTC		0x43	/* Timer offset */
+
+#define LOONGARCH_CSR_TINTCLR		0x44	/* Timer interrupt clear */
+#define  CSR_TINTCLR_TI_SHIFT		0
+#define  CSR_TINTCLR_TI			(1 << CSR_TINTCLR_TI_SHIFT)
 
 /* TLB Refill registers */
 #define LOONGARCH_CSR_TLBRENTRY		0x88	/* TLB refill exception entry */

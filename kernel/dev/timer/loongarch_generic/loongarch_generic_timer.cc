@@ -50,6 +50,33 @@ static uint32_t read_cntfrq(void) {
 		return (base_freq * cfm / cfd);
 }
 
+static inline void write_ctl(uint32_t val) {
+    uint64_t timer_config;
+	timer_config = csr_readq(LOONGARCH_CSR_TCFG);
+    timer_config = (timer_config & ~CSR_TCFG_EN) | (val & CSR_TCFG_EN);
+	csr_writeq(timer_config, LOONGARCH_CSR_TCFG);
+}
+
+static inline void write_cval(uint64_t val) {
+    uint64_t timer_config;
+	timer_config = csr_readq(LOONGARCH_CSR_TCFG);
+    // Clear least 2 bits
+    timer_config = (timer_config & ~CSR_TCFG_VAL) | (val & CSR_TCFG_VAL);
+	csr_writeq(timer_config, LOONGARCH_CSR_TCFG);
+}
+
+static inline void write_tval(uint32_t val) {
+    // TODO: We don't have both tval and cval
+    TODO();
+}
+
+static uint64_t read_ct(void) {
+    uint64_t cntpct = drdtime();
+    LTRACEF_LEVEL(3, "cntpct: 0x%016" PRIx64 ", %" PRIu64 "\n",
+                  cntpct, cntpct);
+    return cntpct;
+}
+
 static interrupt_eoi platform_tick(void* arg) {
     TODO();
     // write_ctl(0);
@@ -58,36 +85,35 @@ static interrupt_eoi platform_tick(void* arg) {
 }
 
 zx_status_t platform_set_oneshot_timer(zx_time_t deadline) {
-    TODO();
-//  DEBUG_ASSERT(arch_ints_disabled());
-//
-//  if (deadline < 0) {
-//    deadline = 0;
-//  }
-//
-//  // Add one to the deadline, since with very high probability the deadline
-//  // straddles a counter tick.
-//  const uint64_t cntpct_deadline = zx_time_to_cntpct(deadline) + 1;
-//
-//  // Even if the deadline has already passed, the ARMv8-A timer will fire the
-//  // interrupt.
-//  write_cval(cntpct_deadline);
-//  write_ctl(1);
+     DEBUG_ASSERT(arch_ints_disabled());
 
-  return 0;
-}
+    if (deadline < 0) {
+        deadline = 0;
+    }
 
-void platform_stop_timer(void) {
-    TODO();
-//  write_ctl(0);
-}
+    // Add one to the deadline, since with very high probability the deadline
+    // straddles a counter tick.
+    const uint64_t cntpct_now = current_ticks();
+    const uint64_t cntpct_deadline = zx_time_to_cntpct(deadline) + 1;
 
-zx_time_t current_time(void) {
+    uint64_t cntpct_delta = cntpct_deadline - cntpct_now;
+
+    write_cval(cntpct_delta);
+    write_ctl(CSR_TCFG_EN);
+
     return 0;
 }
 
+void platform_stop_timer(void) {
+    write_ctl(0);
+}
+
+zx_time_t current_time(void) {
+    return cntpct_to_zx_time(current_ticks());
+}
+
 zx_ticks_t current_ticks(void) {
-	return drdtime();
+    return read_ct();
 }
 
 static uint64_t abs_int64(int64_t a) {
