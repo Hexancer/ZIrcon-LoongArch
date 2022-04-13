@@ -22,6 +22,7 @@
 #define KDRV_MSM_UART 0x554D534D                // 'MSMU'
 #define KDRV_MSM_POWER 1347244877               // 'MSMP'
 #define KDRV_DW8250_UART 0x44573855             // 'DW8U'
+#define KDRV_LOONGARCH_EXTIOI_PIC  0x4349504c   // 'LPIC'
 #define KDRV_LOONGARCH_GENERIC_TIMER 0x4D49544C // 'LTIM'
 
 // kernel driver struct that can be used for simple drivers

@@ -1,0 +1,11 @@
+library("extioi_pic") {
+  kernel = true
+  sources = [
+    "extioi_pic.cc",
+  ]
+  deps = [
+    "$zx/kernel/dev/interrupt",
+    "$zx/kernel/dev/pdev",
+    "$zx/kernel/dev/pdev/interrupt",
+  ]
+}

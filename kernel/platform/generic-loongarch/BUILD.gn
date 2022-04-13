@@ -6,12 +6,12 @@ import("$zx/kernel/params.gni")
 
 source_set("generic-loongarch") {
   sources = [
-    "interrupts.cc",
     "platform.cc",
   ]
   deps = [
     "$zx/kernel/dev/hw_rng",
     "$zx/kernel/dev/interrupt",
+    "$zx/kernel/dev/interrupt/extioi_pic",
     "$zx/kernel/dev/pdev",
     "$zx/kernel/dev/timer/loongarch_generic",
     "$zx/kernel/dev/uart/dw8250",

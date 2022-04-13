@@ -19,6 +19,7 @@ struct iframe_t {
 
 // Lots of the code uses this name.
 typedef struct iframe_t loongarch64_iframe_t;
+typedef struct iframe_t iframe_short_t;
 
 static_assert(sizeof(iframe_t) % 16 == 0, "iframe_t should be 16B-aligned");
 
