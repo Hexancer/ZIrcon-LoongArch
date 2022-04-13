@@ -15,7 +15,6 @@ FUNCTION(loongarch64_context_switch)
     push_reg 24
     push_reg 23
     push_reg 22
-    push_reg 2   // $tp
     push_reg 1   // $ra
 
     /* save old sp */
@@ -27,7 +26,6 @@ FUNCTION(loongarch64_context_switch)
 
     /* restore new frame */
     pop_reg 1    // $ra
-    pop_reg 2    // $tp
     pop_reg 22
     pop_reg 23
     pop_reg 24

@@ -37,7 +37,6 @@ struct arch_exception_context {
 struct loongarch64_context_switch_frame {
     // TODO: What else regs do we need to save?
     uint64_t ra;   // link register
-    uint64_t tp;   // thread id register, ARM also has TPIDRRO_EL0, a RO software thread id
     uint64_t r22;  // callee-saved regs
     uint64_t r23;
     uint64_t r24;
