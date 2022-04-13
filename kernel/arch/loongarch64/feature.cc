@@ -14,6 +14,18 @@ static loongarch64_cache_info_t cache_info[SMP_MAX_CPUS];
 uint32_t loongarch64_icache_size = 32;
 uint32_t loongarch64_dcache_size = 32;
 
+void loongarch64_get_cache_info(loongarch64_cache_info_t* info) {
+    // TODO
+}
+
+void loongarch64_dump_cache_info(uint32_t cpu) {
+    // TODO
+}
+
+static void print_cpu_info() {
+    // TODO
+}
+
 // call on every cpu to save features
 void loongarch64_feature_init() {
     // set up some global constants based on the boot cpu
@@ -43,10 +55,40 @@ void loongarch64_feature_init() {
 }
 
 
-void loongarch64_get_cache_info(loongarch64_cache_info_t* info) {
-    // TODO
+static void print_feature() {
+    const struct {
+        uint32_t bit;
+        const char* name;
+    } features[] = {
+        {ZX_LOONGARCH64_FEATURE_ISA_FPU, "fpu"},
+    };
+
+    printf("LoongArch Features: ");
+    uint col = 0;
+    for (uint i = 0; i < fbl::count_of(features); ++i) {
+        if (loongarch64_feature_test(features[i].bit))
+            col += printf("%s ", features[i].name);
+        if (col >= 80) {
+            printf("\n");
+            col = 0;
+        }
+    }
+    if (col > 0)
+        printf("\n");
 }
 
-void loongarch64_dump_cache_info(uint32_t cpu) {
-    // TODO
+
+// dump the feature set
+// print additional information if full is passed
+void loongarch64_feature_debug(bool full) {
+    print_cpu_info();
+
+    if (full) {
+        print_feature();
+        dprintf(INFO, "LoongArch cache line sizes: icache %u dcache %u\n",
+                loongarch64_icache_size, loongarch64_dcache_size);
+        if (LK_DEBUGLEVEL > 0) {
+            loongarch64_dump_cache_info(arch_curr_cpu_num());
+        }
+    }
 }

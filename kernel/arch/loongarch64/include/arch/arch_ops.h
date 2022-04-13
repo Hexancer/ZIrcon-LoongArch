@@ -4,6 +4,7 @@
 
 #include <arch.h>
 #include <arch/loongarch64.h>
+#include <arch/loongarch64/feature.h>
 #include <arch/loongarch64/interrupt.h>
 #include <arch/loongarch64/mp.h>
 #include <zircon/compiler.h>
@@ -39,18 +40,15 @@ static inline uint64_t arch_cycle_count(void) {
 }
 
 static inline uint32_t arch_cpu_features(void) {
-    TODO();
-    return 0;
+    return loongarch64_features;
 }
 
 static inline uint32_t arch_dcache_line_size(void) {
-    TODO();
-    return 0;
+    return loongarch64_dcache_size;
 }
 
 static inline uint32_t arch_icache_line_size(void) {
-    TODO();
-    return 0;
+    return loongarch64_icache_size;
 }
 
 static inline void arch_trace_process_create(uint64_t pid, paddr_t tt_phys) {

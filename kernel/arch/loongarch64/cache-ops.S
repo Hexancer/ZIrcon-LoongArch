@@ -14,28 +14,29 @@
 
     /* void arch_flush_cache_range(addr_t start, size_t len); */
 FUNCTION(arch_clean_cache_range)
-    break 0
+    // TODO: On qemu we don't need to flush cache,
+    //       implement this if using real boards
 END_FUNCTION(arch_clean_cache_range)
 
     /* void arch_flush_invalidate_cache_range(addr_t start, size_t len); */
 FUNCTION(arch_clean_invalidate_cache_range)
-    break 0
+    // TODO
 END_FUNCTION(arch_clean_invalidate_cache_range)
 
     /* void arch_invalidate_cache_range(addr_t start, size_t len); */
 FUNCTION(arch_invalidate_cache_range)
-    break 0
+    // TODO
 END_FUNCTION(arch_invalidate_cache_range)
 
     /* void arch_sync_cache_range(addr_t start, size_t len); */
 FUNCTION(arch_sync_cache_range)
-    break 0
+    // TODO
 END_FUNCTION(arch_sync_cache_range)
 
 /* void arch_invalidate_cache_all()
  *      should only be used early in boot, prior to enabling mmu/cache
  */
 FUNCTION(arch_invalidate_cache_all)
-    break 0
+    // TODO
 END_FUNCTION(arch_invalidate_cache_all)
 
