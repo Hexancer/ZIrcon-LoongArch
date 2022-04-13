@@ -16,6 +16,16 @@
 // ignore it if this code were in .text.boot, so don't put it there).
 .text
 FUNCTION(_start)
+    // clear bss segment
+    la.pcrel    $t0, __bss_start            // zero out [__bss_start, _end)
+    la.pcrel    $t1, _end
+    beq         $t0, $t1,  clear_bss_done   //.bss 段大小为 0 则跳转 clear_bss_done
+clear_bss_loop:
+    st.d        $r0, $t0, 0
+    addi.d      $t0, $t0, 8
+    bne         $t0, $t1,  clear_bss_loop
+clear_bss_done:
+
     // save boot parameters ($a0, $a1)
     la.pcrel $t0, zbi_paddr
     st.d     $a0, $t0, 0
@@ -27,16 +37,6 @@ FUNCTION(_start)
     la.pcrel $t0, __code_start
     la.pcrel $t1, kernel_base_phys
     st.d     $t0, $t1, 0
-
-    // clear bss segment
-    la.pcrel    $t0, __bss_start            // zero out [__bss_start, _end)
-    la.pcrel    $t1, _end
-    beq         $t0, $t1,  clear_bss_done   //.bss 段大小为 0 则跳转 clear_bss_done
-clear_bss_loop:
-    st.d        $r0, $t0, 0
-    addi.d      $t0, $t0, 8
-    bne         $t0, $t1,  clear_bss_loop
-clear_bss_done:
 
     // setup stack pointer
     la.pcrel $sp, boot_cpu_kstack_end
