@@ -116,6 +116,10 @@ zx_ticks_t current_ticks(void) {
     return read_ct();
 }
 
+zx_ticks_t ticks_per_second(void) {
+    return u64_mul_u32_fp32_64(1000 * 1000 * 1000, cntpct_per_ns);
+}
+
 static uint64_t abs_int64(int64_t a) {
     return (a > 0) ? a : -a;
 }
