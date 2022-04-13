@@ -411,9 +411,7 @@ zx_status_t display_get_info(struct display_info* info) {
 }
 
 bool platform_serial_enabled(void) {
-    TODO();
-//  return !uart_disabled && uart_present();
-    return true;
+    return !uart_disabled && uart_present();
 }
 
 bool platform_early_console_enabled() {

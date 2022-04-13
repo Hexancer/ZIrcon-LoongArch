@@ -2,6 +2,7 @@
 #include <arch/mp.h>
 #include <arch/ops.h>
 #include <assert.h>
+#include <dev/interrupt.h>
 #include <err.h>
 #include <kernel/event.h>
 #include <platform.h>
@@ -43,4 +44,8 @@ void loongarch64_init_percpu_early(void) {
     uint cpu = arch_curr_cpu_num();
 
     loongarch64_write_percpu_ptr(&loongarch64_percpu_array[cpu]);
+}
+
+void arch_mp_init_percpu(void) {
+    interrupt_init_percpu();
 }

@@ -29,6 +29,8 @@ typedef struct {
     // loongarch64_cache_desc_t level_inst_type[7];
 } loongarch64_cache_info_t;
 
+void platform_irq(loongarch64_iframe_t* frame);
+
 struct arch_exception_context {
     struct iframe_t* frame;
 };

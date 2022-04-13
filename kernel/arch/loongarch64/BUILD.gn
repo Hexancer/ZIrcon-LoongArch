@@ -82,6 +82,8 @@ if (current_toolchain == default_toolchain) {
       "user_copy_c.cc"
     ]
     deps = [
+      "$zx/kernel/dev/interrupt",
+      "$zx/kernel/lib/counters",
       "$zx/kernel/object",
       "$zx/system/ulib/bitmap",
     ]
