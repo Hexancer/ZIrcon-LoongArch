@@ -51,16 +51,17 @@ static inline uint32_t arch_icache_line_size(void) {
     return loongarch64_icache_size;
 }
 
+// Log architecture-specific data for process creation.
+// This can only be called after the process has been created and before
+// it is running. Alas we can't use zx_koid_t here as the arch layer is at a
+// lower level than zircon.
 static inline void arch_trace_process_create(uint64_t pid, paddr_t tt_phys) {
-    TODO();
+    // nothing to do
 }
 
-static inline bool arch_cas_16_acquire(volatile unsigned __int128* dst,
-                                       volatile unsigned __int128* expected,
-                                       unsigned __int128 desired) {
-    TODO();
-    return true;
-}
+bool arch_cas_16_acquire(volatile unsigned __int128* dst,
+                         volatile unsigned __int128* expected,
+                         unsigned __int128 desired);
 
 __END_CDECLS
 #endif

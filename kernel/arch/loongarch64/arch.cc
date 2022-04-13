@@ -100,3 +100,24 @@ __NO_RETURN int arch_idle_thread_routine(void*) {
     for (;;)
         __asm__ volatile("idle 0");
 }
+
+struct _arch_cas_16 {};
+
+bool arch_cas_16_acquire(volatile unsigned __int128* dst,
+                         volatile unsigned __int128* expected,
+                         unsigned __int128 desired) {
+
+    static DECLARE_MUTEX(_arch_cas_16) lock_;
+
+    // TODO: We assume that all 16B CAS op will use this routine,
+    //       so add a mutex here should suffice
+    Guard<Mutex> _cas{&lock_};
+
+    unsigned __int128 temp = *dst;
+    if (temp != *expected) {
+        return false;
+    } else {
+        *dst = desired;
+        return true;
+    }
+}

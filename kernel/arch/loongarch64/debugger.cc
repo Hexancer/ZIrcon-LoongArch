@@ -11,13 +11,11 @@
 #include <zircon/types.h>
 
 uint8_t arch_get_hw_breakpoint_count() {
-//  return loongarch64_hw_breakpoint_count();
-  TODO();
-  return 0;
+    // TODO: return loongarch64_hw_breakpoint_count();
+    return 0;
 }
 
 uint8_t arch_get_hw_watchpoint_count() {
-//  return arm64_hw_watchpoint_count();
-  TODO();
-  return 0;
+    // TODO: return arm64_hw_watchpoint_count();
+    return 0;
 }
