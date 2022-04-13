@@ -98,8 +98,13 @@ typedef struct {
     uint64_t hdmitx_phys;
 } dcfg_amlogic_hdcp_driver_t;
 
+// for KDRV_LOONGARCH_GENERIC_TIMER
 typedef struct {
     uint32_t irq_phys;
 } dcfg_loongarch_generic_timer_driver_t;
+
+// for KDRV_LOONGARCH_EXTIOI_PIC
+typedef struct {
+} dcfg_loongarch_extioi_pic_driver_t;
 
 #endif  // SYSROOT_ZIRCON_BOOT_DRIVER_CONFIG_H_

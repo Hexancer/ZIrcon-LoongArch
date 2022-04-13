@@ -28,28 +28,8 @@ static const dcfg_simple_t uart_driver = {
     .irq = 66, // TODO: irq number
 };
 
-// static const dcfg_arm_gicv3_driver_t gicv3_driver = {
-//     .mmio_phys = 0x08000000,
-//     .gicd_offset = 0x00000,
-//     .gicr_offset = 0xa0000,
-//     .gicr_stride = 0x20000,
-//     .ipi_base = 12,
-//     .optional = true,
-// };
-
-// static const dcfg_arm_gicv2_driver_t gicv2_driver = {
-//     .mmio_phys = 0x08000000,
-//     .msi_frame_phys = 0x08020000,
-//     .gicd_offset = 0x00000,
-//     .gicc_offset = 0x10000,
-//     .ipi_base = 12,
-//     .optional = true,
-//     .use_msi = true,
-// };
-
-// static const dcfg_arm_psci_driver_t psci_driver = {
-//     .use_hvc = true,
-// };
+static const dcfg_loongarch_extioi_pic_driver_t extioi_pic_driver = {
+};
 
 static const dcfg_loongarch_generic_timer_driver_t timer_driver = {
     .irq_phys = 27, // TODO: irq number
@@ -99,22 +79,15 @@ static void append_board_boot_item(zbi_header_t* bootdata) {
    append_boot_item(bootdata, ZBI_TYPE_KERNEL_DRIVER, KDRV_DW8250_UART, &uart_driver,
                     sizeof(uart_driver));
 
-//    // append the gic information from the specific gic version we detected from the
-//    // device tree.
-//    if (saved_gic_version == 2) {
-//        append_boot_item(bootdata, ZBI_TYPE_KERNEL_DRIVER, KDRV_ARM_GIC_V2, &gicv2_driver,
-//                         sizeof(gicv2_driver));
-//    } else if (saved_gic_version >= 3) {
-//        append_boot_item(bootdata, ZBI_TYPE_KERNEL_DRIVER, KDRV_ARM_GIC_V3, &gicv3_driver,
-//                         sizeof(gicv3_driver));
-//    } else {
-//        fail("failed to detect gic version from device tree\n");
-//    }
+   // append the gic information from the specific gic version we detected from the
+   // device tree.
+    append_boot_item(bootdata, ZBI_TYPE_KERNEL_DRIVER, KDRV_LOONGARCH_EXTIOI_PIC, &extioi_pic_driver,
+                    sizeof(extioi_pic_driver));
 
 //    append_boot_item(bootdata, ZBI_TYPE_KERNEL_DRIVER, KDRV_ARM_PSCI, &psci_driver,
 //                     sizeof(psci_driver));
-//    append_boot_item(bootdata, ZBI_TYPE_KERNEL_DRIVER, KDRV_ARM_GENERIC_TIMER, &timer_driver,
-//                     sizeof(timer_driver));
+    append_boot_item(bootdata, ZBI_TYPE_KERNEL_DRIVER, KDRV_LOONGARCH_GENERIC_TIMER, &timer_driver,
+                    sizeof(timer_driver));
 
    // add platform ID
    append_boot_item(bootdata, ZBI_TYPE_PLATFORM_ID, 0, &platform_id, sizeof(platform_id));
