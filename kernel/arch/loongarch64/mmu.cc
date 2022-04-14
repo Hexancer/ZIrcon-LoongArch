@@ -740,46 +740,45 @@ void LoongarchArchVmAspace::MmuParamsFromFlags(uint mmu_flags,
 
 zx_status_t LoongarchArchVmAspace::MapContiguous(vaddr_t vaddr, paddr_t paddr, size_t count,
                                            uint mmu_flags, size_t* mapped) {
-    TODO();
-//     canary_.Assert();
-//     LTRACEF("vaddr %#" PRIxPTR " paddr %#" PRIxPTR " count %zu flags %#x\n",
-//             vaddr, paddr, count, mmu_flags);
+    canary_.Assert();
+    LTRACEF("vaddr %#" PRIxPTR " paddr %#" PRIxPTR " count %zu flags %#x\n",
+            vaddr, paddr, count, mmu_flags);
 
-//     DEBUG_ASSERT(tt_virt_);
+    DEBUG_ASSERT(tt_virt_);
 
-//     DEBUG_ASSERT(IsValidVaddr(vaddr));
-//     if (!IsValidVaddr(vaddr))
-//         return ZX_ERR_OUT_OF_RANGE;
+    DEBUG_ASSERT(IsValidVaddr(vaddr));
+    if (!IsValidVaddr(vaddr))
+        return ZX_ERR_OUT_OF_RANGE;
 
-//     if (!(mmu_flags & ARCH_MMU_FLAG_PERM_READ))
-//         return ZX_ERR_INVALID_ARGS;
+    if (!(mmu_flags & ARCH_MMU_FLAG_PERM_READ))
+        return ZX_ERR_INVALID_ARGS;
 
-//     // paddr and vaddr must be aligned.
-//     DEBUG_ASSERT(IS_PAGE_ALIGNED(vaddr));
-//     DEBUG_ASSERT(IS_PAGE_ALIGNED(paddr));
-//     if (!IS_PAGE_ALIGNED(vaddr) || !IS_PAGE_ALIGNED(paddr))
-//         return ZX_ERR_INVALID_ARGS;
+    // paddr and vaddr must be aligned.
+    DEBUG_ASSERT(IS_PAGE_ALIGNED(vaddr));
+    DEBUG_ASSERT(IS_PAGE_ALIGNED(paddr));
+    if (!IS_PAGE_ALIGNED(vaddr) || !IS_PAGE_ALIGNED(paddr))
+        return ZX_ERR_INVALID_ARGS;
 
-//     if (count == 0)
-//         return ZX_OK;
+    if (count == 0)
+        return ZX_OK;
 
     ssize_t ret = 0;
-//     {
-//         Guard<Mutex> a{&lock_};
-//         pte_t attrs;
-//         vaddr_t vaddr_base;
-//         uint top_size_shift, top_index_shift, page_size_shift;
-//         MmuParamsFromFlags(mmu_flags, &attrs, &vaddr_base, &top_size_shift, &top_index_shift,
-//                            &page_size_shift);
-//         ret = MapPages(vaddr, paddr, count * PAGE_SIZE,
-//                        attrs, vaddr_base, top_size_shift,
-//                        top_index_shift, page_size_shift);
-//     }
+    {
+        Guard<Mutex> a{&lock_};
+        pte_t attrs;
+        vaddr_t vaddr_base;
+        uint top_size_shift, top_index_shift, page_size_shift;
+        MmuParamsFromFlags(mmu_flags, &attrs, &vaddr_base, &top_size_shift, &top_index_shift,
+                           &page_size_shift);
+        ret = MapPages(vaddr, paddr, count * PAGE_SIZE,
+                       attrs, vaddr_base, top_size_shift,
+                       top_index_shift, page_size_shift);
+    }
 
-//     if (mapped) {
-//         *mapped = (ret > 0) ? (ret / PAGE_SIZE) : 0u;
-//         DEBUG_ASSERT(*mapped <= count);
-//     }
+    if (mapped) {
+        *mapped = (ret > 0) ? (ret / PAGE_SIZE) : 0u;
+        DEBUG_ASSERT(*mapped <= count);
+    }
 
     return (ret < 0) ? (zx_status_t)ret : ZX_OK;
 }
