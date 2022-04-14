@@ -80,10 +80,9 @@ class VDsoDynSymWindow {
 public:
     DISALLOW_COPY_ASSIGN_AND_MOVE(VDsoDynSymWindow);
 
-    // TODO: 4 missing calls (should be 335, got 331)
-    //static_assert(sizeof(VDsoDynSym) ==
-    //                  VDSO_DATA_END_dynsym - VDSO_DATA_START_dynsym,
-    //              "either VDsoDynsym or gen-rodso-code.sh is suspect");
+    static_assert(sizeof(VDsoDynSym) ==
+                     VDSO_DATA_END_dynsym - VDSO_DATA_START_dynsym,
+                 "either VDsoDynsym or gen-rodso-code.sh is suspect");
 
     explicit VDsoDynSymWindow(fbl::RefPtr<VmObject> vmo)
         : window_("vDSO .dynsym", ktl::move(vmo), VDSO_DATA_START_dynsym) {}

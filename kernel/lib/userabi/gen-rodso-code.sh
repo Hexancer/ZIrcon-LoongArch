@@ -71,7 +71,7 @@ find_code_symbols() {
 }
 
 grok_dynsym_slots() {
-  local symno=0
+  local symno=$2
   local symbol rest
   while read symbol rest; do
     symno=$((symno+1))
@@ -84,7 +84,8 @@ grok_dynsym_slots() {
 }
 
 find_dynsym_slots() {
-  "$NM" -P -D -p "$2" | grok_dynsym_slots "$1"
+  local symno=$($READELF -s $2 | tail -n +5 | sed '/FUNC/,$d' | wc -l) 
+  "$NM" -P -D -p "$2" | grok_dynsym_slots "$1" $symno
 }
 
 SEGMENTS_HAVE_DYNSYM=22
