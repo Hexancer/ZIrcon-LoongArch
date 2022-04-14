@@ -12,7 +12,7 @@
 __BEGIN_CDECLS
 
 static inline void arch_spinloop_pause(void) {
-    TODO();
+    __asm__ volatile("nop" ::: "memory");
 }
 
 #define __sync()	__asm__ __volatile__("dbar 0" : : : "memory")
