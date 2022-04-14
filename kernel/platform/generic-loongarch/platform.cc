@@ -58,6 +58,16 @@ static size_t mexec_zbi_length = 0;
 
 static constexpr bool kProcessZbiEarly = true;
 
+void* platform_get_ramdisk(size_t* size) {
+    if (ramdisk_base) {
+        *size = ramdisk_size;
+        return ramdisk_base;
+    } else {
+        *size = 0;
+        return nullptr;
+    }
+}
+
 static inline bool is_zbi_container(void* addr) {
     DEBUG_ASSERT(addr);
 
@@ -395,7 +405,6 @@ int platform_dgetc(char* c, bool wait) {
 size_t platform_recover_crashlog(size_t len, void* cookie,
                                  void (*func)(const void* data, size_t, size_t len, void* cookie)) {
 
-    TODO();
     return 0;
 }
 
