@@ -70,6 +70,10 @@ static inline void write_tval(uint32_t val) {
     TODO();
 }
 
+static inline void write_clr() {
+    csr_writeq(CSR_TINTCLR_TI, LOONGARCH_CSR_TINTCLR);
+}
+
 static uint64_t read_ct(void) {
     uint64_t cntpct = drdtime();
     LTRACEF_LEVEL(3, "cntpct: 0x%016" PRIx64 ", %" PRIu64 "\n",
@@ -78,10 +82,10 @@ static uint64_t read_ct(void) {
 }
 
 static interrupt_eoi platform_tick(void* arg) {
-    TODO();
-    // write_ctl(0);
-    // timer_tick(current_time());
-    // return IRQ_EOI_DEACTIVATE;
+    write_clr();
+    write_ctl(0);
+    timer_tick(current_time());
+    return IRQ_EOI_DEACTIVATE;
 }
 
 zx_status_t platform_set_oneshot_timer(zx_time_t deadline) {
@@ -215,10 +219,14 @@ static void loongarch_generic_timer_init(uint32_t freq_override) {
 
 
 static void loongarch_generic_timer_pdev_init(const void* driver_data, uint32_t length) {
-    // ASSERT(length >= sizeof(dcfg_loongarch_generic_timer_driver_t));
-    // auto driver = static_cast<const dcfg_loongarch_generic_timer_driver_t*>(driver_data);
+    ASSERT(length >= sizeof(dcfg_loongarch_generic_timer_driver_t));
+    auto driver = static_cast<const dcfg_loongarch_generic_timer_driver_t*>(driver_data);
+    uint32_t irq_phys = driver->irq_phys;
 
-    // TODO: setup irq
+    if (irq_phys) {
+        timer_irq = irq_phys;
+    }
+    smp_mb();
 
     loongarch_generic_timer_init(0);
 }

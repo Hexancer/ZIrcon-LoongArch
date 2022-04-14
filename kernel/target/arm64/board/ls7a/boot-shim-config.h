@@ -32,7 +32,7 @@ static const dcfg_loongarch_extioi_pic_driver_t extioi_pic_driver = {
 };
 
 static const dcfg_loongarch_generic_timer_driver_t timer_driver = {
-    .irq_phys = 27, // TODO: irq number
+    .irq_phys = 11,
 };
 
 static const zbi_platform_id_t platform_id = {

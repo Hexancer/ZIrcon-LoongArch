@@ -1,5 +1,6 @@
 #include <arch/loongarch64/debug.h>
 #include <dev/interrupt.h>
+#include <lib/ktrace.h>
 #include <lk/init.h>
 #include <pdev/driver.h>
 #include <pdev/interrupt.h>
@@ -8,9 +9,10 @@
 
 #define LOCAL_TRACE 1
 
+#define LOONGARCH_MAX_INTERRUPT 13
+
 static bool pic_is_valid_interrupt(unsigned int vector, uint32_t flags) {
-    TODO();
-    return false;
+    return vector < LOONGARCH_MAX_INTERRUPT;
 }
 
 static uint32_t pic_get_base_vector() {
@@ -28,12 +30,12 @@ static void pic_init_percpu_early() {
 }
 
 static zx_status_t pic_mask_interrupt(unsigned int vector) {
-    TODO();
+    csr_xchgl(0, 1 << vector, LOONGARCH_CSR_ECFG);
     return ZX_OK;
 }
 
 static zx_status_t pic_unmask_interrupt(unsigned int vector) {
-    TODO();
+    csr_xchgl(1 << vector, 1 << vector, LOONGARCH_CSR_ECFG);
     return ZX_OK;
 }
 
@@ -58,7 +60,51 @@ static unsigned int pic_remap_interrupt(unsigned int vector) {
 
 // called from assembly
 static void pic_handle_irq(iframe_short_t* frame) {
-    TODO();
+    // // get the current vector
+    // uint32_t iar = gic_read_iar();
+    unsigned vector = 0;
+
+    if (frame->csr[LOONGARCH_CSR_ESTAT] & CSR_ESTAT_IS_TIMER) {
+        vector = CSR_ESTAT_IS_TIMER_SHIFT; // Timer interrupt
+    } else if (frame->csr[LOONGARCH_CSR_ESTAT] & CSR_ESTAT_IS_IPI) {
+        vector = CSR_ESTAT_IS_IPI_SHIFT;// Inter-processor interrupt
+    }
+
+    LTRACEF_LEVEL(2, "vector %u\n", vector);
+
+    // if (vector >= 0x3fe) {
+    //     // spurious
+    //     // TODO check this
+    //     return;
+    // }
+
+    // // tracking external hardware irqs in this variable
+    // if (vector >= 32) {
+    //     CPU_STATS_INC(interrupts);
+    // }
+
+    uint cpu = arch_curr_cpu_num();
+
+    ktrace_tiny(TAG_IRQ_ENTER, (vector << 8) | cpu);
+
+    // LTRACEF_LEVEL(2, "iar 0x%x cpu %u currthread %p vector %u pc %#" PRIxPTR "\n",
+    //               iar, cpu, get_current_thread(), vector, (uintptr_t)IFRAME_PC(frame));
+
+    // deliver the interrupt
+    struct int_handler_struct* handler = pdev_get_int_handler(vector);
+    interrupt_eoi eoi = IRQ_EOI_DEACTIVATE;
+    if (handler->handler) {
+        eoi = handler->handler(handler->arg);
+    }
+    // TODO: deactivate interrupt
+    // gic_write_eoir(vector);
+    if (eoi == IRQ_EOI_DEACTIVATE) {
+    //     gic_write_dir(vector);
+    }
+
+    LTRACEF_LEVEL(2, "cpu %u exit\n", cpu);
+
+    ktrace_tiny(TAG_IRQ_EXIT, (vector << 8) | cpu);
 }
 
 static void pic_handle_fiq(iframe_short_t* frame) {
@@ -72,7 +118,11 @@ static zx_status_t pic_send_ipi(cpu_mask_t target, mp_ipi_t ipi) {
 
 static void pic_init_percpu() {
     // TODO: support SMP & IPI
-    TODO();
+    // mp_set_curr_cpu_online(true);
+    // unmask_interrupt(MP_IPI_GENERIC + ipi_base);
+    // unmask_interrupt(MP_IPI_RESCHEDULE + ipi_base);
+    // unmask_interrupt(MP_IPI_INTERRUPT + ipi_base);
+    // unmask_interrupt(MP_IPI_HALT + ipi_base);
 }
 
 static void pic_shutdown() {
