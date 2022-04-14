@@ -12,7 +12,11 @@
 #include <kernel/interrupt.h>
 #include <kernel/thread.h>
 
+#include <trace.h>
+#include <vm/fault.h>
+
 #include <lib/counters.h>
+#include <lib/crashlog.h>
 
 #include <zircon/syscalls/exception.h>
 #include <zircon/types.h>
@@ -42,7 +46,9 @@ static void dump_iframe(const loongarch64_iframe_t* iframe) {
 
     #define ERR(code, msg) case (code): printf(msg "\n"); break;
 
-    switch ((iframe->csr[LOONGARCH_CSR_ESTAT] >> 16) & 0x3f)
+    int ecode = (ESTAT & CSR_ESTAT_EXC) >> CSR_ESTAT_EXC_SHIFT;
+
+    switch (ecode)
     {
         ERR(0x0, "Interrput");
         ERR(0x1, "Load page invalid");
@@ -74,23 +80,91 @@ KCOUNTER(exceptions_unhandled, "exceptions.unhandled")
 KCOUNTER(exceptions_user, "exceptions.user")
 KCOUNTER(exceptions_unknown, "exceptions.unknown")
 
-extern "C" void loongarch64_handle_exception(loongarch64_iframe_t *iframe) {
-    DEBUG(1, "Hello from exception handler");
+__NO_RETURN static void exception_die(loongarch64_iframe_t* iframe) {
+    platform_panic_start();
 
+    /* fatal exception, die here */
     dump_iframe(iframe);
+    crashlog.iframe = iframe;
 
-    // TODO: if interrupt, run irq
-        
-    while (1) {}
+    platform_halt(HALT_ACTION_HALT, HALT_REASON_SW_PANIC);
+}
+
+
+extern "C" void loongarch64_handle_exception(loongarch64_iframe_t *iframe) {
+    int ecode = (ESTAT & CSR_ESTAT_EXC) >> CSR_ESTAT_EXC_SHIFT;
+
+    if (ecode == CSR_ESTAT_EXC_INT) {
+        loongarch64_handle_irq(iframe);
+    } else if (CSR_ESTAT_EXC_PIL <= ecode && ecode <= CSR_ESTAT_EXC_PPI) {
+        loongarch64_handle_pf(iframe);
+    } else {
+        DEBUG(1, "Hello from exception handler");
+        dump_iframe(iframe);
+        while (1) {}
+    }
 }
 
 static inline void loongarch64_restore_percpu_pointer() {
     loongarch64_write_percpu_ptr(get_current_thread()->arch.current_percpu_ptr);
 }
 
+extern "C" void loongarch64_handle_pf(iframe_t* iframe) {
+    int ecode = (ESTAT & CSR_ESTAT_EXC) >> CSR_ESTAT_EXC_SHIFT;
+
+    uint64_t badv = BADV;
+    bool is_user = (PRMD & PLV_MASK) == PLV_USER;
+
+    uint pf_flags = 0;
+    if (ecode == CSR_ESTAT_EXC_PIS || ecode == CSR_ESTAT_EXC_PME) {
+        pf_flags |= VMM_PF_FLAG_WRITE;
+    }
+    if (is_user) {
+        pf_flags |= VMM_PF_FLAG_USER;
+    }
+    if (ecode == CSR_ESTAT_EXC_PIF || ecode == CSR_ESTAT_EXC_PNX) {
+        pf_flags |= VMM_PF_FLAG_INSTRUCTION;
+    }
+    if (ecode == CSR_ESTAT_EXC_PIL || ecode == CSR_ESTAT_EXC_PIS || ecode == CSR_ESTAT_EXC_PIF) {
+        pf_flags |= VMM_PF_FLAG_NOT_PRESENT;
+    }
+
+    LTRACEF("page fault: PC at %#" PRIx64", is_user %d, BADV %" PRIx64 "\n", EPC, is_user, badv);
+
+    arch_enable_ints();
+    kcounter_add(exceptions_page, 1);
+    CPU_STATS_INC(page_faults);
+    zx_status_t err = vmm_page_fault_handler(badv, pf_flags);
+    arch_disable_ints();
+    if (err >= 0)
+        return;
+
+    // If this is from user space, let the user exception handler
+    // get a shot at it.
+    if (is_user) {
+        TODO();
+        // kcounter_add(exceptions_user, 1);
+        // if (try_dispatch_user_data_fault_exception(ZX_EXCP_FATAL_PAGE_FAULT, iframe, esr, far) == ZX_OK)
+        //     return;
+    }
+
+    printf("page fault: PC at %#" PRIx64 ", is_user %d, BADV %" PRIx64 "\n", EPC, is_user, badv);
+    exception_die(iframe);
+}
+
 /* called from assembly */
-extern "C" uint32_t loongarch64_irq(iframe_t* iframe) {
-    if ((PRMD & PLV_MASK) == PLV_USER) {
+extern "C" uint32_t loongarch64_handle_irq(iframe_t* iframe) {
+    DEBUG(1, "Hello from irq handler");
+    for (int i = 2; i <= 12; ++i) {
+        if (ESTAT & (1 << i)) {
+            DEBUG(1, "irq %d set", i);
+        }
+    }
+
+    bool is_user = (PRMD & PLV_MASK) == PLV_USER;
+    bool is_kernel = (PRMD & PLV_MASK) == PLV_KERN;
+
+    if (is_user) {
         // if we came from a lower level, restore the per cpu pointer
         loongarch64_restore_percpu_pointer();
     }
@@ -104,7 +178,7 @@ extern "C" uint32_t loongarch64_irq(iframe_t* iframe) {
     bool do_preempt = int_handler_finish(&state);
 
     /* if we came from user space, check to see if we have any signals to handle */
-    if (unlikely((PRMD & PLV_MASK) == PLV_USER)) {
+    if (unlikely(is_user)) {
         uint32_t exit_flags = 0;
         if (thread_is_signaled(get_current_thread()))
             exit_flags |= LOONGARCH64_IRQ_EXIT_THREAD_SIGNALED;
@@ -118,7 +192,7 @@ extern "C" uint32_t loongarch64_irq(iframe_t* iframe) {
         thread_preempt();
 
     /* if we're returning to kernel space, make sure we restore the correct x18 */
-    if ((PRMD & PLV_MASK) == PLV_KERN) {
+    if (is_kernel) {
         iframe->gpr[21] = (uint64_t)loongarch64_read_percpu_ptr();
     }
 

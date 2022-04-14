@@ -16,6 +16,10 @@
 // ignore it if this code were in .text.boot, so don't put it there).
 .text
 FUNCTION(_start)
+    // disable interrupt
+    li.d        $t0, CSR_CRMD_IE
+    csrxchg     $r0, $t0, LOONGARCH_CSR_CRMD 
+
     // clear bss segment
     la.pcrel    $t0, __bss_start            // zero out [__bss_start, _end)
     la.pcrel    $t1, _end

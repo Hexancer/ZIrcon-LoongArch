@@ -86,7 +86,30 @@
 #define LOONGARCH_CSR_PRMD      1
 #define LOONGARCH_CSR_EUEN      2
 #define LOONGARCH_CSR_ECFG      4
-#define LOONGARCH_CSR_ESTAT     5
+
+#define LOONGARCH_CSR_ESTAT         0x5    /* Exception status */
+#define  CSR_ESTAT_ESUBCODE_SHIFT   22
+#define  CSR_ESTAT_ESUBCODE_WIDTH   9
+#define  CSR_ESTAT_ESUBCODE         (_ULCAST_(0x1ff) << CSR_ESTAT_ESUBCODE_SHIFT)
+#define  CSR_ESTAT_EXC_SHIFT        16
+#define  CSR_ESTAT_EXC_WIDTH        6
+#define  CSR_ESTAT_EXC              (_ULCAST_(0x3f) << CSR_ESTAT_EXC_SHIFT)
+#define   CSR_ESTAT_EXC_INT         0
+#define   CSR_ESTAT_EXC_PIL         1
+#define   CSR_ESTAT_EXC_PIS         2
+#define   CSR_ESTAT_EXC_PIF         3
+#define   CSR_ESTAT_EXC_PME         4
+#define   CSR_ESTAT_EXC_PNR         5
+#define   CSR_ESTAT_EXC_PNX         6
+#define   CSR_ESTAT_EXC_PPI         7
+#define  CSR_ESTAT_IS_SHIFT         0
+#define  CSR_ESTAT_IS_WIDTH         15
+#define  CSR_ESTAT_IS               (_ULCAST_(0x7fff) << CSR_ESTAT_IS_SHIFT)
+#define  CSR_ESTAT_IS_TIMER_SHIFT   (11)
+#define  CSR_ESTAT_IS_TIMER         (_ULCAST_(1) << CSR_ESTAT_IS_TIMER_SHIFT)
+#define  CSR_ESTAT_IS_IPI_SHIFT     (12)
+#define  CSR_ESTAT_IS_IPI           (_ULCAST_(1) << CSR_ESTAT_IS_IPI_SHIFT)
+
 #define LOONGARCH_CSR_EPC       6
 #define LOONGARCH_CSR_BADV      7
 #define LOONGARCH_CSR_BADINST   8

@@ -84,6 +84,7 @@ if (current_toolchain == default_toolchain) {
     deps = [
       "$zx/kernel/dev/interrupt",
       "$zx/kernel/lib/counters",
+      "$zx/kernel/lib/crashlog",
       "$zx/kernel/object",
       "$zx/system/ulib/bitmap",
     ]
