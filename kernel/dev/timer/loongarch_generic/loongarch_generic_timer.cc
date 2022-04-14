@@ -100,7 +100,10 @@ zx_status_t platform_set_oneshot_timer(zx_time_t deadline) {
     const uint64_t cntpct_now = current_ticks();
     const uint64_t cntpct_deadline = zx_time_to_cntpct(deadline) + 1;
 
-    uint64_t cntpct_delta = cntpct_deadline - cntpct_now;
+    uint64_t cntpct_delta = 0;
+    if (cntpct_deadline > cntpct_now) {
+        cntpct_delta = cntpct_deadline - cntpct_now;
+    }
 
     write_cval(cntpct_delta);
     write_ctl(CSR_TCFG_EN);
