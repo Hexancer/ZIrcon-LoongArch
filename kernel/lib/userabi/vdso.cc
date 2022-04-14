@@ -149,13 +149,13 @@ public:
             code[i] = 0xd4200020; // 'brk #1' (what __builtin_trap() emits)
 
 #elif ARCH_LOONGARCH64
-        TODO();
+
         // Fixed-size instructions.
         ASSERT(address % 4 == 0);
         ASSERT(size % 4 == 0);
         uint32_t* code = reinterpret_cast<uint32_t*>(&Code()[address]);
         for (size_t i = 0; i < size / 4; ++i)
-            code[i] = 0x002a0000; // TODO: is this 'break' ?
+            code[i] = 0x002a0000; // 'break 0' (what __builtin_trap() emits)
 
 #else
 #error what architecture?
