@@ -284,6 +284,7 @@
 #define S7    $r30
 #define S8    $r31 /* callee saved */
 
+#define ZERO_NUM   0
 #define RA_NUM     1
 #define GP_NUM     2
 #define SP_NUM     3

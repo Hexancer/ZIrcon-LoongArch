@@ -20,6 +20,7 @@ FUNCTION(entry_exception_handler)
     and     SP, SP, T0
     addi.d  SP, SP,  -((CSR_NUM + BASE_NUM + FP_BASE_NUM)  * RSIZE)
 
+    st.d   ZERO, SP, ZERO_NUM * RSIZE
     st.d   RA, SP, RA_NUM * RSIZE
     st.d   GP, SP, GP_NUM * RSIZE
     st.d   A0, SP, A0_NUM * RSIZE
