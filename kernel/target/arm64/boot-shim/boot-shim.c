@@ -160,6 +160,7 @@ static int prop_callback(const char *name, uint8_t *data, uint32_t size, void *c
 #ifdef __loongarch64
 static uintptr_t loongarch_initrd_start = 0;
 static size_t loongarch_initrd_size = 0;
+static char * loongarch_cmdline = NULL;
 
 // we cannot use strtoll in stdlib
 static long long strtoll(char* ptr, char **endptr, int base) {
@@ -180,6 +181,7 @@ void loongarch_setup_initrd_start(int argc, char **argv) {
     // This will be called from assembly startup code before boot-shim
     const char *cmdline = argv[1];
     uart_puts(cmdline);
+    uart_puts("\n");
 
     // parse initrd start
     char *pinitrd = strstr(cmdline, "initrd=") + strlen("initrd=");
@@ -188,6 +190,10 @@ void loongarch_setup_initrd_start(int argc, char **argv) {
     // parse initrd size
     pinitrd++; // skip comma
     loongarch_initrd_size = strtoll(pinitrd, &pinitrd, 10);
+
+    // save remaining cmdline
+    pinitrd++; // skip space
+    loongarch_cmdline = pinitrd;
 
     // relocate initrd to phys mem, as PCI_MEM don't fully support writes
     uintptr_t pmem_base = mem_config[0].paddr;
@@ -233,6 +239,8 @@ static void* read_device_tree(void* device_tree, device_tree_context_t* ctx) {
 #ifdef __loongarch64
     // Here we need to override initrd_start, since LA bios pass it in $a1;
     ctx->initrd_start = loongarch_initrd_start;
+    ctx->cmdline = loongarch_cmdline;
+    ctx->cmdline_length = strlen(loongarch_cmdline);
 #endif
 
     // Use the device tree initrd as the ZBI.

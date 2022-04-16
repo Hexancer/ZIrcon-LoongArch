@@ -393,6 +393,9 @@ CMDLINE+="kernel.entropy-mixin=$(head -c 32 /dev/urandom | shasum -a 256 | awk '
 # Don't 'reboot' the emulator if the kernel crashes
 CMDLINE+="kernel.halt-on-panic=true "
 
+# Disable ASLR
+CMDLINE+="aslr.disable=true "
+
 # run qemu
 echo CMDLINE: $CMDLINE
 cd /
