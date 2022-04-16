@@ -29,6 +29,7 @@
 #include <vm/physmap.h>
 #include <vm/pmm.h>
 #include <vm/vm.h>
+#include <vm/vm_aspace.h>
 #include <zircon/types.h>
 
 #define LOCAL_TRACE 0
@@ -1009,33 +1010,46 @@ zx_status_t LoongarchArchVmAspace::Destroy() {
 }
 
 void LoongarchArchVmAspace::ContextSwitch(LoongarchArchVmAspace* old_aspace, LoongarchArchVmAspace* aspace) {
-    TODO();
-//     if (TRACE_CONTEXT_SWITCH)
-//         TRACEF("aspace %p\n", aspace);
+    if (TRACE_CONTEXT_SWITCH)
+        TRACEF("aspace %p\n", aspace);
 
-//     uint64_t tcr;
-//     uint64_t ttbr;
-//     if (aspace) {
-//         aspace->canary_.Assert();
-//         DEBUG_ASSERT((aspace->flags_ & (ARCH_ASPACE_FLAG_KERNEL | ARCH_ASPACE_FLAG_GUEST)) == 0);
+    LoongarchArchVmAspace *kernel_aspace = &VmAspace::kernel_aspace()->arch_aspace();
 
-//         tcr = MMU_TCR_FLAGS_USER;
-//         ttbr = ((uint64_t)aspace->asid_ << 48) | aspace->tt_phys_;
-//         __arm_wsr64("ttbr0_el1", ttbr);
-//         __isb(ARM_MB_SY);
+    if (aspace) {
+        // switch to specified user aspace
+        DEBUG_ASSERT(aspace != kernel_aspace);
+        aspace->canary_.Assert();
+        DEBUG_ASSERT((aspace->flags_ & (ARCH_ASPACE_FLAG_KERNEL | ARCH_ASPACE_FLAG_GUEST)) == 0);
 
-//         if (TRACE_CONTEXT_SWITCH)
-//             TRACEF("ttbr %#" PRIx64 ", tcr %#" PRIx64 "\n", ttbr, tcr);
+        uint16_t asid = aspace->asid_;
+        DEBUG_ASSERT(asid < MMU_LOONGARCH64_MAX_USER_ASID);
+        csr_writel(asid, LOONGARCH_CSR_ASID);
 
-//     } else {
-//         tcr = MMU_TCR_FLAGS_KERNEL;
+        paddr_t tt_phys = aspace->tt_phys_;
+        DEBUG_ASSERT(tt_phys != 0);
+        csr_writeq(tt_phys, LOONGARCH_CSR_PGDL);
 
-//         if (TRACE_CONTEXT_SWITCH)
-//             TRACEF("tcr %#" PRIx64 "\n", tcr);
-//     }
+        // TODO: do we need any sync here?
+        // __isb(ARM_MB_SY);
+        
+        if (TRACE_CONTEXT_SWITCH)
+            TRACEF("asid %#" PRIx64 ", tt_phys %#" PRIx64 "\n", asid, tt_phys);
 
-//     __arm_wsr64("tcr_el1", tcr);
-//     __isb(ARM_MB_SY);
+    } else {
+        // TODO: switch to kernel aspace?
+        uint16_t asid = kernel_aspace->asid_;
+        csr_writel(asid, LOONGARCH_CSR_ASID);
+
+        paddr_t tt_phys = kernel_aspace->tt_phys_;
+        DEBUG_ASSERT(tt_phys != 0);
+        csr_writeq(tt_phys, LOONGARCH_CSR_PGDH);
+
+        // if (TRACE_CONTEXT_SWITCH)
+        //     TRACEF("tcr %#" PRIx64 "\n", tcr);
+    }
+
+    // TODO: do we need any sync here?
+    // __isb(ARM_MB_SY);
 }
 
 void arch_zero_page(void* _ptr) {

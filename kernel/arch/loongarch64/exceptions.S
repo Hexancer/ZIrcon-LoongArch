@@ -13,9 +13,24 @@
 .align 12
 
 FUNCTION(entry_exception_handler)
+    // T0 swapped with KS0, SP swapped with KS1
+    
+    // Make sure we are always using kernel stack to create frames,
+    // which means in USER mode we need to read KSP from KS2
+    csrrd   T0, LOONGARCH_CSR_PRMD
+    andi    T0, T0, PLV_MASK
+    bnez    T0, exception_save_user 
 
+exception_save_kernel:
+    // Read back SP
     csrrd   SP, LOONGARCH_CSR_KS1
+    b       exception_save_done
 
+exception_save_user:
+    // Read KSP from KS2
+    csrrd   SP, LOONGARCH_CSR_KS2
+    
+exception_save_done:
     addi.d  T0, ZERO, -0x10
     and     SP, SP, T0
     addi.d  SP, SP,  -((CSR_NUM + BASE_NUM + FP_BASE_NUM)  * RSIZE)
@@ -219,7 +234,7 @@ FUNCTION(entry_exception_handler)
     ld.d    A5, SP, A5_NUM * RSIZE
     ld.d    A6, SP, A6_NUM * RSIZE
     ld.d    A7, SP, A7_NUM * RSIZE
-    ld.d    T0, SP, T0_NUM * RSIZE
+    // T0 restoration deferred since we need to use it
     ld.d    T1, SP, T1_NUM * RSIZE
     ld.d    T2, SP, T2_NUM * RSIZE
     ld.d    T3, SP, T3_NUM * RSIZE
@@ -240,7 +255,25 @@ FUNCTION(entry_exception_handler)
     ld.d    S7, SP, S7_NUM * RSIZE
     ld.d    S8, SP, S8_NUM * RSIZE
 
+    // Restore stack pointer
+    ld.d    T0, SP, (LOONGARCH_CSR_PRMD + BASE_NUM) * RSIZE
+    andi    T0, T0, PLV_MASK
+    bnez    T0, exception_restore_user 
+
+exception_restore_kernel:
+    // Nothing to do, load from iframe is enough
+    b       exception_restore_done
+
+exception_restore_user:
+    // save KSP in KS2
+    // deallocate iframe
+    addi.d  T0, SP, ((CSR_NUM + BASE_NUM + FP_BASE_NUM)  * RSIZE)
+    csrwr   T0, LOONGARCH_CSR_KS2
+    
+exception_restore_done:
+    ld.d    T0, SP, T0_NUM * RSIZE
     ld.d    SP, SP, SP_NUM * RSIZE
+
     ertn
 END_FUNCTION(entry_exception_handler)
 

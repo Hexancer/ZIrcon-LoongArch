@@ -2,6 +2,7 @@
 #include <arch/loongarch64/feature.h>
 #include <arch/mp.h>
 #include <debug.h>
+#include <inttypes.h>
 #include <kernel/cmdline.h>
 #include <kernel/thread.h>
 #include <lk/main.h>
@@ -19,39 +20,36 @@ static volatile int secondaries_to_init = 0;
 void arch_setup_uspace_iframe(iframe_t* iframe,
                               uintptr_t pc, uintptr_t sp,
                               uintptr_t arg1, uintptr_t arg2) {
-//  // Set up a default spsr to get into 64bit user space:
-//  //  - Zeroed NZCV.
-//  //  - No SS, no IL, no D.
-//  //  - All interrupts enabled.
-//  //  - Mode 0: EL0t.
-//  //
-//  // TODO: (hollande,travisg) Need to determine why some platforms throw an
-//  //         SError exception when first switching to uspace.
-//  uint32_t spsr = 1 << 8;  // Mask SError exceptions (currently unhandled).
-//
-//  iframe->r[0] = arg1;
-//  iframe->r[1] = arg2;
-//  iframe->usp = sp;
-//  iframe->elr = pc;
-//  iframe->spsr = spsr;
-//
-//  iframe->mdscr = MSDCR_EL1_INITIAL_VALUE;
-  TODO();
+    // Set up a default PRMD to get into 64bit user space:
+    //  - All interrupts enabled.
+    //  - User mode
+    uint32_t prmd = PLV_USER | CSR_CRMD_IE;
+
+    // A0 & A1
+    iframe->gpr[A0_NUM] = arg1;
+    iframe->gpr[A1_NUM] = arg2;
+    // SP
+    iframe->gpr[SP_NUM] = sp;
+    // ERA(EPC)
+    iframe->csr[LOONGARCH_CSR_EPC]= pc;
+    // PRMD
+    iframe->csr[LOONGARCH_CSR_PRMD] = prmd;
+
+    // TODO: debug register
 }
 
 void arch_enter_uspace(iframe_t* iframe) {
-//  thread_t* ct = get_current_thread();
-//
-//  LTRACEF("arm_uspace_entry(%#" PRIxPTR ", %#" PRIxPTR ", %#" PRIxPTR
-//  ", %#" PRIxPTR ", %#" PRIxPTR ", 0, %#" PRIxPTR ")\n",
-//      iframe->r[0], iframe->r[1], iframe->spsr, ct->stack.top,
-//      iframe->usp, iframe->elr);
-//
-//  arch_disable_ints();
-//
-//  loongarch64_uspace_entry(iframe, ct->stack.top);
-  TODO();
-  __UNREACHABLE;
+    thread_t *ct = get_current_thread();
+
+    LTRACEF("loongarch_uspace_entry(%#" PRIxPTR ", %#" PRIxPTR ", %#" PRIxPTR
+            ", %#" PRIxPTR ", %#" PRIxPTR ", 0, %#" PRIxPTR ")\n",
+            iframe->gpr[A0_NUM], iframe->gpr[A1_NUM], iframe->csr[LOONGARCH_CSR_PRMD], ct->stack.top,
+            iframe->gpr[SP_NUM], iframe->csr[LOONGARCH_CSR_EPC]);
+
+    arch_disable_ints();
+
+    loongarch64_uspace_entry(iframe, ct->stack.top);
+    __UNREACHABLE;
 }
 
 static void loongarch64_cpu_early_init() {

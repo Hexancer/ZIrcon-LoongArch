@@ -135,6 +135,7 @@ extern "C" void loongarch64_handle_pf(iframe_t* iframe) {
     kcounter_add(exceptions_page, 1);
     CPU_STATS_INC(page_faults);
     zx_status_t err = vmm_page_fault_handler(badv, pf_flags);
+    __asm__ __volatile__("invtlb 0x00, $r0, $r0" ::: "memory");
     arch_disable_ints();
     if (err >= 0)
         return;
@@ -219,16 +220,51 @@ extern "C" void loongarch64_finish_user_irq(uint32_t exit_flags, loongarch64_ifr
 
 /* called from assembly */
 extern "C" void arch_iframe_process_pending_signals(iframe_t* iframe) {
-//  DEBUG_ASSERT(iframe != nullptr);
-//  thread_t* thread = get_current_thread();
-//  if (unlikely(thread_is_signaled(thread))) {
-//    DEBUG_ASSERT(thread->arch.suspended_general_regs == nullptr);
-//
-//    thread->arch.suspended_general_regs = iframe;
-//    thread_process_pending_signals();
-//    thread->arch.suspended_general_regs = nullptr;
-//  }
-  TODO();
+    DEBUG_ASSERT(iframe != nullptr);
+    thread_t *thread = get_current_thread();
+    if (unlikely(thread_is_signaled(thread))) {
+        DEBUG_ASSERT(thread->arch.suspended_general_regs == nullptr);
+
+        thread->arch.suspended_general_regs = iframe;
+        thread_process_pending_signals();
+        thread->arch.suspended_general_regs = nullptr;
+    }
+}
+
+void arch_dump_exception_context(const arch_exception_context_t* context) {
+    TODO();
+    // uint32_t ec = BITS_SHIFT(context->esr, 31, 26);
+    // uint32_t iss = BITS(context->esr, 24, 0);
+
+    // switch (ec) {
+    // case 0b100000: /* instruction abort from lower level */
+    // case 0b100001: /* instruction abort from same level */
+    //     printf("instruction abort: PC at %#" PRIx64
+    //            ", address %#" PRIx64 " IFSC %#x %s\n",
+    //            context->frame->elr, context->far,
+    //            BITS(context->esr, 5, 0),
+    //            BIT(ec, 0) ? "" : "user ");
+
+    //     break;
+    // case 0b100100: /* data abort from lower level */
+    // case 0b100101: /* data abort from same level */
+    //     printf("data abort: PC at %#" PRIx64
+    //            ", address %#" PRIx64 " %s%s\n",
+    //            context->frame->elr, context->far,
+    //            BIT(ec, 0) ? "" : "user ",
+    //            BIT(iss, 6) ? "write" : "read");
+    // }
+
+    // dump_iframe(context->frame);
+
+    // // try to dump the user stack
+    // if (is_user_address(context->frame->usp)) {
+    //     uint8_t buf[256];
+    //     if (arch_copy_from_user(buf, (void*)context->frame->usp, sizeof(buf)) == ZX_OK) {
+    //         printf("bottom of user stack at 0x%lx:\n", (vaddr_t)context->frame->usp);
+    //         hexdump_ex(buf, sizeof(buf), context->frame->usp);
+    //     }
+    // }
 }
 
 void arch_fill_in_exception_context(const arch_exception_context_t* arch_context, zx_exception_report_t* report) {
@@ -243,6 +279,11 @@ void arch_fill_in_exception_context(const arch_exception_context_t* arch_context
 //    zx_context->arch.u.arm_64.far = 0;
 //  }
   TODO();
+}
+
+zx_status_t arch_dispatch_user_policy_exception(void) {
+    arch_exception_context_t context = {};
+    return dispatch_user_exception(ZX_EXCP_POLICY_ERROR, &context);
 }
 
 void arch_install_context_regs(thread_t* thread, const arch_exception_context_t* context) {

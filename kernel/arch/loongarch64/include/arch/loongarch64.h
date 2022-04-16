@@ -52,6 +52,8 @@ struct loongarch64_context_switch_frame {
 };
 
 void loongarch64_context_switch(vaddr_t* old_sp, vaddr_t new_sp);
+void loongarch64_uspace_entry(iframe_t* iframe, vaddr_t kstack) __NO_RETURN;
+
 
 __END_CDECLS
 

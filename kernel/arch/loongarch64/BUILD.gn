@@ -79,7 +79,8 @@ if (current_toolchain == default_toolchain) {
       "spinlock.cc",
       "start.S",
       "thread.cc",
-      "user_copy_c.cc"
+      "user_copy_c.cc",
+      "uspace_entry.S",
     ]
     deps = [
       "$zx/kernel/dev/interrupt",

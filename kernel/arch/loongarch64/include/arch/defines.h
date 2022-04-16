@@ -130,6 +130,13 @@
 #define CSR_EUEN_FPEN_SHIFT         0
 #define CSR_EUEN_FPEN               (_ULCAST_(0x1) << CSR_EUEN_FPEN_SHIFT)
 
+#define LOONGARCH_CSR_ASID		0x18	/* ASID */
+#define  CSR_ASID_BIT_SHIFT		16	/* ASIDBits */
+#define  CSR_ASID_BIT_WIDTH		8
+#define  CSR_ASID_BIT			(_ULCAST_(0xff) << CSR_ASID_BIT_SHIFT)
+#define  CSR_ASID_ASID_SHIFT		0
+#define  CSR_ASID_ASID_WIDTH		10
+#define  CSR_ASID_ASID			(_ULCAST_(0x3ff) << CSR_ASID_ASID_SHIFT)
 
 #define LOONGARCH_CSR_PGDL		0x19	/* Page table base address when VA[47] = 0 */
 #define LOONGARCH_CSR_PGDH		0x1a	/* Page table base address when VA[47] = 1 */
@@ -190,6 +197,8 @@
 
 #define LOONGARCH_CSR_KS0          0x30
 #define LOONGARCH_CSR_KS1          0x31
+#define LOONGARCH_CSR_KS2          0x32 // Kernel stack pointer scratch
+#define LOONGARCH_CSR_KS3          0x33
 
 /* Timer registers */
 #define LOONGARCH_CSR_TMID		0x40	/* Timer ID */

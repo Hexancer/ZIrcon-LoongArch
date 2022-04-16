@@ -24,3 +24,17 @@ typedef struct iframe_t iframe_short_t;
 static_assert(sizeof(iframe_t) % 16 == 0, "iframe_t should be 16B-aligned");
 
 #endif // !__ASSEMBLER__
+
+#define LOONGARCH64_IFRAME_OFFSET_R     0
+#define LOONGARCH64_IFRAME_OFFSET_SP    (SP_NUM * 8)
+#define LOONGARCH64_IFRAME_OFFSET_PRMD  ((BASE_NUM + LOONGARCH_CSR_PRMD) * 8)
+#define LOONGARCH64_IFRAME_OFFSET_EPC   ((BASE_NUM + LOONGARCH_CSR_EPC) * 8)
+
+#ifndef __ASSEMBLER__
+
+static_assert(__offsetof(iframe_t, gpr[0]) == LOONGARCH64_IFRAME_OFFSET_R, "");
+static_assert(__offsetof(iframe_t, gpr[SP_NUM]) == LOONGARCH64_IFRAME_OFFSET_SP, "");
+static_assert(__offsetof(iframe_t, csr[LOONGARCH_CSR_EPC]) == LOONGARCH64_IFRAME_OFFSET_EPC, "");
+static_assert(__offsetof(iframe_t, csr[LOONGARCH_CSR_PRMD]) == LOONGARCH64_IFRAME_OFFSET_PRMD, "");
+
+#endif // !__ASSEMBLER__
