@@ -1040,12 +1040,14 @@ void LoongarchArchVmAspace::ContextSwitch(LoongarchArchVmAspace* old_aspace, Loo
         uint16_t asid = kernel_aspace->asid_;
         csr_writel(asid, LOONGARCH_CSR_ASID);
 
-        paddr_t tt_phys = kernel_aspace->tt_phys_;
+        pte_t* tt_virt = loongarch64_kernel_translation_table;
+        paddr_t tt_phys = vaddr_to_paddr(const_cast<pte_t*>(tt_virt));
         DEBUG_ASSERT(tt_phys != 0);
-        csr_writeq(tt_phys, LOONGARCH_CSR_PGDH);
+        // we really don't need to write PGDH
+        // csr_writeq(tt_phys, LOONGARCH_CSR_PGDH);
 
-        // if (TRACE_CONTEXT_SWITCH)
-        //     TRACEF("tcr %#" PRIx64 "\n", tcr);
+        if (TRACE_CONTEXT_SWITCH)
+            TRACEF("asid %#" PRIx64 ", tt_phys %#" PRIx64 "\n", asid, tt_phys);
     }
 
     // TODO: do we need any sync here?
