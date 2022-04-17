@@ -164,6 +164,9 @@ save_context_done:
     bne     T0, T1, handle_general_exception
 
 handle_syscall:
+    // read EPC to T7, as syscall convention
+    csrrd   T7, LOONGARCH_CSR_EPC
+    addi.d  T7, T7, 4
     b       loongarch64_handle_syscall
     // we jump to handle_exception_done after syscall handling
 
@@ -359,8 +362,7 @@ END_FUNCTION(entry_tlb_refill)
 //
 FUNCTION(loongarch64_handle_syscall)
     // Restore per cpu pointer
-    csrrd   T0, LOONGARCH_CSR_KS3
-    ld.d    TP, T0, CURRENT_PERCPU_PTR_OFFSET
+    csrrd   TP, LOONGARCH_CSR_KS3
 
     // Verify syscall number and call the unknown handler if bad.
     li.d    T0, ZX_SYS_COUNT
