@@ -80,6 +80,23 @@ KCOUNTER(exceptions_unhandled, "exceptions.unhandled")
 KCOUNTER(exceptions_user, "exceptions.user")
 KCOUNTER(exceptions_unknown, "exceptions.unknown")
 
+static zx_status_t try_dispatch_user_data_fault_exception(
+    zx_excp_type_t type, loongarch64_iframe_t* iframe) {
+    arch_exception_context_t context = {};
+    DEBUG_ASSERT(iframe != nullptr);
+    context.frame = iframe;
+
+    arch_enable_ints();
+    zx_status_t status = dispatch_user_exception(type, &context);
+    arch_disable_ints();
+    return status;
+}
+
+static zx_status_t try_dispatch_user_exception(
+    zx_excp_type_t type, loongarch64_iframe_t* iframe) {
+    return try_dispatch_user_data_fault_exception(type, iframe);
+}
+
 __NO_RETURN static void exception_die(loongarch64_iframe_t* iframe) {
     platform_panic_start();
 
@@ -91,8 +108,17 @@ __NO_RETURN static void exception_die(loongarch64_iframe_t* iframe) {
 }
 
 
+static inline void loongarch64_restore_percpu_pointer() {
+    loongarch64_write_percpu_ptr(get_current_thread()->arch.current_percpu_ptr);
+}
+
 extern "C" void loongarch64_handle_exception(loongarch64_iframe_t *iframe) {
     int ecode = (ESTAT & CSR_ESTAT_EXC) >> CSR_ESTAT_EXC_SHIFT;
+
+    bool is_user = (PRMD & PLV_MASK) == PLV_USER;
+    if (is_user) {
+        loongarch64_restore_percpu_pointer();
+    }
 
     if (ecode == CSR_ESTAT_EXC_INT) {
         loongarch64_handle_irq(iframe);
@@ -103,10 +129,6 @@ extern "C" void loongarch64_handle_exception(loongarch64_iframe_t *iframe) {
         dump_iframe(iframe);
         while (1) {}
     }
-}
-
-static inline void loongarch64_restore_percpu_pointer() {
-    loongarch64_write_percpu_ptr(get_current_thread()->arch.current_percpu_ptr);
 }
 
 extern "C" void loongarch64_handle_pf(iframe_t* iframe) {
@@ -129,8 +151,6 @@ extern "C" void loongarch64_handle_pf(iframe_t* iframe) {
         pf_flags |= VMM_PF_FLAG_NOT_PRESENT;
     }
 
-    LTRACEF("page fault: PC at %#" PRIx64", is_user %d, BADV %" PRIx64 "\n", EPC, is_user, badv);
-
     arch_enable_ints();
     kcounter_add(exceptions_page, 1);
     CPU_STATS_INC(page_faults);
@@ -143,10 +163,9 @@ extern "C" void loongarch64_handle_pf(iframe_t* iframe) {
     // If this is from user space, let the user exception handler
     // get a shot at it.
     if (is_user) {
-        TODO();
-        // kcounter_add(exceptions_user, 1);
-        // if (try_dispatch_user_data_fault_exception(ZX_EXCP_FATAL_PAGE_FAULT, iframe, esr, far) == ZX_OK)
-        //     return;
+        kcounter_add(exceptions_user, 1);
+        if (try_dispatch_user_data_fault_exception(ZX_EXCP_FATAL_PAGE_FAULT, iframe) == ZX_OK)
+            return;
     }
 
     printf("page fault: PC at %#" PRIx64 ", is_user %d, BADV %" PRIx64 "\n", EPC, is_user, badv);
@@ -268,17 +287,16 @@ void arch_dump_exception_context(const arch_exception_context_t* context) {
 }
 
 void arch_fill_in_exception_context(const arch_exception_context_t* arch_context, zx_exception_report_t* report) {
-//  zx_exception_context_t* zx_context = &report->context;
-//
-//  zx_context->arch.u.arm_64.esr = arch_context->esr;
-//
-//  // If there was a fatal page fault, fill in the address that caused the fault.
-//  if (ZX_EXCP_FATAL_PAGE_FAULT == report->header.type) {
-//    zx_context->arch.u.arm_64.far = arch_context->far;
-//  } else {
-//    zx_context->arch.u.arm_64.far = 0;
-//  }
-  TODO();
+    zx_exception_context_t *zx_context = &report->context;
+
+    zx_context->arch.u.loongarch64 = {};
+
+    // // If there was a fatal page fault, fill in the address that caused the fault.
+    // if (ZX_EXCP_FATAL_PAGE_FAULT == report->header.type) {
+    //     zx_context->arch.u.arm_64.far = arch_context->far;
+    // } else {
+    //     zx_context->arch.u.arm_64.far = 0;
+    // }
 }
 
 zx_status_t arch_dispatch_user_policy_exception(void) {
@@ -286,18 +304,16 @@ zx_status_t arch_dispatch_user_policy_exception(void) {
     return dispatch_user_exception(ZX_EXCP_POLICY_ERROR, &context);
 }
 
-void arch_install_context_regs(thread_t* thread, const arch_exception_context_t* context) {
-//  // TODO(ZX-563): |context->frame| will be nullptr for exceptions that
-//  // don't (yet) provide the registers.
-//  if (context->frame) {
-//    DEBUG_ASSERT(thread->arch.suspended_general_regs == nullptr);
-//    thread->arch.suspended_general_regs = context->frame;
-//    thread->arch.debug_state.esr = context->esr;
-//  }
-  TODO();
+void arch_install_context_regs(thread_t *thread, const arch_exception_context_t *context) {
+    // TODO(ZX-563): |context->frame| will be nullptr for exceptions that
+    // don't (yet) provide the registers.
+    if (context->frame)
+    {
+        DEBUG_ASSERT(thread->arch.suspended_general_regs == nullptr);
+        thread->arch.suspended_general_regs = context->frame;
+    }
 }
 
-void arch_remove_context_regs(thread_t* thread) {
-//  thread->arch.suspended_general_regs = nullptr;
-  TODO();
+void arch_remove_context_regs(thread_t *thread) {
+    thread->arch.suspended_general_regs = nullptr;
 }
