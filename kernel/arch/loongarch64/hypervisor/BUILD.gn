@@ -3,8 +3,13 @@
 # found in the LICENSE file.
 
 source_set("hypervisor") {
-  sources = []
-  deps = []
+  sources = [
+    "guest.cc",
+    "vcpu.cc",
+  ]
+  deps = [
+    "$zx/kernel/hypervisor:headers",
+  ]
 }
 
 source_set("tests") {

@@ -11,29 +11,29 @@
 class Guest {
 public:
     static zx_status_t Create(ktl::unique_ptr<Guest>* out);
-//     ~Guest();
-//     DISALLOW_COPY_ASSIGN_AND_MOVE(Guest);
+    ~Guest();
+    DISALLOW_COPY_ASSIGN_AND_MOVE(Guest);
 
     zx_status_t SetTrap(uint32_t kind, zx_vaddr_t addr, size_t len,
                         fbl::RefPtr<PortDispatcher> port, uint64_t key);
 
     hypervisor::GuestPhysicalAddressSpace* AddressSpace() const { TODO(); return gpas_.get(); }
-//     hypervisor::TrapMap* Traps() { return &traps_; }
+    hypervisor::TrapMap* Traps() { return &traps_; }
 //     uint8_t Vmid() const { return vmid_; }
 
-//     zx_status_t AllocVpid(uint8_t* vpid);
-//     zx_status_t FreeVpid(uint8_t vpid);
+    zx_status_t AllocVpid(uint8_t* vpid);
+    zx_status_t FreeVpid(uint8_t vpid);
 
 private:
     ktl::unique_ptr<hypervisor::GuestPhysicalAddressSpace> gpas_;
-//     hypervisor::TrapMap traps_;
-//     const uint8_t vmid_;
+    hypervisor::TrapMap traps_;
+    const uint8_t vmid_;
 
-//     DECLARE_MUTEX(Guest) vcpu_mutex_;
-//     // TODO(alexlegg): Find a good place for this constant to live (max vcpus).
-//     hypervisor::IdAllocator<uint8_t, 8> TA_GUARDED(vcpu_mutex_) vpid_allocator_;
+    DECLARE_MUTEX(Guest) vcpu_mutex_;
+    // TODO(alexlegg): Find a good place for this constant to live (max vcpus).
+    hypervisor::IdAllocator<uint8_t, 8> TA_GUARDED(vcpu_mutex_) vpid_allocator_;
 
-//     explicit Guest(uint8_t vmid);
+    explicit Guest(uint8_t vmid);
 };
 
 

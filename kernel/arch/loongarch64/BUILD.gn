@@ -73,6 +73,7 @@ if (current_toolchain == default_toolchain) {
       "exceptions.S",
       "exceptions_c.cc",
       "feature.cc",
+      "mexec.S",
       "mmu.cc",
       "mp.cc",
       "periphmap.cc",

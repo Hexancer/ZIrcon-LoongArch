@@ -11,6 +11,7 @@
 #include <dev/uart.h>
 #include <vm/physmap.h>
 
+#include <mexec.h>
 #include <platform.h>
 #include <platform/timer.h>
 
@@ -406,6 +407,61 @@ size_t platform_recover_crashlog(size_t len, void* cookie,
                                  void (*func)(const void* data, size_t, size_t len, void* cookie)) {
 
     return 0;
+}
+
+zx_status_t platform_mexec_patch_zbi(uint8_t* zbi, const size_t len) {
+    size_t offset = 0;
+
+    // copy certain boot items provided by the bootloader or boot shim
+    // to the mexec zbi
+    zbi::Zbi image(zbi, len);
+    while (offset < mexec_zbi_length) {
+        zbi_header_t* item = reinterpret_cast<zbi_header_t*>(mexec_zbi + offset);
+
+        zbi_result_t status;
+        status = image.AppendSection(item->length, item->type, item->extra,
+                                     item->flags,
+                                     reinterpret_cast<uint8_t*>(item + 1));
+
+        if (status != ZBI_RESULT_OK)
+            return ZX_ERR_INTERNAL;
+
+        offset += ZBI_ALIGN(
+            static_cast<uint32_t>(sizeof(zbi_header_t)) + item->length);
+    }
+
+    return ZX_OK;
+}
+
+void platform_mexec_prep(uintptr_t new_bootimage_addr, size_t new_bootimage_len) {
+    TODO();
+    // DEBUG_ASSERT(!arch_ints_disabled());
+    // DEBUG_ASSERT(mp_get_online_mask() == cpu_num_to_mask(BOOT_CPU_ID));
+}
+
+void platform_mexec(mexec_asm_func mexec_assembly, memmov_ops_t* ops,
+                    uintptr_t new_bootimage_addr, size_t new_bootimage_len,
+                    uintptr_t entry64_addr) {
+    TODO();
+    // DEBUG_ASSERT(arch_ints_disabled());
+    // DEBUG_ASSERT(mp_get_online_mask() == cpu_num_to_mask(BOOT_CPU_ID));
+
+    // paddr_t kernel_src_phys = (paddr_t)ops[0].src;
+    // paddr_t kernel_dst_phys = (paddr_t)ops[0].dst;
+
+    // // check to see if the kernel is packaged as a zbi container
+    // zbi_header_t* header = (zbi_header_t*)paddr_to_physmap(kernel_src_phys);
+    // if (header[0].type == ZBI_TYPE_CONTAINER &&
+    //     (header[1].type == ZBI_TYPE_KERNEL_ARM64 ||
+    //      header[1].type == ZBI_TYPE_KERNEL_LOONGARCH64)) {
+    //     zbi_kernel_t* kernel_header = (zbi_kernel_t*)&header[2];
+    //     // add offset from kernel header to entry point
+    //     kernel_dst_phys += kernel_header->entry;
+    // }
+    // // else just jump to beginning of kernel image
+
+    // mexec_assembly((uintptr_t)new_bootimage_addr, 0, 0, arm64_get_boot_el(), ops,
+    //                (void*)kernel_dst_phys);
 }
 
 size_t hw_rng_get_entropy(void* buf, size_t len, bool block) {
