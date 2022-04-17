@@ -9,7 +9,6 @@
 
 .macro m_syscall name, num, nargs, public
 syscall_entry_begin \name
-    break 0
     zircon_syscall \num, \name, \name
     ertn
 syscall_entry_end \name \public

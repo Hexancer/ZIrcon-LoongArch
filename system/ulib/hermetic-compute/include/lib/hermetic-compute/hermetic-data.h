@@ -94,9 +94,6 @@ struct Tcb {
         stack_guard(guard),
         unsafe_sp(reinterpret_cast<HermeticPtr<std::byte>>(usp)) {}
 
-    // TODO: Figure this out
-    HermeticPtr<void> self;             // Points to this address (%fs:0).
-    HermeticPtr<void> reserved{};       // unused (reserved for runtime)
     uintptr_t stack_guard;
     HermeticPtr<std::byte> unsafe_sp;
 
@@ -105,8 +102,10 @@ struct Tcb {
         return sizeof(Tcb);
     }
 };
-static_assert(offsetof(Tcb, stack_guard) == ZX_TLS_STACK_GUARD_OFFSET);
-static_assert(offsetof(Tcb, unsafe_sp) == ZX_TLS_UNSAFE_SP_OFFSET);
+static_assert(offsetof(Tcb, stack_guard) ==
+              sizeof(Tcb) + ZX_TLS_STACK_GUARD_OFFSET);
+static_assert(offsetof(Tcb, unsafe_sp) ==
+              sizeof(Tcb) + ZX_TLS_UNSAFE_SP_OFFSET);
 
 #elif defined(__x86_64__)
 

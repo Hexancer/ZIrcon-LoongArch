@@ -5,6 +5,7 @@
 #include <arch/loongarch64/iframe.h>
 #include <sys/types.h>
 
+#include <syscalls/syscalls.h>
 #include <zircon/types.h>
 
 __BEGIN_CDECLS

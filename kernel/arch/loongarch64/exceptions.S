@@ -4,7 +4,7 @@
 #include <arch/arch_thread.h>
 #include <arch/loongarch64.h>
 // #include <arch/loongarch64/exceptions.h>
-// #include <zircon/zx-syscall-numbers.h>
+#include <zircon/zx-syscall-numbers.h>
 
 #define RSIZE   8       /* 64 bit mode register size */
 
@@ -94,7 +94,7 @@ exception_save_done:
     /* Save FPU context */
     ori     T1, ZERO, CSR_EUEN_FPEN
     and     T2, T0, T1
-    beqz    T2, 1f
+    beqz    T2, save_fpu_done
 
     fst.d   $f0,  SP, (FP0_NUM + FP_BASE_INDEX) * RSIZE
     fst.d   $f1,  SP, (FP1_NUM + FP_BASE_INDEX) * RSIZE
@@ -148,11 +148,32 @@ exception_save_done:
     movcf2gr        T3, $fcc7
     bstrins.d       T2, T3, 0x3f, 0x38
     st.d            T2, SP, (FCC_NUM + FP_BASE_INDEX)  * RSIZE
-1:
-    or      A0, SP, ZERO
+
+save_fpu_done:
+save_context_done:
+    // Check if this is an syscall
+    //   1. syscall should only come from USER mode
+    csrrd   T0, LOONGARCH_CSR_PRMD
+    andi    T0, T0, PLV_MASK
+    beqz    T0, handle_general_exception
+
+    //   2. ECODE should be SYS
+    csrrd   T0, LOONGARCH_CSR_ESTAT
+    srli.d  T0, T0, CSR_ESTAT_EXC_SHIFT
+    li.d    T1, CSR_ESTAT_EXC_SYS
+    bne     T0, T1, handle_general_exception
+
+handle_syscall:
+    b       loongarch64_handle_syscall
+    // we jump to handle_exception_done after syscall handling
+
+handle_general_exception:    
+    move    A0,   SP
     bl      loongarch64_handle_exception
+
+handle_exception_done:
     /*disable interrupt*/
-    li.d     T0, (1 << 2)
+    li.d    T0,   (1 << 2)
     csrxchg ZERO, T0, LOONGARCH_CSR_CRMD
 
     ld.d    T0, SP, (LOONGARCH_CSR_PRMD + BASE_NUM) * RSIZE
@@ -165,7 +186,7 @@ exception_save_done:
     ld.d    T0, SP, (LOONGARCH_CSR_EUEN + BASE_NUM) * RSIZE
     ori     T1, ZERO, CSR_EUEN_FPEN
     and     T2, T0, T1
-    beqz    T2, 2f
+    beqz    T2, restore_fpu_done
 
     /*
      * check previous FP state
@@ -223,7 +244,8 @@ exception_save_done:
     movgr2cf        $fcc6, T1
     bstrpick.d      T1, T0, 63, 56
     movgr2cf        $fcc7, T1
-2:
+
+restore_fpu_done:
     ld.d    RA, SP, RA_NUM * RSIZE
     ld.d    GP, SP, GP_NUM * RSIZE
     ld.d    A0, SP, A0_NUM * RSIZE
@@ -299,3 +321,99 @@ FUNCTION(entry_tlb_refill)
 	csrrd	$t0, LOONGARCH_CSR_TLBRSAVE
 	ertn
 END_FUNCTION(entry_tlb_refill)
+
+//
+// Syscall args are in a0-a7 already.
+// pc is in T7 and needs to go in the next available register,
+// or the stack if the regs are full.
+//
+.macro pre_args, nargs
+.if \nargs == 8
+    addi.d  SP, SP, -16
+    st.d    T7, SP, 0
+.else
+    move $a\nargs, T7
+.endif
+.endm
+
+.macro post_args, nargs
+.if \nargs == 8
+    ld.d    T7, SP, 0
+    addi.d  SP, SP, 16
+.endif
+    b       handle_syscall_done
+.endm
+
+//
+// Expected state prior to arm64_syscall_dispatcher branch...
+//
+// a0-a7 - contains syscall arguments
+// t7    - contains EPC
+// t8    - contains syscall_num
+// sp    - points to base of frame (frame->r[0])
+//
+// Expected state prior to unknown_syscall and wrapper_syscall...
+//
+// a0-a7 - contains syscall arguments
+// t7    - contains EPC
+//
+FUNCTION(loongarch64_handle_syscall)
+    // Restore per cpu pointer
+    csrrd   T0, LOONGARCH_CSR_KS3
+    ld.d    TP, T0, CURRENT_PERCPU_PTR_OFFSET
+
+    // Verify syscall number and call the unknown handler if bad.
+    li.d    T0, ZX_SYS_COUNT
+    bltu    T0, T8, handle_unknown_syscall
+
+    // Jump to the right syscall wrapper.
+    // call_wrapper_table is 4096 byte aligned so just use adrp
+    la.pcrel T0, call_wrapper_table
+    slli.d   T1, T8, 3
+    ldx.d    T0, T0, T1
+    jirl     ZERO, T0, 0
+    // at end of wrapper call, we always jump to handle_syscall_done
+
+handle_unknown_syscall:
+    move    A0, T8
+    pre_args 1
+    bl   unknown_syscall
+    post_args 1
+
+handle_syscall_done:
+    // Upon return from syscall, x0 = status, x1 = thread signalled
+    // Move the status to frame->r[0] for return to userspace.
+    st.d    A0, SP, 0
+    // Check for pending signals. If none, just return.
+    beqz    A1, handle_exception_done
+    move    A0, SP
+    bl      arch_iframe_process_pending_signals
+    b       handle_exception_done
+END_FUNCTION(loongarch64_handle_syscall)
+
+
+// Adds a label for making the syscall and adds it to the jump table.
+.macro syscall_dispatch nargs, syscall
+    .pushsection .text.syscall-dispatch,"ax",%progbits
+    LOCAL_FUNCTION(.Lcall_\syscall\())
+        pre_args \nargs
+        bl wrapper_\syscall
+        post_args \nargs
+    END_FUNCTION(.Lcall_\syscall\())
+    .popsection
+    .pushsection .rodata.syscall-table,"a",%progbits
+        .quad .Lcall_\syscall
+    .popsection
+.endm
+
+
+// Adds the label for the jump table.
+.macro start_syscall_dispatch
+    .pushsection .rodata.syscall-table,"a",%progbits
+    // align on 4096 byte boundary to save an instruction on table lookup
+    .balign 4096
+    call_wrapper_table:
+    .popsection
+.endm
+
+#include <zircon/syscall-kernel-branches.S>

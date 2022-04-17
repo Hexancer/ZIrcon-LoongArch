@@ -102,6 +102,7 @@
 #define   CSR_ESTAT_EXC_PNR         5
 #define   CSR_ESTAT_EXC_PNX         6
 #define   CSR_ESTAT_EXC_PPI         7
+#define   CSR_ESTAT_EXC_SYS         11
 #define  CSR_ESTAT_IS_SHIFT         0
 #define  CSR_ESTAT_IS_WIDTH         15
 #define  CSR_ESTAT_IS               (_ULCAST_(0x7fff) << CSR_ESTAT_IS_SHIFT)
