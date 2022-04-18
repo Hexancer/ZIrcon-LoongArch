@@ -98,7 +98,6 @@ struct Tcb {
     HermeticPtr<std::byte> unsafe_sp;
 
     static constexpr std::ptrdiff_t ThreadPointerOffset() {
-        TODO();
         return sizeof(Tcb);
     }
 };

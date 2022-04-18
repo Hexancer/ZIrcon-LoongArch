@@ -103,7 +103,6 @@ void HermeticComputeEngineBase<Engine, Args...>::EngineMain(uintptr_t first,
 #  define HermeticComputeEngine_tailcall_asm "b %0"
 #  define HermeticComputeEngine_tailcall_constraint "S"
 # elif defined(__loongarch64)
-    TODO();
 #  define HermeticComputeEngine_tailcall_asm "b %0"
 #  define HermeticComputeEngine_tailcall_constraint "i"
 # else

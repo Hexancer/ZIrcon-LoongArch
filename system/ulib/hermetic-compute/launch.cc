@@ -43,16 +43,17 @@ auto ArgumentRegisters() {
 
 #elif defined(__loongarch64)
 
+#define LOONGARCH_CSR_EPC   6
+#define SP_NUM              3
+#define FP_NUM              22
 constexpr auto kPcRegister = &zx_thread_state_general_regs_t::pc;
-constexpr auto kSpRegister = &zx_thread_state_general_regs_t::sp;
+constexpr auto kSpRegister = &zx_thread_state_general_regs_t::r3;
 constexpr intptr_t kSpBias = 0;
 constexpr auto kThreadRegister = &zx_thread_state_general_regs_t::tp;
 
 constexpr bool kShadowCallStack = true;
 void SetShadowCallStack(zx_thread_state_general_regs_t* regs, uintptr_t tos) {
-    TODO();
-    // TODO: Top of stack ok?
-    regs->sp = tos;
+    regs->r3 = tos; // $sp in $r3
 }
 
 template <size_t... I>
@@ -60,15 +61,13 @@ auto RegisterAccessors(std::index_sequence<I...>) {
     struct Accessor {
         size_t i;
         auto& operator()(zx_thread_state_general_regs_t& regs) const {
-            TODO();
-            return regs.r[i];
+            return *(&regs.r0 + i);
         }
     };
     return std::array<Accessor, sizeof...(I)>{Accessor{I}...};
 }
 
 auto ArgumentRegisters() {
-    TODO();
     return RegisterAccessors(std::make_index_sequence<8>());
 }
 
