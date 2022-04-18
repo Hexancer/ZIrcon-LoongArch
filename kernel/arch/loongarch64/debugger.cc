@@ -16,7 +16,27 @@ zx_status_t arch_get_general_regs(struct thread* thread, zx_thread_state_general
 }
 
 zx_status_t arch_set_general_regs(struct thread* thread, const zx_thread_state_general_regs_t* in) {
-    TODO();
+    Guard<spin_lock_t, IrqSave> thread_lock_guard{ThreadLock::Get()};
+
+    // Punt if registers aren't available. E.g.,
+    // ZX-563 (registers aren't available in synthetic exceptions)
+    if (thread->arch.suspended_general_regs == nullptr)
+        return ZX_ERR_NOT_SUPPORTED;
+
+    loongarch64_iframe_t* out = thread->arch.suspended_general_regs;
+    DEBUG_ASSERT(out);
+
+    memcpy(&out->gpr[0], &in->r0, sizeof(out->gpr));
+    // TODO: $ra should be equal to $pc, assert this
+    //     out->gpr[RA_NUM] = in->pc; 
+    // TODO: LA64 don't allow CSR insns in user mode
+    //     out->csr[LOONGARCH_CSR_PRMD] = ...
+    out->csr[LOONGARCH_CSR_EPC] = in->pc;
+    out->tp = in->tp;
+
+    struct loongarch64_context_switch_frame* frame = loongarch64_get_context_switch_frame(thread);
+    frame->tp = in->tp;
+
     return ZX_OK;
 }
 

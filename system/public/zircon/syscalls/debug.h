@@ -179,7 +179,6 @@ typedef struct zx_thread_state_general_regs {
     uint64_t r30;
     uint64_t r31;
     uint64_t pc;
-    uint64_t crmd;
     uint64_t tp;
 } zx_thread_state_general_regs_t;
 

@@ -93,3 +93,7 @@ void* arch_thread_get_blocked_fp(struct thread* t) {
 //  return (void*)frame->r29;
   return nullptr;
 }
+
+loongarch64_context_switch_frame* loongarch64_get_context_switch_frame(struct thread* thread) {
+    return reinterpret_cast<struct loongarch64_context_switch_frame*>(thread->arch.sp);
+}
