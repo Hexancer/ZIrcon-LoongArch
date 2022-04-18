@@ -14,6 +14,7 @@
 
 #include <trace.h>
 #include <vm/fault.h>
+#include <vm/vm.h>
 
 #include <lib/counters.h>
 #include <lib/crashlog.h>
@@ -182,13 +183,6 @@ extern "C" void loongarch64_handle_pf(iframe_t* iframe) {
 
 /* called from assembly */
 extern "C" uint32_t loongarch64_handle_irq(iframe_t* iframe) {
-    DEBUG(1, "Hello from irq handler");
-    for (int i = 2; i <= 12; ++i) {
-        if (ESTAT & (1 << i)) {
-            DEBUG(1, "irq %d set", i);
-        }
-    }
-
     bool is_user = (PRMD & PLV_MASK) == PLV_USER;
     bool is_kernel = (PRMD & PLV_MASK) == PLV_KERN;
 
@@ -206,13 +200,8 @@ extern "C" uint32_t loongarch64_handle_irq(iframe_t* iframe) {
     bool do_preempt = int_handler_finish(&state);
 
     /* if we came from user space, check to see if we have any signals to handle */
-    if (unlikely(is_user)) {
-        uint32_t exit_flags = 0;
-        if (thread_is_signaled(get_current_thread()))
-            exit_flags |= LOONGARCH64_IRQ_EXIT_THREAD_SIGNALED;
-        if (do_preempt)
-            exit_flags |= LOONGARCH64_IRQ_EXIT_RESCHEDULE;
-        return exit_flags;
+    if (unlikely(is_user) && thread_is_signaled(get_current_thread())) {
+        arch_iframe_process_pending_signals(iframe);
     }
 
     /* preempt the thread if the interrupt has signaled it */
