@@ -432,6 +432,7 @@ ssize_t LoongarchArchVmAspace::UnmapPageTable(vaddr_t vaddr, vaddr_t vaddr_rel,
         pte = page_table[index];
 
         if (index_shift > page_size_shift &&
+            pte != MMU_PTE_INVALID &&
             (pte & MMU_PTE_DESCRIPTOR_MASK) == MMU_PTE_INVALID) {
             page_table_paddr = pte & MMU_PTE_OUTPUT_ADDR_MASK;
             next_page_table = static_cast<volatile pte_t*>(paddr_to_physmap(page_table_paddr));
@@ -452,7 +453,7 @@ ssize_t LoongarchArchVmAspace::UnmapPageTable(vaddr_t vaddr, vaddr_t vaddr_rel,
                 FreePageTable(const_cast<pte_t*>(next_page_table), page_table_paddr,
                               page_size_shift);
             }
-        } else if (pte) {
+        } else if (pte != MMU_PTE_INVALID) {
             LTRACEF("pte %p[0x%lx] = 0\n", page_table, index);
             page_table[index] = MMU_PTE_INVALID;
 
