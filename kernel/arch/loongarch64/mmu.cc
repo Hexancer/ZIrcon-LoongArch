@@ -983,29 +983,29 @@ zx_status_t LoongarchArchVmAspace::Init(vaddr_t base, size_t size, uint flags) {
 }
 
 zx_status_t LoongarchArchVmAspace::Destroy() {
-    TODO();
-//     canary_.Assert();
-//     LTRACEF("aspace %p\n", this);
+    canary_.Assert();
+    LTRACEF("aspace %p\n", this);
 
-//     Guard<Mutex> a{&lock_};
+    Guard<Mutex> a{&lock_};
 
-//     DEBUG_ASSERT((flags_ & ARCH_ASPACE_FLAG_KERNEL) == 0);
+    DEBUG_ASSERT((flags_ & ARCH_ASPACE_FLAG_KERNEL) == 0);
 
-//     // XXX make sure it's not mapped
+    // XXX make sure it's not mapped
 
-//     vm_page_t* page = paddr_to_vm_page(tt_phys_);
-//     DEBUG_ASSERT(page);
-//     pmm_free_page(page);
+    vm_page_t* page = paddr_to_vm_page(tt_phys_);
+    DEBUG_ASSERT(page);
+    pmm_free_page(page);
 
-//     if (flags_ & ARCH_ASPACE_FLAG_GUEST) {
-//         paddr_t vttbr = arm64_vttbr(asid_, tt_phys_);
-//         __UNUSED zx_status_t status = arm64_el2_tlbi_vmid(vttbr);
-//         DEBUG_ASSERT(status == ZX_OK);
-//     } else {
-//         ARM64_TLBI(ASIDE1IS, asid_);
-//         asid.Free(asid_);
-//         asid_ = MMU_ARM64_UNUSED_ASID;
-//     }
+    if (flags_ & ARCH_ASPACE_FLAG_GUEST) {
+        TODO();
+        // paddr_t vttbr = arm64_vttbr(asid_, tt_phys_);
+        // __UNUSED zx_status_t status = arm64_el2_tlbi_vmid(vttbr);
+        // DEBUG_ASSERT(status == ZX_OK);
+    } else {
+        __asm__ __volatile__("invtlb 0x00, $r0, $r0" ::: "memory");
+        asid.Free(asid_);
+        asid_ = MMU_LOONGARCH64_UNUSED_ASID;
+    }
 
     return ZX_OK;
 }

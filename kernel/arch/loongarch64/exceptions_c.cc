@@ -248,7 +248,6 @@ extern "C" void arch_iframe_process_pending_signals(iframe_t* iframe) {
 }
 
 void arch_dump_exception_context(const arch_exception_context_t* context) {
-    TODO();
     // uint32_t ec = BITS_SHIFT(context->esr, 31, 26);
     // uint32_t iss = BITS(context->esr, 24, 0);
 
@@ -271,16 +270,16 @@ void arch_dump_exception_context(const arch_exception_context_t* context) {
     //            BIT(iss, 6) ? "write" : "read");
     // }
 
-    // dump_iframe(context->frame);
+    dump_iframe(context->frame);
 
-    // // try to dump the user stack
-    // if (is_user_address(context->frame->usp)) {
-    //     uint8_t buf[256];
-    //     if (arch_copy_from_user(buf, (void*)context->frame->usp, sizeof(buf)) == ZX_OK) {
-    //         printf("bottom of user stack at 0x%lx:\n", (vaddr_t)context->frame->usp);
-    //         hexdump_ex(buf, sizeof(buf), context->frame->usp);
-    //     }
-    // }
+    // try to dump the user stack
+    if (is_user_address(context->frame->gpr[SP_NUM])) {
+        uint8_t buf[256];
+        if (arch_copy_from_user(buf, (void*)context->frame->gpr[SP_NUM], sizeof(buf)) == ZX_OK) {
+            printf("bottom of user stack at 0x%lx:\n", (vaddr_t)context->frame->gpr[SP_NUM]);
+            hexdump_ex(buf, sizeof(buf), context->frame->gpr[SP_NUM]);
+        }
+    }
 }
 
 void arch_fill_in_exception_context(const arch_exception_context_t* arch_context, zx_exception_report_t* report) {

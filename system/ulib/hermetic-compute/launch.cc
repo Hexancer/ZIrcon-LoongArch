@@ -61,7 +61,7 @@ auto RegisterAccessors(std::index_sequence<I...>) {
     struct Accessor {
         size_t i;
         auto& operator()(zx_thread_state_general_regs_t& regs) const {
-            return *(&regs.r0 + i);
+            return *(&regs.r4 + i);
         }
     };
     return std::array<Accessor, sizeof...(I)>{Accessor{I}...};
