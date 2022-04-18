@@ -364,5 +364,5 @@
 
 #define FP_BASE_NUM             34
 #define BASE_NUM                32
-#define CSR_NUM                 10
+#define CSR_NUM                 12
 #define FP_BASE_INDEX           (CSR_NUM + BASE_NUM)

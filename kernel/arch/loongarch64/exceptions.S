@@ -91,6 +91,9 @@ exception_save_done:
     csrrd   T0, LOONGARCH_CSR_EUEN
     st.d    T0, SP, (LOONGARCH_CSR_EUEN + BASE_NUM)  * RSIZE
 
+    csrrd   T0, LOONGARCH_CSR_KS3
+    st.d    T0, SP, (CSR_NUM - 2 + BASE_NUM) * RSIZE
+
     /* Save FPU context */
     ori     T1, ZERO, CSR_EUEN_FPEN
     and     T2, T0, T1
@@ -179,6 +182,10 @@ handle_exception_done:
     /*disable interrupt*/
     li.d    T0,   (1 << 2)
     csrxchg ZERO, T0, LOONGARCH_CSR_CRMD
+
+
+    ld.d    T0, SP, (CSR_NUM - 2 + BASE_NUM) * RSIZE
+    csrwr   T0, LOONGARCH_CSR_KS3
 
     ld.d    T0, SP, (LOONGARCH_CSR_PRMD + BASE_NUM) * RSIZE
     csrwr   T0, LOONGARCH_CSR_PRMD
