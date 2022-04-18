@@ -160,6 +160,14 @@ extern "C" void loongarch64_handle_pf(iframe_t* iframe) {
     if (err >= 0)
         return;
 
+    // Check if the current thread was expecting a data fault and
+    // we should return to its handler.
+    thread_t* thr = get_current_thread();
+    if (thr->arch.data_fault_resume != NULL && is_user_address(BADV)) {
+        EPC = (uintptr_t)thr->arch.data_fault_resume;
+        return;
+    }
+
     // If this is from user space, let the user exception handler
     // get a shot at it.
     if (is_user) {

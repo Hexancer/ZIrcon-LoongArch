@@ -10,7 +10,7 @@
 .macro m_syscall name, num, nargs, public
 syscall_entry_begin \name
     zircon_syscall \num, \name, \name
-    ertn
+    jr $ra
 syscall_entry_end \name \public
 .endm
 

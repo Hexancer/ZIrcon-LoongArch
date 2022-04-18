@@ -81,6 +81,7 @@ if (current_toolchain == default_toolchain) {
       "start.S",
       "thread.cc",
       "user_copy_c.cc",
+      "user_copy.S",
       "uspace_entry.S",
     ]
     deps = [

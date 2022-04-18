@@ -282,7 +282,7 @@
 #define T6    $r18
 #define T7    $r19
 #define T8    $r20 /* caller saved */
-#define TP    $r21 /* TLS */
+#define TP    $r21 /* Percpu pointer */ /* Thread pointer in KS3 */
 #define FP    $r22 /* frame pointer */
 #define S0    $r23 /* callee saved */
 #define S1    $r24

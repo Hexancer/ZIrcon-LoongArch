@@ -167,6 +167,7 @@ handle_syscall:
     // read EPC to T7, as syscall convention
     csrrd   T7, LOONGARCH_CSR_EPC
     addi.d  T7, T7, 4
+    st.d    T7, SP, (LOONGARCH_CSR_EPC+ BASE_NUM)    * RSIZE
     b       loongarch64_handle_syscall
     // we jump to handle_exception_done after syscall handling
 
@@ -362,7 +363,8 @@ END_FUNCTION(entry_tlb_refill)
 //
 FUNCTION(loongarch64_handle_syscall)
     // Restore per cpu pointer
-    csrrd   TP, LOONGARCH_CSR_KS3
+    csrrd   T0, LOONGARCH_CSR_KS3
+    ld.d    TP, T0, CURRENT_PERCPU_PTR_OFFSET
 
     // Verify syscall number and call the unknown handler if bad.
     li.d    T0, ZX_SYS_COUNT
@@ -383,9 +385,9 @@ handle_unknown_syscall:
     post_args 1
 
 handle_syscall_done:
-    // Upon return from syscall, x0 = status, x1 = thread signalled
-    // Move the status to frame->r[0] for return to userspace.
-    st.d    A0, SP, 0
+    // Upon return from syscall, a0 = status, a1 = thread signalled
+    // Move the status to frame->gpr[$a0] for return to userspace.
+    st.d    A0, SP, A0_NUM * RSIZE
     // Check for pending signals. If none, just return.
     beqz    A1, handle_exception_done
     move    A0, SP

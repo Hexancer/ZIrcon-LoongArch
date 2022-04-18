@@ -29,8 +29,11 @@ struct arch_thread {
     struct iframe_t* suspended_general_regs;
 
     // Point to the current cpu pointer when the thread is running, used to
-    // restore x18 on exception entry. Swapped on context switch.
+    // restore x21 on exception entry. Swapped on context switch.
     struct loongarch64_percpu* current_percpu_ptr;
+
+    // if non-NULL, address to return to on data fault
+    void* data_fault_resume;
 };
 
 #define thread_pointer_offsetof(field)          \
