@@ -434,7 +434,9 @@ static struct symdef find_sym(struct dso* dso, const char* s, int need_def) {
     return def;
 }
 
+#ifndef __loongarch64
 __attribute__((__visibility__("hidden"))) ptrdiff_t __tlsdesc_static(void), __tlsdesc_dynamic(void);
+#endif
 
 __NO_SAFESTACK NO_ASAN static void do_relocs(struct dso* dso, size_t* rel,
                                              size_t rel_size, size_t stride) {
@@ -552,6 +554,7 @@ __NO_SAFESTACK NO_ASAN static void do_relocs(struct dso* dso, size_t* rel,
             *reloc_addr = def.dso->tls.offset - tls_val + addend;
             break;
 #endif
+#ifndef __loongarch64
         case REL_TLSDESC:
             if (stride < 3)
                 addend = reloc_addr[1];
@@ -575,6 +578,7 @@ __NO_SAFESTACK NO_ASAN static void do_relocs(struct dso* dso, size_t* rel,
 #endif
             }
             break;
+#endif
         default:
             error("Error relocating %s: unsupported relocation type %d", dso->l_map.l_name, type);
             if (runtime)
