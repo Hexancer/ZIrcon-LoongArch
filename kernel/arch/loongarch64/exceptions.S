@@ -364,8 +364,8 @@ END_FUNCTION(entry_tlb_refill)
 //
 FUNCTION(loongarch64_handle_syscall)
     // Restore per cpu pointer
-    csrrd   X0, LOONGARCH_CSR_KS3
-    csrrd   TP, LOONGARCH_CSR_KS4
+    csrrd   TP, LOONGARCH_CSR_KS3
+    ld.d    X0, TP, CURRENT_PERCPU_PTR_OFFSET
 
     // Verify syscall number and call the unknown handler if bad.
     li.d    T0, ZX_SYS_COUNT
@@ -396,7 +396,7 @@ handle_syscall_done:
     bl      arch_iframe_process_pending_signals
 
 handle_signals_done:
-    csrwr   TP, LOONGARCH_CSR_KS4
+    csrwr   TP, LOONGARCH_CSR_KS3
     b       handle_exception_done
 END_FUNCTION(loongarch64_handle_syscall)
 

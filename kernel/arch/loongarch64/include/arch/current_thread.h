@@ -19,11 +19,11 @@ static inline void set_current_thread(struct thread* t) {
 
 
 static inline void loongarch64_save_thread_pointer(void) {
-    csr_writeq((uint64_t)__loongarch64_tp, LOONGARCH_CSR_KS4);
+    csr_writeq((uint64_t)__loongarch64_tp, LOONGARCH_CSR_KS3);
 }
 
 static inline void loongarch64_restore_thread_pointer(void) {
-    __loongarch64_tp = (uint8_t*) csr_readq(LOONGARCH_CSR_KS4);
+    __loongarch64_tp = (uint8_t*) csr_readq(LOONGARCH_CSR_KS3);
 }
 
 __END_CDECLS
