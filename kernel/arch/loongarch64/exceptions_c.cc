@@ -118,6 +118,7 @@ extern "C" void loongarch64_handle_exception(loongarch64_iframe_t *iframe) {
 
     bool is_user = (PRMD & PLV_MASK) == PLV_USER;
     if (is_user) {
+        loongarch64_restore_thread_pointer();
         loongarch64_restore_percpu_pointer();
     }
 
@@ -129,6 +130,10 @@ extern "C" void loongarch64_handle_exception(loongarch64_iframe_t *iframe) {
         DEBUG(1, "Hello from exception handler");
         dump_iframe(iframe);
         while (1) {}
+    }
+
+    if (is_user) {
+        loongarch64_save_thread_pointer();
     }
 }
 
@@ -208,7 +213,7 @@ extern "C" uint32_t loongarch64_handle_irq(iframe_t* iframe) {
     if (do_preempt)
         thread_preempt();
 
-    /* if we're returning to kernel space, make sure we restore the correct x18 */
+    /* if we're returning to kernel space, make sure we restore the correct x21 */
     if (is_kernel) {
         iframe->gpr[21] = (uint64_t)loongarch64_read_percpu_ptr();
     }

@@ -48,6 +48,7 @@ void arch_enter_uspace(iframe_t* iframe) {
 
     arch_disable_ints();
 
+    loongarch64_save_thread_pointer();
     loongarch64_uspace_entry(iframe, ct->stack.top);
     __UNREACHABLE;
 }

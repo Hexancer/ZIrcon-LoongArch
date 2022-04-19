@@ -5,6 +5,7 @@
 FUNCTION(loongarch64_context_switch)
     // /* save old frame */
     // /* This layout should match struct context_switch_frame */
+    push_reg 0   // padding
     push_reg 31
     push_reg 30
     push_reg 29
@@ -36,6 +37,7 @@ FUNCTION(loongarch64_context_switch)
     pop_reg 29
     pop_reg 30
     pop_reg 31
+    pop_reg 0    // padding
 
     jr $r1
 END_FUNCTION(loongarch64_context_switch)

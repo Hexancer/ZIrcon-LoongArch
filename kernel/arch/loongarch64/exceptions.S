@@ -37,7 +37,7 @@ exception_save_done:
 
     st.d   ZERO, SP, ZERO_NUM * RSIZE
     st.d   RA, SP, RA_NUM * RSIZE
-    st.d   GP, SP, GP_NUM * RSIZE
+    st.d   TP, SP, TP_NUM * RSIZE
     st.d   A0, SP, A0_NUM * RSIZE
     st.d   A1, SP, A1_NUM * RSIZE
     st.d   A2, SP, A2_NUM * RSIZE
@@ -54,7 +54,7 @@ exception_save_done:
     st.d   T6, SP, T6_NUM * RSIZE
     st.d   T7, SP, T7_NUM * RSIZE
     st.d   T8, SP, T8_NUM * RSIZE
-    st.d   TP, SP, TP_NUM * RSIZE
+    st.d   X0, SP, X0_NUM * RSIZE
     st.d   FP, SP, FP_NUM * RSIZE
     st.d   S0, SP, S0_NUM * RSIZE
     st.d   S1, SP, S1_NUM * RSIZE
@@ -90,9 +90,6 @@ exception_save_done:
     st.d    T0, SP, (LOONGARCH_CSR_BADI + BASE_NUM)  * RSIZE
     csrrd   T0, LOONGARCH_CSR_EUEN
     st.d    T0, SP, (LOONGARCH_CSR_EUEN + BASE_NUM)  * RSIZE
-
-    csrrd   T0, LOONGARCH_CSR_KS3
-    st.d    T0, SP, (CSR_NUM - 2 + BASE_NUM) * RSIZE
 
     /* Save FPU context */
     ori     T1, ZERO, CSR_EUEN_FPEN
@@ -184,9 +181,6 @@ handle_exception_done:
     csrxchg ZERO, T0, LOONGARCH_CSR_CRMD
 
 
-    ld.d    T0, SP, (CSR_NUM - 2 + BASE_NUM) * RSIZE
-    csrwr   T0, LOONGARCH_CSR_KS3
-
     ld.d    T0, SP, (LOONGARCH_CSR_PRMD + BASE_NUM) * RSIZE
     csrwr   T0, LOONGARCH_CSR_PRMD
     ld.d    T0, SP, (LOONGARCH_CSR_ECFG + BASE_NUM) * RSIZE
@@ -258,7 +252,7 @@ handle_exception_done:
 
 restore_fpu_done:
     ld.d    RA, SP, RA_NUM * RSIZE
-    ld.d    GP, SP, GP_NUM * RSIZE
+    ld.d    TP, SP, TP_NUM * RSIZE
     ld.d    A0, SP, A0_NUM * RSIZE
     ld.d    A1, SP, A1_NUM * RSIZE
     ld.d    A2, SP, A2_NUM * RSIZE
@@ -276,7 +270,7 @@ restore_fpu_done:
     ld.d    T6, SP, T6_NUM * RSIZE
     ld.d    T7, SP, T7_NUM * RSIZE
     ld.d    T8, SP, T8_NUM * RSIZE
-    ld.d    TP, SP, TP_NUM * RSIZE
+    ld.d    X0, SP, X0_NUM * RSIZE
     ld.d    FP, SP, FP_NUM * RSIZE
     ld.d    S0, SP, S0_NUM * RSIZE
     ld.d    S1, SP, S1_NUM * RSIZE
@@ -370,8 +364,8 @@ END_FUNCTION(entry_tlb_refill)
 //
 FUNCTION(loongarch64_handle_syscall)
     // Restore per cpu pointer
-    csrrd   T0, LOONGARCH_CSR_KS3
-    ld.d    TP, T0, CURRENT_PERCPU_PTR_OFFSET
+    csrrd   X0, LOONGARCH_CSR_KS3
+    csrrd   TP, LOONGARCH_CSR_KS4
 
     // Verify syscall number and call the unknown handler if bad.
     li.d    T0, ZX_SYS_COUNT
@@ -396,9 +390,13 @@ handle_syscall_done:
     // Move the status to frame->gpr[$a0] for return to userspace.
     st.d    A0, SP, A0_NUM * RSIZE
     // Check for pending signals. If none, just return.
-    beqz    A1, handle_exception_done
+
+    bnez    A1, handle_signals_done
     move    A0, SP
     bl      arch_iframe_process_pending_signals
+
+handle_signals_done:
+    csrwr   TP, LOONGARCH_CSR_KS4
     b       handle_exception_done
 END_FUNCTION(loongarch64_handle_syscall)
 

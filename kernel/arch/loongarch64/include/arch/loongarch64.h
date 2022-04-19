@@ -50,7 +50,7 @@ struct loongarch64_context_switch_frame {
     uint64_t r29;
     uint64_t r30;
     uint64_t r31;
-    uint64_t tp;
+    uint64_t __padding;
 };
 
 void loongarch64_context_switch(vaddr_t* old_sp, vaddr_t new_sp);

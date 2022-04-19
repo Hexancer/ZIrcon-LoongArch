@@ -13,9 +13,7 @@
 // loongarch64_iframe_t is the alias.
 struct iframe_t {
     uint64_t gpr[BASE_NUM];
-    uint64_t csr[CSR_NUM - 2];
-    uint64_t tp;  // KS3
-    uint64_t __pad;
+    uint64_t csr[CSR_NUM];
     uint64_t fpr[FP_BASE_NUM];
 };
 

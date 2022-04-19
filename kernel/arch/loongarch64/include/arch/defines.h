@@ -200,6 +200,7 @@
 #define LOONGARCH_CSR_KS1          0x31
 #define LOONGARCH_CSR_KS2          0x32 // Kernel stack pointer scratch
 #define LOONGARCH_CSR_KS3          0x33
+#define LOONGARCH_CSR_KS4          0x34
 
 /* Timer registers */
 #define LOONGARCH_CSR_TMID		0x40	/* Timer ID */
@@ -261,7 +262,7 @@
 #define COPY_SIGCODE    // copy sigcode above user stack in exec
 #define ZERO  $r0 /* wired zero */
 #define RA    $r1 /* return address */
-#define GP    $r2 /* global pointer - caller saved for PIC */
+#define TP    $r2 /* thread pointer */
 #define SP    $r3 /* stack pointer */
 #define V0    $r4 /* return value - caller saved */
 #define V1    $r5
@@ -282,7 +283,7 @@
 #define T6    $r18
 #define T7    $r19
 #define T8    $r20 /* caller saved */
-#define TP    $r21 /* Percpu pointer */ /* Thread pointer in KS3 */
+#define X0    $r21 /* Percpu pointer */
 #define FP    $r22 /* frame pointer */
 #define S0    $r23 /* callee saved */
 #define S1    $r24
@@ -296,7 +297,7 @@
 
 #define ZERO_NUM   0
 #define RA_NUM     1
-#define GP_NUM     2
+#define TP_NUM     2
 #define SP_NUM     3
 #define A0_NUM     4
 #define A1_NUM     5
@@ -315,7 +316,7 @@
 #define T6_NUM     18
 #define T7_NUM     19
 #define T8_NUM     20
-#define TP_NUM     21
+#define X0_NUM     21
 #define FP_NUM     22
 #define S0_NUM     23
 #define S1_NUM     24
@@ -364,5 +365,5 @@
 
 #define FP_BASE_NUM             34
 #define BASE_NUM                32
-#define CSR_NUM                 12
+#define CSR_NUM                 10
 #define FP_BASE_INDEX           (CSR_NUM + BASE_NUM)

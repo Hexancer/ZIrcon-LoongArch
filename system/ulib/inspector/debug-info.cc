@@ -99,13 +99,10 @@ __EXPORT void inspector_print_debug_info(zx_handle_t process, zx_handle_t thread
     sp = regs->sp;
     fp = regs->r[29];
 #elif defined(__loongarch64)
-    #define LOONGARCH_CSR_EPC   6
-    #define SP_NUM              3
-    #define FP_NUM              22
     arch = "loongarch64";
     pc = regs->pc;
-    sp = regs->r3;
-    fp = regs->r22;
+    sp = regs->sp;
+    fp = regs->fp;
 #else
 #error unsupported architecture
 #endif
