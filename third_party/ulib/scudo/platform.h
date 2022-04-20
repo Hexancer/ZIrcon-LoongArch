@@ -9,6 +9,12 @@
 #ifndef SCUDO_PLATFORM_H_
 #define SCUDO_PLATFORM_H_
 
+#if defined(__loongarch64)
+#if defined(__linux__)
+#undef __linux__
+#endif
+#endif
+
 #if defined(__linux__)
 #define SCUDO_LINUX 1
 #else
