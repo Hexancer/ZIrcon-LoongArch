@@ -14,7 +14,8 @@
 // void loongarch64_uspace_entry(iframe_t* iframe, vaddr_t kstack) __NO_RETURN;
 FUNCTION(loongarch64_uspace_entry)
     // save kstack
-    csrwr  A1, LOONGARCH_CSR_KS2
+    csrwr  A1, LOONGARCH_CSR_KS_SP
+    csrwr  TP, LOONGARCH_CSR_KS_TP
 
     ld.d   A2, A0, LOONGARCH64_IFRAME_OFFSET_EPC
     csrwr  A2, LOONGARCH_CSR_EPC
@@ -42,7 +43,7 @@ FUNCTION(loongarch64_uspace_entry)
     ld.d   T6,  A0, LOONGARCH64_IFRAME_OFFSET_R + (T6_NUM * 8)
     ld.d   T7,  A0, LOONGARCH64_IFRAME_OFFSET_R + (T7_NUM * 8)
     ld.d   T8,  A0, LOONGARCH64_IFRAME_OFFSET_R + (T8_NUM * 8)
-    ld.d   X0, A0, LOONGARCH64_IFRAME_OFFSET_R + (X0_NUM * 8)
+    ld.d   X0,  A0, LOONGARCH64_IFRAME_OFFSET_R + (X0_NUM * 8)
     ld.d   FP,  A0, LOONGARCH64_IFRAME_OFFSET_R + (FP_NUM * 8)
     ld.d   S0,  A0, LOONGARCH64_IFRAME_OFFSET_R + (S0_NUM * 8)
     ld.d   S1,  A0, LOONGARCH64_IFRAME_OFFSET_R + (S1_NUM * 8)

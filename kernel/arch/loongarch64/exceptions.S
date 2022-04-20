@@ -13,23 +13,19 @@
 .align 12
 
 FUNCTION(entry_exception_handler)
-    // T0 swapped with KS0, SP swapped with KS1
+    // T0 swapped with KS0, SP swapped with KS1, TP swapped with KS2
     
     // Make sure we are always using kernel stack to create frames,
-    // which means in USER mode we need to read KSP from KS2
     csrrd   T0, LOONGARCH_CSR_PRMD
     andi    T0, T0, PLV_MASK
     bnez    T0, exception_save_user 
 
 exception_save_kernel:
-    // Read back SP
-    csrrd   SP, LOONGARCH_CSR_KS1
-    b       exception_save_done
+    // Read back SP from KS1
+    csrrd   SP, LOONGARCH_CSR_KS_SP
+    csrrd   TP, LOONGARCH_CSR_KS_TP
 
 exception_save_user:
-    // Read KSP from KS2
-    csrrd   SP, LOONGARCH_CSR_KS2
-    
 exception_save_done:
     addi.d  T0, ZERO, -0x10
     and     SP, SP, T0
@@ -37,7 +33,6 @@ exception_save_done:
 
     st.d   ZERO, SP, ZERO_NUM * RSIZE
     st.d   RA, SP, RA_NUM * RSIZE
-    st.d   TP, SP, TP_NUM * RSIZE
     st.d   A0, SP, A0_NUM * RSIZE
     st.d   A1, SP, A1_NUM * RSIZE
     st.d   A2, SP, A2_NUM * RSIZE
@@ -67,12 +62,14 @@ exception_save_done:
     st.d   S8, SP, S8_NUM * RSIZE
 
     /*
-     * save T0/SP from scratch registers on stack
+     * save T0/SP/TP from scratch registers on stack
      */
     csrrd  T0, LOONGARCH_CSR_KS0
     st.d   T0, SP, T0_NUM * RSIZE
-    csrrd  T0, LOONGARCH_CSR_KS1
+    csrrd  T0, LOONGARCH_CSR_KS_SP
     st.d   T0, SP, SP_NUM * RSIZE
+    csrrd  T0, LOONGARCH_CSR_KS_TP
+    st.d   T0, SP, TP_NUM * RSIZE
 
     csrrd   T0, LOONGARCH_CSR_CRMD
     st.d    T0, SP, (LOONGARCH_CSR_CRMD + BASE_NUM)  * RSIZE
@@ -252,7 +249,6 @@ handle_exception_done:
 
 restore_fpu_done:
     ld.d    RA, SP, RA_NUM * RSIZE
-    ld.d    TP, SP, TP_NUM * RSIZE
     ld.d    A0, SP, A0_NUM * RSIZE
     ld.d    A1, SP, A1_NUM * RSIZE
     ld.d    A2, SP, A2_NUM * RSIZE
@@ -285,20 +281,20 @@ restore_fpu_done:
     // Restore stack pointer
     ld.d    T0, SP, (LOONGARCH_CSR_PRMD + BASE_NUM) * RSIZE
     andi    T0, T0, PLV_MASK
-    bnez    T0, exception_restore_user 
-
-exception_restore_kernel:
-    // Nothing to do, load from iframe is enough
-    b       exception_restore_done
+    beqz    T0, exception_restore_kernel
 
 exception_restore_user:
-    // save KSP in KS2
-    // deallocate iframe
+    // save KSP in KS1
+    // also deallocate iframe
     addi.d  T0, SP, ((CSR_NUM + BASE_NUM + FP_BASE_NUM)  * RSIZE)
-    csrwr   T0, LOONGARCH_CSR_KS2
+    csrwr   T0, LOONGARCH_CSR_KS_SP
+    // save TP in KS2
+    csrwr   TP, LOONGARCH_CSR_KS_TP
     
+exception_restore_kernel:
 exception_restore_done:
     ld.d    T0, SP, T0_NUM * RSIZE
+    ld.d    TP, SP, TP_NUM * RSIZE
     ld.d    SP, SP, SP_NUM * RSIZE
 
     ertn
@@ -309,7 +305,8 @@ END_FUNCTION(entry_exception_handler)
  */
 FUNCTION(entry_exception)
     csrwr   T0, LOONGARCH_CSR_KS0
-    csrwr   SP, LOONGARCH_CSR_KS1
+    csrwr   SP, LOONGARCH_CSR_KS_SP
+    csrwr   TP, LOONGARCH_CSR_KS_TP
     la      T0, entry_exception_handler
     jirl    ZERO, T0, 0
 END_FUNCTION(entry_exception)
@@ -364,7 +361,6 @@ END_FUNCTION(entry_tlb_refill)
 //
 FUNCTION(loongarch64_handle_syscall)
     // Restore per cpu pointer
-    csrrd   TP, LOONGARCH_CSR_KS3
     ld.d    X0, TP, CURRENT_PERCPU_PTR_OFFSET
 
     // Verify syscall number and call the unknown handler if bad.
@@ -396,7 +392,6 @@ handle_syscall_done:
     bl      arch_iframe_process_pending_signals
 
 handle_signals_done:
-    csrwr   TP, LOONGARCH_CSR_KS3
     b       handle_exception_done
 END_FUNCTION(loongarch64_handle_syscall)
 

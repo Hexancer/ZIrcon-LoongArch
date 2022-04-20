@@ -92,7 +92,7 @@ static_assert((sizeof(struct pthread) -
               "ABI tcbhead_t misplaced in struct pthread");
 #endif
 
-#if defined(__x86_64__) || defined(__aarch64__)
+#if defined(__x86_64__) || defined(__aarch64__) || defined(__loongarch64)
 // The tlsdesc.s assembly code assumes this, though it's not part of the ABI.
 static_assert(TP_OFFSETOF(head.dtv) == 8, "dtv misplaced in struct pthread");
 #endif

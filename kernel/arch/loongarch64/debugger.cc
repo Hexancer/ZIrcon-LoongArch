@@ -32,10 +32,6 @@ zx_status_t arch_set_general_regs(struct thread* thread, const zx_thread_state_g
     // TODO: LA64 don't allow CSR insns in user mode
     //     out->csr[LOONGARCH_CSR_PRMD] = ...
     out->csr[LOONGARCH_CSR_EPC] = in->pc;
-    out->tp = in->tp;
-
-    struct loongarch64_context_switch_frame* frame = loongarch64_get_context_switch_frame(thread);
-    frame->tp = in->tp;
 
     return ZX_OK;
 }

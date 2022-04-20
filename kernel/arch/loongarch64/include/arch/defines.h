@@ -198,8 +198,11 @@
 
 #define LOONGARCH_CSR_KS0          0x30
 #define LOONGARCH_CSR_KS1          0x31
-#define LOONGARCH_CSR_KS2          0x32 // Kernel stack pointer scratch
-#define LOONGARCH_CSR_KS3          0x33 // Kernel thread pointer scratch
+#define LOONGARCH_CSR_KS2          0x32
+#define LOONGARCH_CSR_KS3          0x33
+
+#define LOONGARCH_CSR_KS_SP  LOONGARCH_CSR_KS1  // Kernel stack pointer scratch
+#define LOONGARCH_CSR_KS_TP  LOONGARCH_CSR_KS2  // Kernel thread pointer scratch
 
 /* Timer registers */
 #define LOONGARCH_CSR_TMID		0x40	/* Timer ID */
