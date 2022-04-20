@@ -31,6 +31,11 @@ source_set("compiler") {
       "x86_64/memcpy.S",
       "x86_64/memset.S",
     ]
+  } else if (current_cpu == "loongarch64") {
+    sources = [
+      "loongarch64/memcpy.S",
+      "loongarch64/memset.S",
+    ]
   } else {
     sources = [
       "memcpy.c",
