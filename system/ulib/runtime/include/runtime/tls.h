@@ -33,17 +33,13 @@ __NO_SAFESTACK static inline void zxr_tp_set(zx_handle_t self, void* tp) {
 
 #elif defined(__loongarch64)
 
-// TODO:
+register void * __loongarch64_tp __asm("tp");
 __NO_SAFESTACK static inline void* zxr_tp_get(void) {
-    TODO();
-    void* tp;
-    __asm__ __volatile__("move $tp, %0"
-                         : "=r"(tp));
-    return tp;
+    return __loongarch64_tp;
 }
 
 __NO_SAFESTACK static inline void zxr_tp_set(zx_handle_t self, void* tp) {
-    TODO();
+    __loongarch64_tp = tp;
 }
 
 #elif defined(__x86_64__)
