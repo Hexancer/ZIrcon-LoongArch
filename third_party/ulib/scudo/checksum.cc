@@ -69,8 +69,8 @@ bool hasHardwareCRC32() {
 }
 #elif defined(__loongarch64)
 bool hasHardwareCRC32() {
-  TODO();
-  return true;
+  // in fact this should be true, but set it to false is ok
+  return false;
 }
 #endif // defined(__x86_64__) || defined(__i386__)
 
