@@ -1,8 +1,10 @@
+#include <arch/loongarch64/debug.h>
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <zircon/types.h>
 
-static volatile uint8_t* uart_reg_dat = (uint8_t *)(0x900000001fe001e0UL);          // Data register 0x1fe001e0
+static volatile uint8_t* uart_reg_dat = (uint8_t *)(0x800000001fe001e0UL);          // Data register 0x1fe001e0
 static void uart_pputc(char c)
 {
     *uart_reg_dat = c;//sending data
