@@ -136,7 +136,7 @@ AsidAllocator asid;
 // Convert user level mmu flags to flags that go in L1 descriptors.
 static pte_t mmu_flags_to_pte_attr(uint flags) {
     // TODO: remove dirty flag after finishing irq handler
-    pte_t attr = _PAGE_VALID | _PAGE_DIRTY;
+    pte_t attr = _PAGE_VALID;
 
     switch (flags & ARCH_MMU_FLAG_CACHE_MASK) {
     case ARCH_MMU_FLAG_CACHED:
@@ -159,7 +159,7 @@ static pte_t mmu_flags_to_pte_attr(uint flags) {
         attr |= _PAGE_NO_READ;
     }
     if (flags & ARCH_MMU_FLAG_PERM_WRITE) {
-        attr |= _PAGE_WRITE;
+        attr |= _PAGE_WRITE | _PAGE_DIRTY;
     }
     if (!(flags & ARCH_MMU_FLAG_PERM_EXECUTE)) {
         attr |= _PAGE_NO_EXEC;
@@ -183,7 +183,7 @@ static void pte_attr_to_mmu_flags(pte_t pte, uint* mmu_flags) {
     if (!(pte & _PAGE_NO_READ)) {
         *mmu_flags |= ARCH_MMU_FLAG_PERM_READ;
     }
-    if (pte & _PAGE_WRITE) {
+    if (pte & (_PAGE_WRITE | _PAGE_DIRTY)) {
         *mmu_flags |= ARCH_MMU_FLAG_PERM_WRITE;
     }
     if (!(pte & _PAGE_NO_EXEC)) {
