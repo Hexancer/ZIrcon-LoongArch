@@ -395,8 +395,8 @@ void LoongarchArchVmAspace::FlushTLBEntry(vaddr_t vaddr, bool terminal) {
         // __UNUSED zx_status_t status = arm64_el2_tlbi_ipa(vttbr, vaddr, terminal);
         // DEBUG_ASSERT(status == ZX_OK);
     } else if (asid_ == MMU_LOONGARCH64_GLOBAL_ASID) {
-        // flush this address on all ASIDs
-        __asm__ __volatile__("invtlb 0x06, %0, %1" : : "r"(asid_), "r"(vaddr));
+        // flush this address on global asid
+        __asm__ __volatile__("invtlb 0x05, %0, %1" : : "r"(asid_), "r"(vaddr));
     } else {
         // flush this address for the specific asid
         __asm__ __volatile__("invtlb 0x05, %0, %1" : : "r"(asid_), "r"(vaddr) :);
@@ -536,11 +536,10 @@ ssize_t LoongarchArchVmAspace::MapPageTable(vaddr_t vaddr_in, vaddr_t vaddr_rel_
             pte = paddr | attrs;
             if (index_shift == page_size_shift)
                 pte |= _PAGE_VALID;
-            if (!(flags_ & ARCH_ASPACE_FLAG_GUEST)) {
-                // pte |= MMU_PTE_ATTR_NON_GLOBAL;
+            if (flags_ & ARCH_ASPACE_FLAG_GUEST) {
                 // TODO: what is guest aspace?
-            } else {
-                pte |= _PAGE_GLOBAL;
+                // pte |= _PAGE_GLOBAL;
+                TODO();
             }
             LTRACEF("pte %p[%#" PRIxPTR "] = %#" PRIx64 "\n",
                     page_table, index, pte);

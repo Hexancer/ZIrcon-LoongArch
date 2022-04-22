@@ -84,6 +84,10 @@ dmw_jmup:
     csrwr    $t0, LOONGARCH_CSR_PGDH // write PGDH
     csrwr    $t0, LOONGARCH_CSR_PGDL // write PGDL
 
+    // setup ASID
+    li.d     $t0, 1023               // Global ASID
+    csrwr    $t0, LOONGARCH_CSR_ASID
+
     // TODO: setup exception handler routine, especially TLB refill helper
     la.pcrel $t0, entry_tlb_refill
     csrwr    $t0, LOONGARCH_CSR_TLBRENTRY

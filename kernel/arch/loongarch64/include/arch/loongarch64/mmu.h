@@ -105,11 +105,11 @@
 #define PAGE_READONLY	__pgprot(_PAGE_PRESENT | _PAGE_USER | _CACHE_CC)
 
 #define PAGE_KERNEL	__pgprot(_PAGE_PRESENT | __READABLE | __WRITEABLE | \
-				 _PAGE_GLOBAL | _PAGE_KERN | _CACHE_CC)
+				 _PAGE_KERN | _CACHE_CC)
 #define PAGE_KERNEL_SUC __pgprot(_PAGE_PRESENT | __READABLE | __WRITEABLE | \
-				 _PAGE_GLOBAL | _PAGE_KERN |  _CACHE_SUC)
+				 _PAGE_KERN |  _CACHE_SUC)
 #define PAGE_KERNEL_WUC __pgprot(_PAGE_PRESENT | __READABLE | __WRITEABLE | \
-				 _PAGE_GLOBAL | _PAGE_KERN |  _CACHE_WUC)
+				 _PAGE_KERN |  _CACHE_WUC)
 
 typedef uint64_t pte_t;
 
