@@ -159,11 +159,10 @@ static NO_ASAN _Noreturn void finish_exit(pthread_t self) {
             [len]"r"(self->tcb_region.iov_len - PAGE_SIZE),
             [self]"r"(self));
 #elif defined(__loongarch64)
-    TODO();
     // The thread descriptor is at the start of the region, so the rest of
     // the space up to the guard page is available as the temporary stack.
     __asm__("add.d $sp, %[base], %[len]\n"
-            "move  $r0, %[self]\n"
+            "move  $a0, %[self]\n"
             "bl final_exit" : :
             [base]"r"(self->tcb_region.iov_base),
             [len]"r"(self->tcb_region.iov_len - PAGE_SIZE),
