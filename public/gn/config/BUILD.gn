@@ -123,7 +123,8 @@ config("compiler") {
                 "-I${_libcxx_incdir}",
                 "-I${_clang_incdir}",
                 "-L${_libcxx_libdir}",
-                "-static-libgcc"
+                "-static-libgcc",
+                "-static-libstdc++",
                 ]
         cflags_cc = [ "-nostdinc++" ]
       }
