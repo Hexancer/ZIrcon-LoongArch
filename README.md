@@ -2,7 +2,7 @@
 从Fuchsia官方仓库中分离出的Zircon代码，可以通过简陋的Makefile脚本进行编译并在qemu上运行。  参考https://github.com/PanQL/zircon
 
 ### LoongArch构建
-1. 从[这里](https://github.com/loongson/build-tools/releases/download/2021.12.21/loongarch64-clfs-2021-12-18-cross-tools-gcc-full.tar.xz) 获取GCC工具链, 解压到`/home/geng/gcc-cross-tools/`
+1. 从[这里](https://github.com/loongson/build-tools/)或[这里](https://github.com/loongson/build-tools/releases/download/2023.08.08/CLFS-loongarch64-8.1-x86_64-cross-tools-gcc-glibc.tar.xz) 获取GCC工具链, 解压到`/home/geng/gcc-cross-tools/`
 2. 从[这里](https://chrome-infra-packages.appspot.com/p/fuchsia/clang/linux-amd64/+/oEsFSe99FkcDKVxZkAY0MKi6C-yYOan1m-QL45N33W8C) 获取CIPD包(Clang), 解压到`/home/geng/clang/`
 3. 从[这里](http://foxsen.3322.org:33336/xuhuai/libcxx-scripts/) 获取libcxx构建脚本到`/home/geng/libcxx-scripts/`, 并按Readme中的说明进行编译
 4. Clang工具链没有LA相关的元数据, 因此仓库里提供了修改后的`runtime.json`
